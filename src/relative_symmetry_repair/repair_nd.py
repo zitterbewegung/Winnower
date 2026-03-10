@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from .coding import combinatorial_repair_bits, lz4_mask_bits, run_length_bits, template_bits
+from .coding import combinatorial_repair_bits, lz4_mask_bits, run_length_bits, template_bits_raw, template_bits_nml
 
 
 @dataclass(slots=True)
@@ -146,8 +146,10 @@ def fit_relative_periodic_background_nd(
     rule_error = None if rule_error_fn is None else rule_error_fn(background)
 
     rl_bits = run_length_bits(defect_mask)
-    t_bits = template_bits(period, spatial_dims)
-    mdl = t_bits + rl_bits
+    steps = spacetime.shape[0]
+    t_bits_raw = template_bits_raw(period, spatial_dims)
+    t_bits_nml = template_bits_nml(period, spatial_dims, steps)
+    mdl = t_bits_nml + rl_bits
 
     return RelativePeriodicFitND(
         shift=tuple(int(s) for s in shift),
@@ -160,7 +162,7 @@ def fit_relative_periodic_background_nd(
         combinatorial_bits=combinatorial_repair_bits(total_sites, defect_sites, alphabet_size=2),
         run_length_bits=rl_bits,
         lz4_bits=lz4_mask_bits(defect_mask),
-        template_bits=t_bits,
+        template_bits=t_bits_raw,
         mdl_bits=mdl,
         rule_error=rule_error,
     )

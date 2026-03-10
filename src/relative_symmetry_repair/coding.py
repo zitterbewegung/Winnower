@@ -51,29 +51,47 @@ def lz4_mask_bits(mask: np.ndarray, compression_level: int = 12) -> int:
     return int(8 * len(compressed))
 
 
-def template_bits(period: int, spatial_shape: tuple[int, ...]) -> int:
-    """Cost to describe the background template in a two-part MDL code.
-
-    The template has ``period * prod(spatial_shape)`` free binary values,
-    so it costs exactly that many bits to transmit.
-    """
+def template_bits_raw(period: int, spatial_shape: tuple[int, ...]) -> int:
+    """Raw template size: ``period * prod(spatial_shape)`` free binary values."""
     n = period
     for d in spatial_shape:
         n *= d
     return n
 
 
+def template_bits_nml(period: int, spatial_shape: tuple[int, ...], steps: int) -> float:
+    """Parametric complexity (NML-style) for the background template.
+
+    Each of the ``k = period * prod(spatial_shape)`` binary template bits is
+    estimated from ``steps / period`` observations by majority vote.  The
+    standard parametric complexity for *k* Bernoulli parameters, each with
+    *n_obs* samples, is ``(k / 2) * log2(n_obs)``.  This grows
+    logarithmically with observation length *T*, so model selection
+    stabilizes as T → ∞.
+    """
+    k = period
+    for d in spatial_shape:
+        k *= d
+    n_obs = max(steps / period, 1)
+    return k / 2.0 * math.log2(n_obs)
+
+
+# Keep old name as alias for backwards compat in to_record
+template_bits = template_bits_raw
+
+
 def mdl_total_bits(
     period: int,
     spatial_shape: tuple[int, ...],
+    steps: int,
     defect_mask: np.ndarray,
     defect_encoding: str = "run_length",
-) -> tuple[int, int, int]:
-    """Two-part MDL score: template cost + defect encoding cost.
+) -> tuple[float, int, float]:
+    """Two-part MDL score: NML template complexity + defect encoding cost.
 
     Returns (template_cost, defect_cost, total).
     """
-    t_bits = template_bits(period, spatial_shape)
+    t_bits = template_bits_nml(period, spatial_shape, steps)
     if defect_encoding == "run_length":
         d_bits = run_length_bits(defect_mask)
     elif defect_encoding == "lz4":
