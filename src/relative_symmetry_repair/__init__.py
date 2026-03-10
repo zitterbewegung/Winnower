@@ -11,8 +11,19 @@ from .repair import (
     extract_components,
     summarise_components,
 )
+from .ca2d import random_initial_grid, simulate_2d, LIFE_RULES
+from .ca3d import random_initial_volume, simulate_3d, RULES_3D
+from .repair_nd import (
+    RelativePeriodicFitND,
+    component_labels_nd,
+    fit_relative_periodic_background_nd,
+    scan_relative_periodicity_nd,
+    extract_components_nd,
+    summarise_components_nd,
+)
 
 __all__ = [
+    # 1D ECA
     "ReflectionFit",
     "RelativePeriodicFit",
     "component_labels",
@@ -25,4 +36,19 @@ __all__ = [
     "scan_relative_periodicity",
     "simulate_eca",
     "summarise_components",
+    # 2D CA
+    "LIFE_RULES",
+    "random_initial_grid",
+    "simulate_2d",
+    # 3D CA
+    "RULES_3D",
+    "random_initial_volume",
+    "simulate_3d",
+    # N-D repair
+    "RelativePeriodicFitND",
+    "component_labels_nd",
+    "fit_relative_periodic_background_nd",
+    "scan_relative_periodicity_nd",
+    "extract_components_nd",
+    "summarise_components_nd",
 ]

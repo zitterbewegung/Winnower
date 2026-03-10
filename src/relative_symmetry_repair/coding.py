@@ -49,3 +49,35 @@ def lz4_mask_bits(mask: np.ndarray, compression_level: int = 12) -> int:
     payload = packed.tobytes()
     compressed = lz4.frame.compress(payload, compression_level=compression_level)
     return int(8 * len(compressed))
+
+
+def template_bits(period: int, spatial_shape: tuple[int, ...]) -> int:
+    """Cost to describe the background template in a two-part MDL code.
+
+    The template has ``period * prod(spatial_shape)`` free binary values,
+    so it costs exactly that many bits to transmit.
+    """
+    n = period
+    for d in spatial_shape:
+        n *= d
+    return n
+
+
+def mdl_total_bits(
+    period: int,
+    spatial_shape: tuple[int, ...],
+    defect_mask: np.ndarray,
+    defect_encoding: str = "run_length",
+) -> tuple[int, int, int]:
+    """Two-part MDL score: template cost + defect encoding cost.
+
+    Returns (template_cost, defect_cost, total).
+    """
+    t_bits = template_bits(period, spatial_shape)
+    if defect_encoding == "run_length":
+        d_bits = run_length_bits(defect_mask)
+    elif defect_encoding == "lz4":
+        d_bits = lz4_mask_bits(defect_mask)
+    else:
+        raise ValueError(f"Unknown encoding: {defect_encoding}")
+    return t_bits, d_bits, t_bits + d_bits
