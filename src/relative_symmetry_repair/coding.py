@@ -60,15 +60,18 @@ def template_bits_raw(period: int, spatial_shape: tuple[int, ...]) -> int:
 
 
 def template_bits_nml(period: int, spatial_shape: tuple[int, ...], steps: int) -> float:
-    """MDL-motivated parametric penalty for the background template.
+    """BIC-type parametric penalty for the background template.
 
     Each of the ``k = period * prod(spatial_shape)`` template parameters is
     estimated from ``steps / period`` observations by majority vote.  The
-    penalty ``(k / 2) * log2(n_obs)`` is the asymptotic NML parametric
-    complexity for *k* Bernoulli parameters.  Our template values are binary
-    choices rather than continuous Bernoulli rates, so this is an
-    *approximation* — it works as a complexity penalty but is not exact NML.
-    It grows logarithmically with *T*, so model selection stabilizes.
+    penalty ``(k / 2) * log2(n_obs)`` is the BIC / asymptotic stochastic
+    complexity for *k* Bernoulli parameters.  This is *not* exact NML: it
+    omits constant terms and treats binary template values as continuous
+    Bernoulli rates.  It grows logarithmically with *T*, so model selection
+    stabilizes.
+
+    Prefer ``nml_score_bits`` (NLL + per-orbit complexity) for model
+    selection; this function is retained for the legacy ``mdl_bits`` score.
     """
     k = period
     for d in spatial_shape:
@@ -81,6 +84,74 @@ def template_bits_nml(period: int, spatial_shape: tuple[int, ...], steps: int) -
 template_bits = template_bits_raw
 
 
+# ── Asymptotic Bernoulli NML on orbit classes ────────────────────────────────
+
+def orbit_nll_bits(
+    spacetime: np.ndarray,
+    labels: np.ndarray,
+    n_labels: int,
+) -> float:
+    """Bernoulli negative log-likelihood over orbit classes, in bits.
+
+    For each orbit class j with n_j observations and empirical frequency
+    θ̂_j = n_j^(1) / n_j, the contribution is n_j * H_b(θ̂_j) where H_b is
+    binary entropy.  This is the exact Bernoulli MLE data-fit term.
+    """
+    flat_labels = labels.ravel()
+    flat_values = spacetime.ravel().astype(np.float64)
+    totals = np.bincount(flat_labels, minlength=n_labels).astype(np.float64)
+    ones = np.bincount(flat_labels, weights=flat_values, minlength=n_labels)
+
+    # θ̂_j = ones_j / totals_j
+    with np.errstate(divide="ignore", invalid="ignore"):
+        theta = np.where(totals > 0, ones / totals, 0.0)
+
+    # H_b(θ) = -θ log2(θ) - (1-θ) log2(1-θ)
+    h = np.zeros_like(theta)
+    interior = (theta > 0) & (theta < 1)
+    h[interior] = (
+        -theta[interior] * np.log2(theta[interior])
+        - (1 - theta[interior]) * np.log2(1 - theta[interior])
+    )
+    return float(np.sum(totals * h))
+
+
+def nml_complexity_bits(
+    labels: np.ndarray,
+    n_labels: int,
+) -> float:
+    """Asymptotic NML parametric complexity: Σ_j (1/2) log2(n_j).
+
+    For each orbit class j with n_j observations, the Bernoulli NML
+    normalizing constant contributes (1/2) log2(n_j) + O(1) bits.
+    The O(1) term ((1/2) log(π/2) ≈ 0.326 bits per class) is omitted;
+    this does not affect asymptotic model selection.
+    """
+    flat_labels = labels.ravel()
+    totals = np.bincount(flat_labels, minlength=n_labels).astype(np.float64)
+    valid = totals[totals > 1]  # classes with ≤1 observation have zero complexity
+    if valid.size == 0:
+        return 0.0
+    return float(0.5 * np.sum(np.log2(valid)))
+
+
+def nml_score_bits(
+    spacetime: np.ndarray,
+    labels: np.ndarray,
+    n_labels: int,
+) -> tuple[float, float, float]:
+    """Asymptotic Bernoulli NML score = NLL + parametric complexity.
+
+    Returns (nll_bits, complexity_bits, total_nml_bits).
+    The score is asymptotically equivalent to the normalized maximum
+    likelihood code for independent Bernoulli parameters on orbit classes,
+    up to O(k) additive bits where k is the number of orbit classes.
+    """
+    nll = orbit_nll_bits(spacetime, labels, n_labels)
+    comp = nml_complexity_bits(labels, n_labels)
+    return nll, comp, nll + comp
+
+
 def mdl_total_bits(
     period: int,
     spatial_shape: tuple[int, ...],
@@ -88,7 +159,10 @@ def mdl_total_bits(
     defect_mask: np.ndarray,
     defect_encoding: str = "run_length",
 ) -> tuple[float, int, float]:
-    """Two-part MDL score: NML template complexity + defect encoding cost.
+    """Legacy two-part score: approximate penalty + defect encoding.
+
+    Retained for backwards compatibility. Prefer nml_score_bits for
+    model selection.
 
     Returns (template_cost, defect_cost, total).
     """

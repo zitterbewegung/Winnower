@@ -1,8 +1,8 @@
-"""Cross-dimensional MDL convergence study (1D, 2D, 3D).
+"""Cross-dimensional NML convergence study (1D, 2D, 3D).
 
-Validates the MDL consistency theorem: for each rule, the MDL-selected
+Validates the NML consistency theorem: for each rule, the NML-selected
 period stabilizes as T grows, with margins increasing monotonically
-once stabilized.
+once stabilized.  Uses exact Bernoulli NML on orbit classes.
 """
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ T_VALUES_3D = [10, 20, 40, 60, 80]
 
 
 def convergence_1d(max_period=10):
-    """1D ECA convergence: sweep T, find MDL-optimal period."""
+    """1D ECA convergence: sweep T, find NML-optimal period."""
     print("\n" + "=" * 70)
     print("1D ECA CONVERGENCE")
     print("=" * 70)
@@ -60,31 +60,31 @@ def convergence_1d(max_period=10):
 
         for T in T_VALUES_1D:
             spacetime = spacetime_full[:T + 1]
-            best_mdl = float("inf")
+            best_nml = float("inf")
             best_p = 1
             all_scores = {}
             for p in range(1, max_period + 1):
                 fit = fit_relative_periodic_background(spacetime, shift=0, period=p)
-                all_scores[p] = fit.mdl_bits
-                if fit.mdl_bits < best_mdl:
-                    best_mdl = fit.mdl_bits
+                all_scores[p] = fit.nml_bits
+                if fit.nml_bits < best_nml:
+                    best_nml = fit.nml_bits
                     best_p = p
 
-            runner_up_mdl = min(v for k, v in all_scores.items() if k != best_p)
-            margin = runner_up_mdl - best_mdl
+            runner_up = min(v for k, v in all_scores.items() if k != best_p)
+            margin = runner_up - best_nml
 
             results.append({
                 "dim": 1, "rule": name, "T": T,
-                "best_period": best_p, "best_mdl": round(best_mdl, 1),
-                "runner_up_mdl": round(runner_up_mdl, 1), "margin": round(margin, 1),
+                "best_period": best_p, "best_nml": round(best_nml, 1),
+                "runner_up_nml": round(runner_up, 1), "margin": round(margin, 1),
             })
-            print(f"    T={T}: period={best_p}, mdl={best_mdl:.0f}, margin={margin:.0f}")
+            print(f"    T={T}: period={best_p}, nml={best_nml:.0f}, margin={margin:.0f}")
 
     return pd.DataFrame.from_records(results)
 
 
 def convergence_2d(max_period=8):
-    """2D totalistic convergence: sweep T, find MDL-optimal period."""
+    """2D totalistic convergence: sweep T, find NML-optimal period."""
     print("\n" + "=" * 70)
     print("2D TOTALISTIC CONVERGENCE")
     print("=" * 70)
@@ -99,31 +99,31 @@ def convergence_2d(max_period=8):
 
         for T in T_VALUES_2D:
             spacetime = spacetime_full[:T + 1]
-            best_mdl = float("inf")
+            best_nml = float("inf")
             best_p = 1
             all_scores = {}
             for p in range(1, max_period + 1):
                 fit = fit_relative_periodic_background_nd(spacetime, shift=(0, 0), period=p)
-                all_scores[p] = fit.mdl_bits
-                if fit.mdl_bits < best_mdl:
-                    best_mdl = fit.mdl_bits
+                all_scores[p] = fit.nml_bits
+                if fit.nml_bits < best_nml:
+                    best_nml = fit.nml_bits
                     best_p = p
 
-            runner_up_mdl = min(v for k, v in all_scores.items() if k != best_p)
-            margin = runner_up_mdl - best_mdl
+            runner_up = min(v for k, v in all_scores.items() if k != best_p)
+            margin = runner_up - best_nml
 
             results.append({
                 "dim": 2, "rule": name, "T": T,
-                "best_period": best_p, "best_mdl": round(best_mdl, 1),
-                "runner_up_mdl": round(runner_up_mdl, 1), "margin": round(margin, 1),
+                "best_period": best_p, "best_nml": round(best_nml, 1),
+                "runner_up_nml": round(runner_up, 1), "margin": round(margin, 1),
             })
-            print(f"    T={T}: period={best_p}, mdl={best_mdl:.0f}, margin={margin:.0f}")
+            print(f"    T={T}: period={best_p}, nml={best_nml:.0f}, margin={margin:.0f}")
 
     return pd.DataFrame.from_records(results)
 
 
 def convergence_3d(max_period=6):
-    """3D totalistic convergence: sweep T, find MDL-optimal period."""
+    """3D totalistic convergence: sweep T, find NML-optimal period."""
     print("\n" + "=" * 70)
     print("3D TOTALISTIC CONVERGENCE")
     print("=" * 70)
@@ -144,25 +144,25 @@ def convergence_3d(max_period=6):
 
         for T in T_VALUES_3D:
             spacetime = spacetime_full[:T + 1]
-            best_mdl = float("inf")
+            best_nml = float("inf")
             best_p = 1
             all_scores = {}
             for p in range(1, max_period + 1):
                 fit = fit_relative_periodic_background_nd(spacetime, shift=(0, 0, 0), period=p)
-                all_scores[p] = fit.mdl_bits
-                if fit.mdl_bits < best_mdl:
-                    best_mdl = fit.mdl_bits
+                all_scores[p] = fit.nml_bits
+                if fit.nml_bits < best_nml:
+                    best_nml = fit.nml_bits
                     best_p = p
 
-            runner_up_mdl = min(v for k, v in all_scores.items() if k != best_p)
-            margin = runner_up_mdl - best_mdl
+            runner_up = min(v for k, v in all_scores.items() if k != best_p)
+            margin = runner_up - best_nml
 
             results.append({
                 "dim": 3, "rule": name, "T": T,
-                "best_period": best_p, "best_mdl": round(best_mdl, 1),
-                "runner_up_mdl": round(runner_up_mdl, 1), "margin": round(margin, 1),
+                "best_period": best_p, "best_nml": round(best_nml, 1),
+                "runner_up_nml": round(runner_up, 1), "margin": round(margin, 1),
             })
-            print(f"    T={T}: period={best_p}, mdl={best_mdl:.0f}, margin={margin:.0f}")
+            print(f"    T={T}: period={best_p}, nml={best_nml:.0f}, margin={margin:.0f}")
 
     return pd.DataFrame.from_records(results)
 

@@ -7,7 +7,10 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from .coding import combinatorial_repair_bits, lz4_mask_bits, run_length_bits, template_bits_nml, template_bits_raw
+from .coding import (
+    combinatorial_repair_bits, lz4_mask_bits, nml_score_bits,
+    run_length_bits, template_bits_nml, template_bits_raw,
+)
 from .eca import rule_consistency_rate
 
 
@@ -24,7 +27,10 @@ class RelativePeriodicFit:
     run_length_bits: int
     lz4_bits: int
     template_bits: int = 0
-    mdl_bits: float = 0.0       # template_bits_nml + run_length_bits
+    mdl_bits: float = 0.0       # legacy: template_bits_nml + run_length_bits
+    nll_bits: float = 0.0       # Bernoulli NLL over orbit classes
+    nml_complexity: float = 0.0 # asymptotic NML complexity: Σ (1/2) log2(n_j)
+    nml_bits: float = 0.0       # asymptotic Bernoulli NML: nll_bits + nml_complexity
     rule_error: float | None = None
 
     def to_record(self) -> dict[str, float | int | None]:
@@ -39,6 +45,9 @@ class RelativePeriodicFit:
             "lz4_bits": self.lz4_bits,
             "template_bits": self.template_bits,
             "mdl_bits": self.mdl_bits,
+            "nll_bits": self.nll_bits,
+            "nml_complexity": self.nml_complexity,
+            "nml_bits": self.nml_bits,
             "rule_error": self.rule_error,
         }
 
@@ -116,10 +125,14 @@ def fit_relative_periodic_background(
     rule_error = None if rule is None else rule_consistency_rate(background, int(rule))
 
     steps, width = spacetime.shape
+    n_labels = int(period) * width
     rl_bits = run_length_bits(defect_mask)
     t_bits_raw = template_bits_raw(period, (width,))
     t_bits_nml = template_bits_nml(period, (width,), steps)
     mdl = t_bits_nml + rl_bits
+
+    # Asymptotic Bernoulli NML score on orbit classes
+    nll, nml_comp, nml_total = nml_score_bits(spacetime.astype(np.uint8), labels, n_labels)
 
     return RelativePeriodicFit(
         shift=int(shift),
@@ -134,6 +147,9 @@ def fit_relative_periodic_background(
         lz4_bits=lz4_mask_bits(defect_mask),
         template_bits=t_bits_raw,
         mdl_bits=mdl,
+        nll_bits=nll,
+        nml_complexity=nml_comp,
+        nml_bits=nml_total,
         rule_error=rule_error,
     )
 
