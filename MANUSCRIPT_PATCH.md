@@ -91,7 +91,7 @@ Since $|\mathcal{C}|$ is finite, all pairwise comparisons stabilize, giving a un
 
 **Corollary (Dimension-agnostic).** Theorem 3 makes no reference to spatial dimension. It applies identically to 1D rings, 2D tori, 3D tori, or any periodic lattice.
 
-**Remark on run-length encoding.** An alternative MDL criterion using $\frac{k}{2} \log_2(T/p) + L_{\text{RL}}(M^*)$ (BIC-type penalty plus run-length defect encoding) satisfies an analogous stabilization theorem under the additional assumption that the per-site RL rate $\ell_c = \lim L_{\text{RL}} / N(T)$ converges. This assumption is plausible but stronger than the NLL convergence assumed above, since RL codelength depends on the spatial geometry of residuals, not just their frequency. We use the NML score as the primary selection criterion and report RL codelength as a secondary geometric diagnostic (Proposition 1).
+**Remark on run-length encoding.** An alternative MDL criterion using $\frac{k}{2} \log_2(T/p) + L_{\text{RL}}(M^*)$ (BIC-type penalty plus run-length defect encoding) satisfies an analogous stabilization theorem, provided the per-site RL rate $\ell_c = \lim L_{\text{RL}} / N(T)$ converges. For finite deterministic CA, this convergence can be proved: the CA state sequence is eventually periodic (pigeonhole on the finite state space), the majority vote stabilizes (under a "no exact frequency ties" condition), and the resulting defect mask is eventually periodic, so $L_{\text{RL}}/N$ converges by a purely combinatorial argument about run-length coding of periodic sequences. We use the NML score as the primary selection criterion because it converges *unconditionally* (no ties assumption needed), and report RL codelength as a secondary geometric diagnostic (Proposition 1).
 
 ---
 

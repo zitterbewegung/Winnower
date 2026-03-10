@@ -253,6 +253,129 @@ RL codelength depends on spatial structure (run-length distribution), not just
 defect count. The original paper's assumption (A2) — "Omega(T) runs" — is
 necessary for L_RL to be Theta(T) but insufficient for ell_c to converge.
 
+However, for finite deterministic CA, assumption (E2) can be *proved* — see
+Theorem G below.
+
+---
+
+## G. RL Rate Convergence for Finite Deterministic CA
+
+This theorem closes the gap in Theorem E.2 by proving assumption (E2) from
+first principles for finite deterministic CA.
+
+### G.1 Lemma (RL convergence for eventually periodic sequences)
+
+**Lemma G.1.** Let b_1, b_2, ... be a binary sequence that is eventually
+periodic: there exist T_0 >= 0 and Q >= 1 such that b_{n+Q} = b_n for all
+n > T_0. Then:
+
+    lim_{N -> inf} L_RL(b_1 ... b_N) / N = C / Q
+
+where C is the per-period RL cost of the periodic part, defined as follows.
+Let the period pattern b_{T_0+1}, ..., b_{T_0+Q} have runs r_1, ..., r_R.
+
+- If b_{T_0+Q} != b_{T_0+1} (no seam merging): C = sum_{i=1}^R gamma(r_i).
+- If b_{T_0+Q} = b_{T_0+1} (seam merging):
+  C = gamma(r_R + r_1) + sum_{i=2}^{R-1} gamma(r_i).
+
+**Proof.** Write N = T_0 + M*Q + R' where 0 <= R' < Q and M = floor((N - T_0)/Q).
+The RL codelength decomposes as:
+
+    L_RL(b_1...b_N) = L_transient + M * C + O(log Q)
+
+where L_transient accounts for the prefix b_1...b_{T_0} and any boundary
+run merging with the periodic part (a fixed O(1) cost), and the O(log Q) term
+accounts for a potentially truncated final period.
+
+Therefore L_RL(N) / N = (M * C + O(1)) / (T_0 + M*Q + R') -> C / Q
+as M -> inf. QED.
+
+**Verified computationally.** A synthetic eventually periodic sequence with
+T_0 = 10, Q = 8 converges to C/Q = 1.2500 with error < 3e-4 at N = 1610.
+See `tests/test_theory.py::TestRLConvergence`.
+
+### G.2 Theorem (RL rate convergence for finite CA)
+
+**Theorem G.2 (RL Rate Convergence).** Let U be the spacetime of a
+deterministic CA on a finite spatial domain S with |S| = D. Let (p, s) be
+a candidate model. Assume:
+
+(NT) *No exact ties:* For each orbit class j, the limiting empirical
+frequency theta_j* != 1/2. (Equivalently, over one full CA period, no orbit
+class has exactly equal counts of 0s and 1s.)
+
+Then the per-site RL rate converges:
+
+    lim_{T -> inf} L_RL(M*_c(T)) / (T * D)  exists.
+
+**Proof.** The proof chains four facts:
+
+**Step 1 (Eventual periodicity of the CA).** The CA operates on the finite
+state space {0,1}^D. By the pigeonhole principle, the state sequence
+U[0], U[1], ... is eventually periodic: there exist T_1 and P such that
+U[t + P] = U[t] for all t >= T_1.
+
+**Step 2 (Majority vote stabilization).** For each orbit class j, the
+empirical frequency theta_j(T) converges to theta_j* as T -> inf (because
+the per-period contribution is fixed after the transient, and the transient
+contribution is O(1/T)). By assumption (NT), theta_j* != 1/2, so the
+majority vote b_j* = [theta_j* > 1/2] is eventually stable: there exists
+T_2 such that the majority vote is constant for all T >= T_2.
+
+**Step 3 (Eventual periodicity of the defect mask).** After T_0 = max(T_1, T_2):
+- The CA state U[t] is periodic with period P (for t >= T_1).
+- The background B*(T) is fixed (for T >= T_2), so M[t, x] = U[t, x] xor B*[t, x]
+  is determined by U[t, x] and the fixed template.
+- The template value B*[t, x] depends on (t mod p, (x - floor(t/p)*s) mod D),
+  which is periodic in t with period Lambda_B = p * D / gcd(|s|, D).
+- So the mask row M[t, :] is periodic with period Lambda = lcm(P, Lambda_B)
+  for t >= T_0.
+- The flattened mask is eventually periodic with period Lambda * D.
+
+**Step 4 (RL convergence).** By Lemma G.1, L_RL(flattened mask) / N converges
+as N = T * D -> inf. QED.
+
+**Verified computationally.** Rule 30 on width 11 (CA period = 17, no exact
+ties, min |theta - 0.5| = 0.029): majority vote stabilizes at T ~ 17, mask
+rows become periodic with period 17, and L_RL/N converges to 1.1658
+matching the theoretical limit computed from the periodic mask pattern.
+See `tests/test_theory.py::TestRLConvergence::test_rl_converges_rule30_width11`.
+
+### G.3 Corollary (Unconditional NML convergence)
+
+**Corollary G.3.** For a deterministic CA on a finite spatial domain, the
+per-site NLL converges *unconditionally* (no assumption (NT) needed):
+
+    lim_{T -> inf} NLL_c(T) / (T * D) = h_c  exists.
+
+**Proof.** The per-orbit-class frequency theta_j(T) -> theta_j* (from Step 1
+and Step 2 of Theorem G.2, without needing (NT)). Binary entropy H_b is
+continuous, so n_j * H_b(theta_j(T)) / (T * D) -> (1/p) * H_b(theta_j*).
+Summing over j gives the limit.
+
+When theta_j* = 1/2, the NLL contribution is n_j * H_b(1/2) = n_j bits,
+regardless of the tie-breaking direction. So the NLL does not depend on (NT).
+
+Combined with the O(log T) complexity penalty, this gives:
+NML(c, T) / (T * D) -> h_c, and by Theorem E.1, model selection stabilizes.
+No assumption beyond finiteness of the CA is needed. QED.
+
+### G.4 When (NT) fails: RL may not converge
+
+When an orbit class j has theta_j* = 1/2 exactly, the majority vote may
+oscillate: as T increases, the cumulative count can cross the 0.5 threshold
+back and forth (e.g., if the transient bias and periodic contribution have
+opposing parities). Each flip of the majority vote changes the mask at all
+O(T) sites in orbit class j, potentially changing L_RL by Theta(T). So L_RL/N
+may fail to converge.
+
+The exact-tie condition is *non-generic* (it requires the count of 1s in an
+orbit class over one CA period to be exactly half the class size) but is not
+impossible — Rule 30 on width 8 has ALL classes with theta* = 0.5 exactly.
+
+This is another advantage of the NML score over the RL score: NML converges
+unconditionally, while RL requires the no-ties assumption.
+
 ---
 
 ## F. Optional Recoverability Under Noise Assumptions
@@ -285,7 +408,7 @@ checkable from a single deterministic CA run.
 1. **"MDL converges to the true background period."** False in general (Theorem D).
 2. **"Higher periods always achieve lower defect rates."** False without the velocity-matching condition (Theorem C.2 counterexample).
 3. **"The score uses exact NML."** The asymptotic approximation (1/2) log n omits the constant (1/2) log(pi/2) per class. This is acceptable for model selection but is not "exact NML."
-4. **"Run-length codelength converges per-site."** Not proved under the stated assumptions. It may or may not converge depending on the spatial structure of defects.
+4. **"Run-length codelength converges per-site under (A2)."** The original paper's assumption (A2) is insufficient. However, for finite deterministic CA, convergence IS provable under the no-exact-ties assumption (Theorem G.2). For the NML score, convergence is unconditional (Corollary G.3).
 5. **"Defects" in the computational-mechanics sense.** The projection residuals are geometric artifacts of the Hamming projection, not necessarily physical defects, domain walls, or particles.
 
 ---

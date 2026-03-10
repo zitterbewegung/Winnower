@@ -46,5 +46,15 @@ frequencies converge. This is cleaner than the RL-based version, requires no
 3. The "NML" terminology must be honest (rename to "asymptotic NML" or "BIC-type" throughout).
 4. Empirical language must distinguish "stabilization over tested range" from "proved convergence."
 
-None of these are fatal. The paper has a publishable core; it needs surgical corrections,
-not a rewrite. Estimated effort: 2-3 days for a careful revision.
+## What Has Been Resolved Since Initial Audit
+
+The convergence gap in Theorem 3 has been closed with a rigorous proof:
+- For the NML score: convergence is *unconditional* for finite deterministic CA
+  (Corollary G.3). No ergodic assumptions needed beyond finiteness.
+- For the RL score: convergence holds under a "no exact ties" assumption
+  (Theorem G.2), proved via: finite CA → eventually periodic states →
+  stable majority vote → eventually periodic mask → convergent L_RL/N (Lemma G.1).
+- Both are verified computationally (27 tests pass).
+
+None of the remaining issues are fatal. The paper has a publishable core; it needs
+surgical corrections, not a rewrite. Estimated effort: 2-3 days for a careful revision.

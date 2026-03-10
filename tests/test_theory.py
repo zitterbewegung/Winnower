@@ -473,3 +473,119 @@ class TestLabelConsistency:
                 found_multi = True
                 break
         assert found_multi, "Expected to find a p2-class spanning multiple p1-classes"
+
+
+# ──────────────────────────────────────────────────────────────────────
+# H. RL Rate Convergence (Theorem G)
+# ──────────────────────────────────────────────────────────────────────
+
+
+class TestRLConvergence:
+    """Theorem G: L_RL/N converges for eventually periodic sequences
+    and for finite deterministic CA (under no-ties assumption)."""
+
+    def test_eventually_periodic_sequence_converges(self):
+        """Lemma G.1: L_RL/N converges for eventually periodic binary sequences."""
+        transient = np.array([1, 0, 1, 1, 0, 0, 1, 0, 1, 0], dtype=np.uint8)
+        period = np.array([1, 1, 0, 1, 0, 0, 1, 0], dtype=np.uint8)
+
+        # Compute theoretical limit from long periodic sequence
+        very_long = np.tile(period, 10000)
+        rl_limit = run_length_bits(very_long) / len(very_long)
+
+        # Check that L_RL/N converges to limit
+        rates = []
+        for M in [10, 50, 100, 200]:
+            seq = np.concatenate([transient] + [period] * M)
+            N = len(seq)
+            rl = run_length_bits(seq)
+            rates.append(rl / N)
+
+        # Last rate should be close to limit
+        assert abs(rates[-1] - rl_limit) < 0.01, (
+            f"L_RL/N = {rates[-1]:.6f} not close to limit {rl_limit:.6f}"
+        )
+        # Rates should be converging (decreasing distance to limit)
+        for i in range(1, len(rates)):
+            assert abs(rates[i] - rl_limit) <= abs(rates[i-1] - rl_limit) + 0.001
+
+    def test_nll_converges_unconditionally(self):
+        """Corollary G.3: NLL/N converges even with exact ties."""
+        # Spacetime with orbit class at exactly 50% frequency
+        width = 4
+        nll_rates = []
+        for T in [50, 100, 200, 500, 1000]:
+            st = np.zeros((T, width), dtype=np.uint8)
+            for t in range(T):
+                st[t, 0] = t % 2  # exact 50%
+                st[t, 1] = 0
+                st[t, 2] = 1
+                st[t, 3] = 0
+            fit = fit_relative_periodic_background(st, shift=0, period=1)
+            nll_rates.append(fit.nll_bits / (T * width))
+
+        # NLL/N should be exactly 0.25 = (1/4) * H(0.5) for all T
+        for rate in nll_rates:
+            assert abs(rate - 0.25) < 1e-10, f"NLL/N = {rate}, expected 0.25"
+
+    def test_rl_converges_rule110(self):
+        """For Rule 110 (transient defects only), L_RL/N -> 0."""
+        from relative_symmetry_repair.eca import random_initial_state, simulate_eca
+
+        width = 16
+        initial = random_initial_state(width=width, density=0.5, seed=11)
+        st = simulate_eca(rule=110, initial=initial, steps=2000)
+
+        rates = []
+        for T in [200, 500, 1000, 2000]:
+            fit = fit_relative_periodic_background(st[:T], shift=-2, period=4)
+            rates.append(fit.run_length_bits / (T * width))
+
+        # Should decrease toward 0
+        for i in range(1, len(rates)):
+            assert rates[i] < rates[i-1], (
+                f"RL/N not decreasing: {rates[i]:.6f} >= {rates[i-1]:.6f}"
+            )
+        # Last rate should be very small
+        assert rates[-1] < 0.05, f"RL/N = {rates[-1]:.6f}, expected < 0.05"
+
+    def test_rl_converges_rule30_width11(self):
+        """For Rule 30 width 11 (persistent defects, no ties), L_RL/N converges."""
+        from relative_symmetry_repair.eca import random_initial_state, simulate_eca
+
+        width = 11
+        initial = random_initial_state(width=width, density=0.5, seed=11)
+        st = simulate_eca(rule=30, initial=initial, steps=5000)
+
+        p, s = 1, 0
+        rates = []
+        for T in [500, 1000, 2000, 3000, 5000]:
+            fit = fit_relative_periodic_background(st[:T], shift=s, period=p)
+            rates.append(fit.run_length_bits / (T * width))
+
+        # All rates should be close to each other (converged)
+        spread = max(rates) - min(rates)
+        assert spread < 0.01, (
+            f"RL/N spread = {spread:.6f}, expected < 0.01 (rates: {rates})"
+        )
+
+    def test_mask_prefix_stability(self):
+        """After majority vote stabilizes, mask prefix doesn't change."""
+        from relative_symmetry_repair.eca import random_initial_state, simulate_eca
+
+        width = 11
+        initial = random_initial_state(width=width, density=0.5, seed=11)
+        st = simulate_eca(rule=30, initial=initial, steps=3000)
+
+        p, s = 1, 0
+        fit_1000 = fit_relative_periodic_background(st[:1000], shift=s, period=p)
+        fit_2000 = fit_relative_periodic_background(st[:2000], shift=s, period=p)
+        fit_3000 = fit_relative_periodic_background(st[:3000], shift=s, period=p)
+
+        # Mask prefix should be stable (majority vote already locked)
+        assert np.array_equal(
+            fit_1000.defect_mask, fit_2000.defect_mask[:1000]
+        ), "Mask prefix changed between T=1000 and T=2000"
+        assert np.array_equal(
+            fit_2000.defect_mask, fit_3000.defect_mask[:2000]
+        ), "Mask prefix changed between T=2000 and T=3000"
