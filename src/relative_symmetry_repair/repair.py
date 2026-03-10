@@ -160,7 +160,7 @@ def scan_relative_periodicity(
 
 
 def fit_reflection_symmetric_state(state: np.ndarray) -> ReflectionFit:
-    """Nearest mirror-symmetric binary state under pairwise majority."""
+    """Nearest mirror-symmetric binary state (minimum Hamming distance, 0-bias on ties)."""
     if state.ndim != 1:
         raise ValueError("state must be 1D")
     if np.any((state != 0) & (state != 1)):

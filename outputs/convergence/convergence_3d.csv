@@ -1,0 +1,6 @@
+dim,rule,T,best_period,best_mdl,runner_up_mdl,margin
+3,diamoeba3d,10,6,31076.0,44375.0,13299.0
+3,diamoeba3d,20,1,87286.5,94851.6,7565.2
+3,diamoeba3d,40,1,167175.3,176203.6,9028.4
+3,diamoeba3d,60,1,246392.2,255672.6,9280.5
+3,diamoeba3d,80,1,321150.3,330757.6,9607.3
