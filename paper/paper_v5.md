@@ -131,16 +131,16 @@ Top rules by MDL score are period-1 (static/fixed-point) patterns — MDL correc
 
 We verified 6 rules across 10 seeds (64×64, 60 steps) with NML period selection:
 
-| Rule | NML Period | Mean Rate | CV | Period Consistent |
-|------|-----------|-----------|-----|-------------------|
+| Rule | Modal Period | Mean Rate | CV | Period Consistent |
+|------|-------------|-----------|-----|-------------------|
 | S14/B11 | 1 | 0.59% | 8.4% | 10/10 |
-| S25/B12 | 2 | 0.56% | 11.4% | 10/10 |
+| S25/B12 | 2 | 0.58% | 15.6% | 8/10 |
 | S66/B36 | 2 | 0.63% | 10.5% | 10/10 |
 | S24/B11 | 2 | 2.78% | 9.4% | 10/10 |
-| S11/B37 | 4 | 2.71% | 16.2% | 10/10 |
+| S11/B37 | 4 | 2.75% | 18.7% | 7/10 |
 | S37/B11 | 2 | 4.41% | 12.4% | 10/10 |
 
-At 60 steps, NML selects conservative (lower) periods with 100% seed consistency. At longer horizons (T ≥ 400), the NML-optimal period increases for persistent-defect rules as the data justifies more complex models — converging with increasing margins (Section 5.3). This is the expected behavior of principled model selection.
+At 60 steps, NML selects conservative (lower) periods with high but not perfect seed consistency. Rules with near-zero MDL margins (S25/B12, S11/B37) show seed-dependent period selection — a signature of the model-selection boundary rather than genuine inconsistency. At longer horizons (T ≥ 400), the NML-optimal period increases as the data justifies more complex models, and margins grow (Section 5.3).
 
 ---
 
@@ -154,14 +154,14 @@ The most interesting rules are those with persistent, structured defects — lon
 
 We ran 400-step simulations (64×64, seed 11) and measured defect counts in 100-step windows:
 
-| Rule | Window | Mean Defects | Std | Range |
-|------|--------|-------------|-----|-------|
-| S24/B11 | t=50–100 | 10.8 | 3.5 | [5, 16] |
-| S24/B11 | t=300–400 | 10.8 | 3.5 | [5, 16] |
-| S11/B37 | t=50–100 | 10.0 | 5.2 | [4, 25] |
-| S11/B37 | t=300–400 | 7.1 | 2.0 | [4, 9] |
-| S37/B11 | t=50–100 | 28.6 | 4.2 | [21, 37] |
-| S37/B11 | t=300–400 | 28.1 | 3.9 | [18, 37] |
+| Rule | Period | Window | Mean Defects | Std | Range |
+|------|--------|--------|-------------|-----|-------|
+| S24/B11 | 4 | t=50–100 | 14.8 | 1.3 | [13, 17] |
+| S24/B11 | 4 | t=300–400 | 14.8 | 1.3 | [13, 17] |
+| S11/B37 | 4 | t=50–100 | 15.5 | 5.2 | [10, 31] |
+| S11/B37 | 4 | t=300–400 | 12.6 | 2.0 | [10, 15] |
+| S37/B11 | 6 | t=50–100 | 28.6 | 4.2 | [21, 37] |
+| S37/B11 | 6 | t=300–400 | 28.1 | 3.9 | [18, 37] |
 
 All three rules show stable defect populations from t=100 onward. S11/B37 shows initial transient decay that stabilizes. S24/B11 and S37/B11 are stable throughout.
 
@@ -172,10 +172,10 @@ NML period selection converges as the observation window grows:
 | Rule | T=60 | T=100 | T=200 | T=400 | T=600 | T=800 |
 |------|------|-------|-------|-------|-------|-------|
 | S24/B11 | 2 | 2 | 2 | 4 | 6 | 6 |
-| S11/B37 | 4 | 4 | 4 | 4 | 8 | 8 |
+| S11/B37 | 2 | 4 | 4 | 4 | 8 | 8 |
 | S37/B11 | 2 | 2 | 2 | 6 | 6 | 6 |
 
-Margins between best and runner-up *increase* with T (e.g., S37/B11: 4.6k bits at T=60 → 60k bits at T=800), confirming convergence to a stable period rather than unbounded drift. The converged periods (6, 8, 6) are consistent with the known period subsumption structure: period 6 subsumes periods 1, 2, 3; period 8 subsumes 1, 2, 4.
+At short horizons (T=60), S11/B37 selects period 2 with a near-zero margin (7 bits), effectively a tie that resolves to period 4 by T=100. Margins between best and runner-up *increase* with T (e.g., S37/B11: 5.2k bits at T=60 → 60k bits at T=800), confirming convergence to a stable period rather than unbounded drift. The converged periods (6, 8, 6) are consistent with the known period subsumption structure: period 6 subsumes periods 1, 2, 3; period 8 subsumes 1, 2, 4.
 
 ### 5.4 Multi-Seed Size Scaling
 
@@ -185,23 +185,25 @@ Margins between best and runner-up *increase* with T (e.g., S37/B11: 4.6k bits a
 
 | Grid | Mean Rate | Late Defects | Defect Density |
 |------|-----------|-------------|----------------|
-| 32×32 | 3.19% | 8.1 ± 5.2 | 0.008 |
-| 64×64 | 3.18% | 40.9 ± 8.8 | 0.010 |
+| 32×32 | 3.47% | 11.4 ± 5.3 | 0.011 |
+| 64×64 | 3.26% | 45.7 ± 6.6 | 0.011 |
 | 96×96 | 3.11% | 101.9 ± 8.0 | 0.011 |
 | 128×128 | 3.33% | 196.5 ± 10.6 | 0.012 |
 | 192×192 | 3.14% | 428.5 ± 32.4 | 0.012 |
 
-Defect density is approximately constant (~0.01) from 64×64 to 192×192 across 5 seeds, consistent with a bulk (extensive) phenomenon. Late defect count scales linearly with grid area.
+Defect density is approximately constant (~0.011) from 32×32 to 192×192 across 5 seeds, consistent with a bulk (extensive) phenomenon. Late defect count scales linearly with grid area.
 
 **S11/B37 — Sub-extensive scaling:**
 
 | Grid | Mean Rate | Late Defects | Defect Density |
 |------|-----------|-------------|----------------|
-| 64×64 | 1.81% | 11.1 ± 6.3 | 0.003 |
-| 128×128 | 1.58% | 32.7 ± 4.1 | 0.002 |
-| 192×192 | 1.69% | 79.5 ± 16.7 | 0.002 |
+| 32×32 | 1.46% | 1.6 ± 0.6 | 0.0016 |
+| 64×64 | 1.81% | 11.1 ± 6.3 | 0.0027 |
+| 96×96 | 1.71% | 18.6 ± 6.2 | 0.0020 |
+| 128×128 | 1.58% | 32.7 ± 4.1 | 0.0020 |
+| 192×192 | 1.69% | 79.5 ± 16.7 | 0.0022 |
 
-Defect density slowly decreases, consistent with a fixed or slowly-growing population.
+Defect density drops from 64×64 to 96×96 then stabilizes around 0.002, consistent with a sub-extensive population.
 
 ---
 
@@ -268,7 +270,7 @@ We have developed a symmetry-projection theory for decomposing CA spacetimes int
 All code is open-source. Key parameters:
 - 1D ECA: width=192, steps=144, density=0.5, seed=11, shifts=-6..+6, periods=1..10
 - 2D survey: 48×48, steps=40, 621 candidates (458 non-trivial)
-- Persistent-defect survey: 64×64, steps=100, 986 candidates
+- Persistent-defect verification: 64×64, steps=100–400, 3 rules (S24/B11, S11/B37, S37/B11)
 - Multi-seed: seeds=[11, 42, 73, 99, 137, 200, 314, 500, 777, 1024]
 - Size scaling: grids=[32, 64, 96, 128, 192], steps=100, 5 seeds
 - 400-step verification: 64×64, steps=400, seed=11

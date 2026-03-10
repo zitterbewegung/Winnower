@@ -73,7 +73,7 @@ def template_bits_nml(period: int, spatial_shape: tuple[int, ...], steps: int) -
     k = period
     for d in spatial_shape:
         k *= d
-    n_obs = max(steps / period, 1)
+    n_obs = max(steps // period, 1)
     return k / 2.0 * math.log2(n_obs)
 
 

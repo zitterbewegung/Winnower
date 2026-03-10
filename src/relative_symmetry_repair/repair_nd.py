@@ -25,7 +25,7 @@ class RelativePeriodicFitND:
     run_length_bits: int
     lz4_bits: int
     template_bits: int = 0
-    mdl_bits: int = 0           # template_bits + run_length_bits
+    mdl_bits: float = 0.0       # template_bits_nml + run_length_bits
     rule_error: float | None = None
 
     def to_record(self) -> dict[str, float | int | None]:
