@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from .coding import combinatorial_repair_bits, lz4_mask_bits, run_length_bits
+from .coding import combinatorial_repair_bits, lz4_mask_bits, run_length_bits, template_bits_nml, template_bits_raw
 from .eca import rule_consistency_rate
 
 
@@ -23,6 +23,8 @@ class RelativePeriodicFit:
     combinatorial_bits: float
     run_length_bits: int
     lz4_bits: int
+    template_bits: int = 0
+    mdl_bits: float = 0.0       # template_bits_nml + run_length_bits
     rule_error: float | None = None
 
     def to_record(self) -> dict[str, float | int | None]:
@@ -35,6 +37,8 @@ class RelativePeriodicFit:
             "combinatorial_bits": self.combinatorial_bits,
             "run_length_bits": self.run_length_bits,
             "lz4_bits": self.lz4_bits,
+            "template_bits": self.template_bits,
+            "mdl_bits": self.mdl_bits,
             "rule_error": self.rule_error,
         }
 
@@ -111,6 +115,12 @@ def fit_relative_periodic_background(
     total_sites = int(defect_mask.size)
     rule_error = None if rule is None else rule_consistency_rate(background, int(rule))
 
+    steps, width = spacetime.shape
+    rl_bits = run_length_bits(defect_mask)
+    t_bits_raw = template_bits_raw(period, (width,))
+    t_bits_nml = template_bits_nml(period, (width,), steps)
+    mdl = t_bits_nml + rl_bits
+
     return RelativePeriodicFit(
         shift=int(shift),
         period=int(period),
@@ -120,8 +130,10 @@ def fit_relative_periodic_background(
         total_sites=total_sites,
         defect_rate=defect_sites / total_sites,
         combinatorial_bits=combinatorial_repair_bits(total_sites, defect_sites, alphabet_size=2),
-        run_length_bits=run_length_bits(defect_mask),
+        run_length_bits=rl_bits,
         lz4_bits=lz4_mask_bits(defect_mask),
+        template_bits=t_bits_raw,
+        mdl_bits=mdl,
         rule_error=rule_error,
     )
 
@@ -156,8 +168,8 @@ def fit_reflection_symmetric_state(state: np.ndarray) -> ReflectionFit:
 
     state = state.astype(np.uint8)
     flipped = state[::-1]
-    target = np.where(state >= flipped, state, flipped).astype(np.uint8)
-    target = np.maximum(target, target[::-1]).astype(np.uint8)
+    # Pairwise majority: agree → keep value; disagree → 0 (minimum-defect tie-break)
+    target = np.where(state == flipped, state, (state & flipped)).astype(np.uint8)
     defect_mask = state != target
     defect_sites = int(defect_mask.sum())
     total_sites = int(state.size)

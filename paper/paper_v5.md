@@ -103,13 +103,13 @@ This is confirmed empirically: for all three persistent-defect rules, the MDL-op
 
 ECA rules 30, 54, and 110 on a ring of width 192 for 144 steps, scanning shifts $\pm 6$, periods 1–10.
 
-| Rule | Best $(s, p)$ | Defect Rate | RL Bits | Rule Error |
-|------|---------------|-------------|---------|------------|
-| 54   | $(0, 8)$      | 20.1%       | 19,840  | 0.111      |
-| 110  | $(0, 7)$      | 30.8%       | 25,924  | 0.211      |
-| 30   | $(-5, 10)$    | 39.1%       | 30,656  | 0.363      |
+| Rule | Best $(s, p)$ | Defect Rate | RL Bits | Rule Error | MDL Bits |
+|------|---------------|-------------|---------|------------|----------|
+| 54   | $(0, 4)$      | 20.1%       | 19,852  | 0.112      | 21,837   |
+| 110  | $(-2, 4)$     | 32.2%       | 25,428  | 0.172      | 27,413   |
+| 30   | $(-2, 1)$     | 46.7%       | 31,132  | 0.422      | 31,820   |
 
-The known hierarchy Rule 54 < Rule 110 < Rule 30 [1,2,3] is recovered. The method provides a positive control for the MDL ranking without claiming to recover full domain/particle structure.
+MDL selection favors lower periods than pure defect-rate ranking (e.g., period 4 instead of 8 for Rule 54) because the parametric penalty outweighs the marginal defect-rate improvement. The known complexity hierarchy Rule 54 < Rule 110 < Rule 30 [1,2,3] is recovered under MDL ranking. The method provides a positive control without claiming to recover full domain/particle structure.
 
 **Codelength distinguishes geometry.** Two synthetic masks of size 512, each with 64 defects: clustered (42 RL bits) vs scattered (251 RL bits), a 6× ratio at identical Hamming weight, illustrating Proposition 1.
 

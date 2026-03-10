@@ -56,7 +56,7 @@ def analyze(
         periods=range(1, max_period + 1),
         rule=rule,
     )
-    best = frame.sort_values(["defect_rate", "rule_error", "run_length_bits"]).iloc[0]
+    best = frame.sort_values(["mdl_bits", "defect_rate"]).iloc[0]
     best_key = (int(best["shift"]), int(best["period"]))
     best_fit = fits[best_key]
 
@@ -114,7 +114,7 @@ def analyze2d(
         rule_error_fn=rule_error_fn,
     )
 
-    best = frame.sort_values(["defect_rate", "run_length_bits"]).iloc[0]
+    best = frame.sort_values(["mdl_bits", "defect_rate"]).iloc[0]
     best_shift = (int(best["shift_0"]), int(best["shift_1"]))
     best_period = int(best["period"])
     best_fit = fits[(best_shift, best_period)]
@@ -179,7 +179,7 @@ def analyze3d(
         rule_error_fn=rule_error_fn,
     )
 
-    best = frame.sort_values(["defect_rate", "run_length_bits"]).iloc[0]
+    best = frame.sort_values(["mdl_bits", "defect_rate"]).iloc[0]
     best_shift = (int(best["shift_0"]), int(best["shift_1"]), int(best["shift_2"]))
     best_period = int(best["period"])
     best_fit = fits[(best_shift, best_period)]
