@@ -98,7 +98,7 @@ where $d^*$ denotes the optimal Hamming distance.
 
 *Proof.* Each orbit class under $p_1$ splits into $m$ or fewer classes under $p_2$. Independent majority voting on finer classes can only reduce or maintain total disagreements. $\square$
 
-**Corollary.** Without complexity control, defect rate is monotonically non-increasing in period. This is the *overcapacity problem*: higher periods always fit at least as well, but at the cost of $k = p \prod D_i$ free binary parameters.
+**Corollary.** Along any divisibility chain $p, 2p, 3p, \ldots$, defect rate is monotonically non-increasing. More generally, for a fixed candidate set, the minimum achievable defect rate over all periods $\leq P$ is non-increasing in $P$. This is the *overcapacity problem*: higher periods can always fit at least as well as their divisors, but at the cost of $k = p \prod D_i$ free binary parameters.
 
 ### 2.4 Defect-Mask Codelength as Geometric Proxy
 
@@ -112,13 +112,17 @@ This justifies using RL codelength as a geometric quality metric beyond defect r
 
 **Definition 3 (Two-Part Code).** For model $(p, \mathbf{s})$ with $k = p \prod_i D_i$ template parameters, each estimated from $\lfloor T/p \rfloor$ observations by majority vote, the total description length is:
 
-$$\text{MDL}(p, \mathbf{s}) = \underbrace{\frac{k}{2} \log_2 \frac{T}{p}}_{\text{NML parametric complexity}} + \underbrace{L_{\text{RL}}(M^*)}_{\text{defect encoding}}$$
+$$\text{MDL}(p, \mathbf{s}) = \underbrace{\frac{k}{2} \log_2 \frac{T}{p}}_{\text{parametric penalty}} + \underbrace{L_{\text{RL}}(M^*)}_{\text{defect encoding}}$$
 
-The first term is the standard NML parametric complexity for $k$ Bernoulli parameters [9]. The second term encodes the residual defect mask.
+The first term is the asymptotic parametric complexity for $k$ Bernoulli parameters, each estimated from $\lfloor T/p \rfloor$ observations [9, Ch. 3]. It approximates the NML stochastic complexity but is not exact NML, since the residual code (run-length encoding) is a fixed-order heuristic rather than a normalized maximum likelihood code. We call this an *MDL-motivated* criterion: it inherits the key MDL property that model complexity competes against data fit, without claiming full NML optimality.
 
-**Proposition 2 (Convergence).** For a spacetime that is exactly $(p_0, \mathbf{s}_0)$-periodic outside a defect set of rate $\epsilon < 1/2$, the MDL-optimal period $p^*$ satisfies $p^* \leq p_0$ for all sufficiently large $T$.
+**Remark (No general convergence guarantee).** One might hope that $p^*$ converges to the "true" background period $p_0$ as $T \to \infty$. This does *not* hold in general: if the defects themselves have periodic structure (e.g., defects at every $k$-th step), then period $p_0 \cdot k$ absorbs the defects into the template and achieves a lower MDL score for all large $T$. The MDL criterion correctly identifies the period that best describes the *entire* spacetime, not just the "background" — the distinction between background periodicity and defect periodicity is not intrinsic to the data.
 
-*Proof sketch.* For the true period $p_0$, the defect encoding grows as $\Theta(T \cdot H(\epsilon) \cdot \prod D_i)$ where $H$ is binary entropy. For any $p > p_0$ that is not a multiple of $p_0$, the defect rate does not improve, but the NML complexity increases. For multiples $mp_0$, the NML cost grows as $\frac{m k_0}{2} \log_2 \frac{T}{mp_0}$ while defect encoding can only decrease, bounded below by the true defect rate. The logarithmic growth of NML ensures the complexity penalty eventually dominates the diminishing defect improvement. $\square$
+**Proposition 2 (Finite-Candidate Stabilization).** Within a fixed candidate set $\{1, \ldots, P_{\max}\}$, the MDL-selected period $p^*$ stabilizes for sufficiently large $T$: there exists $T_0$ such that $p^*(T) = p^*(T_0)$ for all $T > T_0$, provided the empirical per-orbit defect rates converge.
+
+*Proof sketch.* For fixed candidates, the MDL score for each period is a continuous function of $T$ (logarithmic penalty + defect encoding that grows linearly). Two such functions can cross at most finitely many times on $[1, \infty)$, so the minimizer eventually becomes constant. $\square$
+
+This is confirmed empirically: for all three persistent-defect rules, the MDL-optimal period stabilizes by $T = 600$ with margins increasing monotonically thereafter (Section 5.3).
 
 **Selection rule.** We scan a grid of $(p, \mathbf{s})$ pairs and select the model minimizing MDL. The model index cost $\log_2(|\text{candidates}|)$ is constant across all models and does not affect selection.
 
