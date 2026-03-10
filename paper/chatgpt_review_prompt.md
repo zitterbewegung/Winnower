@@ -13,6 +13,16 @@ Please:
 
 After your report, we will iterate — I'll fix what you flag and paste revisions back.
 
+## Known issues from prior review (please help fix, not just re-discover)
+
+A previous automated review (Codex/GPT-5.4, 154k tokens) found three specific problems:
+
+1. **Proposition 2 (convergence) is FALSE as stated.** Counterexample: a period-1 spacetime (all zeros) with defects at every 3rd step (rate 1/3 < 1/2). Period p=3 fits perfectly and wins MDL for all large T, because the defects themselves are periodic. The claim "p* ≤ p0 for large T" fails when defect structure has its own periodicity. Please help me find the correct statement — what convergence guarantee CAN we make?
+
+2. **"NML parametric complexity" is overstated.** The score (k/2) log(T/p) with a run-length residual code is not strict NML in the Grünwald sense. It should be called "MDL-inspired" or "asymptotic parametric penalty." What is the correct MDL-theoretic framing for this criterion?
+
+3. **Monotonicity corollary is too strong.** Theorem 2 is correct for divisibility chains (p1 | p2), but the corollary claiming "defect rate is monotonically non-increasing in period" doesn't hold for arbitrary periods (e.g., p=5 vs p=6). Please help me state this correctly.
+
 ---
 
 # PAPER
