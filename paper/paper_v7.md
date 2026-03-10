@@ -1,12 +1,12 @@
-# Consistent Period Selection for Cellular Automaton Spacetimes via Orbit-Class NML
+# Model Selection Stabilization for Relative-Periodic Decomposition of Cellular Automaton Spacetimes
 
 ## Abstract
 
-We prove that model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes converges to a unique period as the observation window grows. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent Bernoulli estimation on orbit classes (Theorem 1), partition refinement makes higher periods monotonically more expressive (Theorem 2), and an exact Bernoulli NML (normalized maximum likelihood) criterion with parametric complexity $O(\log T)$ against data-fit cost $\Theta(T)$ yields consistent model selection (Theorem 3). Under an aperiodic-defect condition, the selected period recovers the true background period (Theorem 4). The theory applies identically to 1D, 2D, and 3D automata.
+We prove that model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes stabilizes to a unique period as the observation window grows. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem 1), partition refinement along constant-velocity chains makes higher periods monotonically more expressive (Theorem 2), and a Bernoulli NML criterion with $O(\log T)$ complexity penalty against $\Theta(T)$ data-fit cost yields eventual stabilization of the selected model (Theorem 3). We also prove that background period recovery is impossible in general without additional assumptions (Theorem 4). The theory applies identically to 1D, 2D, and 3D automata.
 
-Cross-dimensional experiments validate the convergence: NML-selected periods stabilize for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (773 non-trivial from 1,050 candidates), and 3D totalistic rules — with margins growing monotonically after stabilization. As an application, the framework identifies 2D rules with persistent structured defects, including one (S37/B11) exhibiting extensive defect scaling verified across multiple grid sizes and seeds.
+Cross-dimensional experiments confirm the stabilization: selected periods lock for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (773 non-trivial from 1,050 candidates), and 3D totalistic rules — with margins growing after stabilization. As an application, the framework identifies 2D rules with persistent structured projection residuals, including one (S37/B11) exhibiting extensive residual scaling verified at 400 steps, across multiple seeds, and at grid sizes up to 192×192.
 
-**Keywords:** cellular automata, normalized maximum likelihood, model selection consistency, symmetry projection, defect decomposition
+**Keywords:** cellular automata, normalized maximum likelihood, model selection stabilization, symmetry projection, projection residual decomposition
 
 ---
 
@@ -16,29 +16,29 @@ Cellular automata (CA) generate complex spatiotemporal patterns from simple loca
 
 The computational mechanics program [1,2] builds local epsilon-machine models that identify domains, particles, and their interactions. Redeker [3] formalized particle catalogs via de Bruijn diagrams. Rupe and Crutchfield [4] generalized local causal states to arbitrary dimensions. Shalizi et al. [7] developed automatic coherent-structure filters. These methods build rich local models at significant computational cost.
 
-We take a different approach: rather than building local models, we ask a global model-selection question. *Given a finite family of relative-periodic templates, which template best describes the data?* We show that this question has a clean answer — the NML-optimal period converges — and that the convergence proof is dimension-agnostic, applying uniformly to 1D, 2D, and 3D automata.
+We take a different approach: rather than building local models, we ask a global model-selection question. *Given a finite family of relative-periodic templates, which template best describes the data?* We show that this question has a clean answer — the NML-optimal period stabilizes — and that the stabilization proof is dimension-agnostic, applying uniformly to 1D, 2D, and 3D automata.
 
 ### 1.1 Contributions
 
 1. **Orbit-class reduction** (Theorem 1): fitting a relative-periodic background reduces to independent majority voting on orbit classes, yielding the unique Hamming-optimal projection in $O(n)$ time.
-2. **Monotonicity and overcapacity** (Theorem 2): higher periods always achieve lower defect rates along divisibility chains, necessitating complexity control.
-3. **NML consistency** (Theorem 3): under ergodic defect rates, the NML-selected period stabilizes with growing margins — proved for any spatial dimension, with no assumption on defect geometry.
-4. **Identifiability** (Theorem 4): when defects are aperiodic relative to the background, NML recovers the true background period.
-5. **Cross-dimensional validation**: convergence confirmed empirically for 1D (ECA 30/54/110), 2D (773 totalistic rules), and 3D (totalistic rules on a 3-torus).
-6. **Application**: identification of persistent structured defects in 2D rules, with extensive scaling in S37/B11.
+2. **Monotonicity under velocity matching** (Theorem 2): higher periods achieve lower defect rates along constant-velocity divisibility chains, necessitating complexity control.
+3. **Model selection stabilization** (Theorem 3): under ergodic defect rates, the NML-selected period stabilizes with growing margins — proved for any spatial dimension, with no assumption on defect geometry.
+4. **Nonidentifiability** (Theorem 4): background period recovery is impossible in general; periodic defect structure can be absorbed by higher-period templates.
+5. **Cross-dimensional experiments**: empirical stabilization observed for 1D (ECA 30/54/110), 2D (773 totalistic rules), and 3D (totalistic rules on a 3-torus).
+6. **Application**: identification of persistent structured projection residuals in 2D rules, with extensive scaling in S37/B11.
 
 ### 1.2 Relationship to Prior Work
 
 | Aspect | Computational Mechanics [1,2,4] | This Work |
 |--------|-------------------------------|-----------|
 | Model class | Local (epsilon-machine) | Global (relative-periodic) |
-| Selection criterion | Statistical complexity | Exact Bernoulli NML |
-| Consistency proof | — | Theorem 3 |
-| Identifiability | — | Theorem 4 |
+| Selection criterion | Statistical complexity | Bernoulli NML |
+| Stabilization proof | — | Theorem 3 |
+| Nonidentifiability | — | Theorem 4 |
 | Dimensionality | Case-by-case | Dimension-agnostic |
 | Cost | Higher | $O(n)$ per model |
 
-Packard and Wolfram [5] surveyed 2D rules qualitatively. Boccara and Roger [6] identified period-2 families. Zenil [8] used compression for CA classification. Our contribution is a *consistency theorem* for period selection that applies across dimensions, with the surveys as validation.
+Packard and Wolfram [5] surveyed 2D rules qualitatively. Boccara and Roger [6] identified period-2 families. Zenil [8] used compression for CA classification. Our contribution is a *stabilization theorem* for period selection that applies across dimensions, with the surveys as empirical evidence.
 
 ---
 
@@ -68,17 +68,19 @@ This is the *orbit-class reduction*: the spatiotemporal fitting problem decompos
 
 ### 2.3 Monotonicity and Overcapacity
 
-**Theorem 2 (Monotonicity).** If period $p_2$ is a multiple of $p_1$ (i.e., $p_2 = m \cdot p_1$ for integer $m \geq 1$) with the same shift $\mathbf{s}$, then the orbit partition under $p_2$ refines the partition under $p_1$, and:
+**Theorem 2 (Monotonicity under Velocity-Matched Refinement).** Let $(p_1, \mathbf{s}_1)$ and $(p_2, \mathbf{s}_2)$ be two relative-periodic models. If there exists an integer $m \geq 1$ such that $p_2 = m \cdot p_1$ and $s_2^{(i)} \equiv m \cdot s_1^{(i)} \pmod{D_i}$ for each spatial dimension $i$, then the orbit partition under $(p_2, \mathbf{s}_2)$ refines the partition under $(p_1, \mathbf{s}_1)$, and:
 
-$$d^*(p_2, \mathbf{s}) \leq d^*(p_1, \mathbf{s})$$
+$$d^*(p_2, \mathbf{s}_2) \leq d^*(p_1, \mathbf{s}_1)$$
 
-where $d^*$ denotes the optimal Hamming distance.
+The condition $s_2 = m \cdot s_1 \pmod{D}$ means the two models share the same *characteristic velocity* $\mathbf{s}/p$. In particular, for shift $\mathbf{s} = \mathbf{0}$, monotonicity holds along all divisibility chains $p, 2p, 3p, \ldots$
 
-*Proof.* Each orbit class $O_j$ under $p_1$ is the union of $m$ orbit classes under $p_2$. Independent majority voting on finer classes can only reduce or maintain total disagreements, since optimizing over a finer partition is a relaxation. $\square$
+*Proof.* Under the stated condition, the periodicity map $\tau_2: (t, \mathbf{x}) \mapsto (t + p_2, \mathbf{x} + \mathbf{s}_2 \bmod \mathbf{D})$ equals $\tau_1^m$, the $m$-fold composition of the $(p_1, \mathbf{s}_1)$ map. Therefore, the $\tau_2$-orbit of any point is a subset of its $\tau_1$-orbit, so the $\tau_2$-partition refines the $\tau_1$-partition. By Theorem 1, optimizing over a finer partition can only reduce total disagreement. $\square$
 
-**Corollary (Overcapacity).** Along any divisibility chain $p, 2p, 3p, \ldots$, defect rate is monotonically non-increasing. This creates an *overcapacity problem*: higher periods always fit at least as well as their divisors, but use $k = p \prod D_i$ free parameters. Naive defect-rate minimization always prefers the highest available period. This motivates the NML criterion below.
+**Remark.** The velocity-matching condition is necessary in general. For example, on a ring of width 4, the models $(p=1, s=1)$ and $(p=2, s=1)$ share the same shift but *not* the same velocity ($1/1 \neq 1/2$). The checkerboard spacetime $U[t,x] = (t+x) \bmod 2$ has $d^*(1,1) = 0$ but $d^*(2,1) = 4$, violating monotonicity.
 
-### 2.4 Exact Bernoulli NML Criterion
+**Corollary (Overcapacity).** Along any constant-velocity divisibility chain, the residual count is monotonically non-increasing. This creates an *overcapacity problem*: naive residual-count minimization always prefers the highest available period. This motivates the complexity-penalized criterion below.
+
+### 2.4 Bernoulli NML Criterion
 
 The orbit-class reduction (Theorem 1) shows that each model $(p, \mathbf{s})$ decomposes the data into $k = p \prod_i D_i$ independent Bernoulli estimation problems. This motivates a *Bernoulli NML* criterion where the statistical model family is exactly the one implied by the orbit-class structure.
 
@@ -90,19 +92,19 @@ where $H_b(\theta) = -\theta \log_2 \theta - (1-\theta) \log_2(1-\theta)$ is bin
 
 **Definition 4 (Bernoulli NML score).** The normalized maximum likelihood score for $k$ independent Bernoulli classes is:
 
-$$\text{NML}(p, \mathbf{s}) = \underbrace{\text{NLL}(p, \mathbf{s})}_{\text{data fit}} + \underbrace{\sum_{j=1}^{k} \frac{1}{2} \log_2 n_j}_{\text{parametric complexity}}$$
+$$\text{NML}(p, \mathbf{s}) = \underbrace{\text{NLL}(p, \mathbf{s})}_{\text{data fit}} + \underbrace{\sum_{j=1}^{k} \frac{1}{2} \log_2 n_j}_{\text{asymptotic parametric complexity}}$$
 
-The complexity term $\frac{1}{2} \log_2 n_j$ is the asymptotic Bernoulli NML normalizing constant for class $j$ with $n_j$ observations [9, §11.3]. For a single Bernoulli parameter with $n$ observations, this approximation is tight: the exact normalizer is $\frac{1}{2}\log_2(n/2) + O(1/n)$.
+The complexity term $\frac{1}{2} \log_2 n_j$ is the asymptotic NML parametric complexity for class $j$ with $n_j$ observations [9, §11.3]. The combined score is an asymptotic approximation to the normalized maximum likelihood code for the orbit-class Bernoulli model. It is not exact NML (the exact normalizing constants involve sums of binomial coefficients), but the $O(k)$ additive error does not affect asymptotic model selection since the NLL term is $\Theta(T)$.
 
 **Remark (Relationship to Hamming projection).** Majority vote (Theorem 1) minimizes Hamming distance; the Bernoulli MLE $\hat{\theta}_j$ minimizes negative log-likelihood. These serve different purposes: majority vote produces the optimal background decomposition, while NML selects among competing decompositions. The two coincide when $\hat{\theta}_j \in \{0, 1\}$ (pure orbit classes) and diverge most when $\hat{\theta}_j \approx 1/2$ (maximally noisy classes).
 
 **Remark (No geometry dependence).** Unlike run-length or LZ4 codelengths, the NML score depends only on the orbit-class statistics $(n_j, n_j^{(1)})$ — it is independent of the spatial arrangement of defects and of the traversal order. This makes the criterion intrinsic to the orbit-class structure.
 
-### 2.5 NML Consistency Theorem
+### 2.5 Stabilization Theorem
 
 This is the main theoretical result.
 
-**Theorem 3 (NML Consistency).** Let $\mathcal{C} = \{(p_1, \mathbf{s}_1), \ldots, (p_m, \mathbf{s}_m)\}$ be a fixed finite candidate set. For each candidate $c \in \mathcal{C}$, let $k_c = p_c \prod_i D_i$ be the number of orbit classes and let $n_j(T)$ denote the size of the $j$-th orbit class at observation length $T$. Assume:
+**Theorem 3 (Stabilization of Bernoulli NML Selection).** Let $\mathcal{C} = \{(p_1, \mathbf{s}_1), \ldots, (p_m, \mathbf{s}_m)\}$ be a fixed finite candidate set. For each candidate $c \in \mathcal{C}$, let $k_c = p_c \prod_i D_i$ be the number of orbit classes and let $n_j(T)$ denote the size of the $j$-th orbit class at observation length $T$. Assume:
 
 (A1) *Ergodic orbit-class frequencies*: for each candidate $c$ and each orbit class $j$, the empirical frequency $\hat{\theta}_j(T) \to \theta_j^*$ as $T \to \infty$.
 
@@ -132,13 +134,19 @@ Since $|\mathcal{C}|$ is finite, all pairwise comparisons stabilize, giving a un
 
 **Corollary (Dimension-agnostic).** Theorem 3 makes no reference to spatial dimension $n$. It applies identically to 1D rings, 2D tori, 3D tori, or any periodic lattice.
 
-**Remark (Comparison with v6 proof).** The previous MDL formulation (paper v6) used run-length codelength $L_{\text{RL}}$ as the data-fit term, requiring an additional assumption (A2: $\Omega(T)$ runs) to ensure $L_{\text{RL}} = \Theta(T)$. The NML formulation removes this assumption entirely: the data-fit term is the Bernoulli NLL, which is always $\Theta(T)$ under (A1) whenever any orbit class has $\theta_j^* \in (0,1)$. This makes the proof strictly cleaner.
+**Remark on run-length encoding.** An alternative MDL criterion using $\frac{k}{2} \log_2(T/p) + L_{\text{RL}}(M^*)$ (BIC-type penalty plus run-length defect encoding) satisfies an analogous stabilization theorem, provided the per-site RL rate $\ell_c = \lim L_{\text{RL}} / N(T)$ converges. For finite deterministic CA, this convergence can be proved: the CA state sequence is eventually periodic (pigeonhole on the finite state space), the majority vote stabilizes (under a "no exact frequency ties" condition), and the resulting defect mask is eventually periodic, so $L_{\text{RL}}/N$ converges by a purely combinatorial argument about run-length coding of periodic sequences. We use the NML score as the primary selection criterion because it converges *unconditionally* (no ties assumption needed), and report RL codelength as a secondary geometric diagnostic (Proposition 1).
 
-### 2.6 Identifiability
+### 2.6 Nonidentifiability
 
-**Definition 5.** The *true background period* $p_0$ of a CA spacetime is the smallest period such that the defect mask $M^*_{p_0}$ has vanishing structure: all orbit classes under $p_0$ have asymptotic frequency $\theta_j^* \in \{0, 1\}$ (i.e., the background is an exact relative-periodic orbit, modulo finite transients).
+**Theorem 4 (Nonidentifiability of Background Period).** For any period $p_0$, shift $\mathbf{s}$, and MDL-type criterion with $O(\log T)$ penalty and $\Theta(T)$ data-fit cost, there exist spacetimes for which the criterion does not select $p_0$ for any $T$ beyond some threshold. Specifically, if the projection residual under $(p_0, \mathbf{s})$ has its own periodic structure with period $k > 1$, then the candidate $(k \cdot p_0, k \cdot \mathbf{s} \bmod \mathbf{D})$ absorbs the residual into its template and eventually achieves a lower total score.
 
-**Theorem 4 (Identifiability under Aperiodic Defects).** Let $p_0$ be the true background period and suppose defects are aperiodic in the following sense: for all orbit classes $j$ under model $p_0$, the empirical frequency $\theta_j^* \in \{0, 1\}$, but for any strict multiple $p = m \cdot p_0$ ($m > 1$), the refinement of some orbit class produces sub-classes with the same frequency $\theta_j^* \in \{0, 1\}$. Then:
+The observed spacetime does not intrinsically separate into "background" plus "residual" without additional assumptions. The selected period is the one that best compresses the *entire* spacetime, not necessarily the one matching an external notion of "true background period."
+
+### 2.7 Identifiability under Aperiodic Residuals
+
+**Definition 5.** The *true background period* $p_0$ of a CA spacetime is the smallest period such that the projection residual $M^*_{p_0}$ has vanishing structure: all orbit classes under $p_0$ have asymptotic frequency $\theta_j^* \in \{0, 1\}$ (i.e., the background is an exact relative-periodic orbit, modulo finite transients).
+
+**Theorem 5 (Identifiability under Aperiodic Residuals).** Let $p_0$ be the true background period and suppose residuals are aperiodic in the following sense: for all orbit classes $j$ under model $p_0$, the empirical frequency $\theta_j^* \in \{0, 1\}$, but for any strict multiple $p = m \cdot p_0$ ($m > 1$), the refinement of some orbit class produces sub-classes with the same frequency $\theta_j^* \in \{0, 1\}$. Then:
 
 (i) $\text{NLL}(p, T) = \text{NLL}(p_0, T) + o(T)$ for any multiple $p = m \cdot p_0$, because splitting a pure orbit class ($\theta^* \in \{0,1\}$) into sub-classes does not reduce NLL.
 
@@ -148,9 +156,9 @@ Since $|\mathcal{C}|$ is finite, all pairwise comparisons stabilize, giving a un
 
 *Proof.* When $\theta_j^* \in \{0,1\}$, we have $H_b(\theta_j^*) = 0$, so the NLL contribution from class $j$ is zero. Splitting $O_j$ into $m$ sub-classes $O_{j_1}, \ldots, O_{j_m}$ with the same frequency preserves $H_b = 0$ for each sub-class, so NLL is unchanged. But the complexity increases by $\frac{m-1}{2}\log_2(T/p)$ per split class. Since $k_p > k_{p_0}$, the complexity difference $\frac{k_p - k_{p_0}}{2}\log_2 T \to +\infty$, and NML penalizes the larger model. $\square$
 
-**Remark (Impossibility with periodic defects).** If defects themselves have period $q$, then period $p_0 \cdot q$ absorbs defects into the template, achieving pure orbit classes ($H_b = 0$) and thus NLL = 0. In this case NML may prefer $p_0 \cdot q$ over $p_0$, because the NLL reduction (from $\Theta(T)$ to 0) outweighs the complexity increase ($O(\log T)$). This is *principled* behavior: the data genuinely admits a simpler (zero-defect) description at the higher period. The distinction between "background periodicity" and "defect periodicity" is not intrinsic to the observation.
+**Remark.** Theorem 4 and Theorem 5 are complementary: when residuals are aperiodic, NML recovers the true period (Theorem 5); when residuals have their own periodic structure, NML absorbs them into higher-period templates (Theorem 4). This is *principled* behavior: the data genuinely admits a simpler (zero-residual) description at the higher period. The distinction between "background periodicity" and "residual periodicity" is not intrinsic to the observation.
 
-### 2.7 Geometric Diagnostics: Run-Length and LZ4
+### 2.8 Geometric Diagnostics: Run-Length and LZ4
 
 The NML criterion (Definition 4) is the primary model selector. For geometric analysis of defect masks *after* model selection, we use two compression-based diagnostics:
 
@@ -166,9 +174,9 @@ These diagnostics are *not* used for model selection — they depend on traversa
 
 ---
 
-## 3. Cross-Dimensional Validation
+## 3. Cross-Dimensional Experiments
 
-We validate Theorem 3 by sweeping the observation length $T$ and tracking the NML-selected period across 1D, 2D, and 3D cellular automata.
+We test Theorem 3 by sweeping the observation length $T$ and tracking the NML-selected period across 1D, 2D, and 3D cellular automata.
 
 ### 3.1 1D Elementary CA
 
@@ -192,7 +200,7 @@ The known complexity hierarchy Rule 54 < Rule 110 < Rule 30 [1,2,3] is recovered
 | ECA-110 | 7 | 7 | 7 | 7 | 7 | 7 | 18,378 |
 | ECA-30  | 1 | 1 | 1 | 1 | 1 | 1 | 598 |
 
-All three 1D rules show *immediate* stabilization — the NML-selected period is constant from T=50 onward, with positive margins at every point. Margins grow monotonically, exactly as Theorem 3 predicts. Rule 110 shows the strongest separation (margin 18,378 bits at T=800), consistent with its pronounced period-7 Ether background.
+All three 1D rules show *immediate* stabilization — the NML-selected period is constant from T=50 onward, with positive margins at every point. Margins grow monotonically, consistent with Theorem 3. Rule 110 shows the strongest separation (margin 18,378 bits at T=800), consistent with its pronounced period-7 Ether background.
 
 ### 3.2 2D Totalistic Rules
 
@@ -225,7 +233,7 @@ Rules with near-zero NML margins (S25/B12, S11/B37) show seed-dependent period s
 | S11/B37 | 2 | 2 | 2 | 4 | 4 | 4 | 22,352 |
 | S37/B11 | 1 | 1 | 2 | 2 | 2 | 2 | 16,006 |
 
-The 2D persistent-defect rules show *progressive* stabilization: the NML-selected period increases in discrete jumps (1→2 for S24/B11, 2→4 for S11/B37, 1→2 for S37/B11), then locks with growing margins. This is the regime described by Theorem 3's impossibility remark: periodic defect structure is absorbed into higher-period templates, and NML correctly identifies the period that best compresses the entire spacetime.
+The 2D persistent-residual rules show *progressive* stabilization: the NML-selected period increases in discrete jumps (1→2 for S24/B11, 2→4 for S11/B37, 1→2 for S37/B11), then locks with growing margins. This is the regime described by Theorem 4 (nonidentifiability): periodic residual structure is absorbed into higher-period templates, and NML correctly identifies the period that best compresses the entire spacetime.
 
 Notably, NML selects *lower* periods than the previous MDL formulation (which used RL codelength as data fit). For example, S24/B11 converges to period 2 under NML vs period 6 under MDL — the RL artifact inflated the data-fit term for higher periods, making them appear artificially competitive.
 
@@ -241,17 +249,17 @@ Diamoeba3d rule (survive 5–8, birth 5–8) on a 16×16×16 3-torus, shift (0,0
 | 60 | 1 | 232,856 | 4,872 |
 | 80 | 1 | 303,209 | 5,840 |
 
-The initial T=10–20 selection of period 6 is a small-sample artifact (10–20 time steps with a period-6 model means only 1–3 full cycles per orbit class, where overfitting is expected). By T=40, NML stabilizes to period 1 with margins growing monotonically — confirming Theorem 3 in 3D. The 3D-life rule (survive 4–5, birth 5) dies out, providing a null result.
+The initial T=10–20 selection of period 6 is a small-sample artifact (10–20 time steps with a period-6 model means only 1–3 full cycles per orbit class, where overfitting is expected). By T=40, NML stabilizes to period 1 with margins growing monotonically — consistent with Theorem 3 in 3D. The 3D-life rule (survive 4–5, birth 5) dies out, providing a null result.
 
-### 3.4 Summary of Convergence Evidence
+### 3.4 Summary of Stabilization Evidence
 
 | Dimension | Rules Tested | Stabilization Onset | Behavior |
 |-----------|-------------|--------------------|-----------|
 | 1D | ECA 30, 54, 110 | Immediate (T=50) | Period locked from first measurement |
-| 2D | 3 persistent-defect rules | T=200–400 | Progressive jumps, then locked |
+| 2D | 3 persistent-residual rules | T=200–400 | Progressive jumps, then locked |
 | 3D | diamoeba3d | T=40 | Initial transient, then locked |
 
-In all cases, the NML-selected period makes finitely many transitions then stabilizes, exactly as Theorem 3 predicts. The convergence rate depends on how quickly the asymptotic NLL rates $\lambda_c$ separate: 1D rules separate immediately, 3D rules after one correction, and 2D persistent-defect rules (where defects have their own periodic structure) take longest.
+In all tested cases, the NML-selected period makes finitely many transitions then stabilizes over the observed range, consistent with Theorem 3. The margins grow after stabilization in all cases, providing empirical evidence that the asymptotic regime has been reached, though finite data cannot prove this. The stabilization rate depends on how quickly the asymptotic NLL rates $\lambda_c$ separate: 1D rules separate immediately, 3D rules after one correction, and 2D persistent-residual rules (where residuals have their own periodic structure) take longest.
 
 ---
 
@@ -310,10 +318,10 @@ The orbit-class reduction (Theorem 1) transforms a seemingly complex spatiotempo
 
 1. **Exact optimal decomposition** in $O(n)$ time for any dimension.
 2. **A formal explanation** of overcapacity (Theorem 2), showing why naive defect-rate ranking is inadequate.
-3. **A consistency theorem** (Theorem 3) proving NML period selection converges, with a single assumption (ergodic orbit-class frequencies) and no dependence on defect geometry.
-4. **An identifiability result** (Theorem 4) showing NML recovers the true period when defects are aperiodic, with a clean impossibility characterization when they are not.
+3. **A stabilization theorem** (Theorem 3) proving that NML model selection over the finite candidate set eventually locks to a unique winner, with a single assumption (ergodic orbit-class frequencies) and no dependence on defect geometry.
+4. **A nonidentifiability result** (Theorem 4) showing that background period recovery is impossible in general, with recovery guaranteed only when residuals are aperiodic (Theorem 5).
 
-The key insight is that the *same* theoretical framework — orbit classes → Bernoulli estimation → NML consistency — applies without modification across spatial dimensions.
+The key insight is that the *same* theoretical framework — orbit classes → Bernoulli estimation → NML stabilization — applies without modification across spatial dimensions.
 
 ### 5.2 NML vs Legacy MDL
 
@@ -333,9 +341,10 @@ The method identifies *where* defects are but not *how* they interact. It does n
 
 ### 5.4 Limitations
 
+0. **Monotonicity requires velocity matching.** Theorem 2 holds along constant-velocity chains ($s_2 = m \cdot s_1 \bmod D$), not arbitrary period multiples with the same shift. For shift-zero scanning (the empirically dominant case), all divisibility chains satisfy the condition. For nonzero shifts, this restriction matters.
 1. **Shift scanning adds little for this rule family.** All 2D best fits have shift (0,0). The theoretical framework supports nonzero shifts, but the empirical gain is rule-dependent.
-2. **NML selects the best-compressing period, not necessarily the "true" period.** When defects have their own periodicity, NML absorbs them into higher-period templates (Theorem 4 impossibility remark). This is principled but may not match a physicist's intuition.
-3. **Asymptotic NML complexity.** The $\frac{1}{2}\log_2 n_j$ complexity term is an asymptotic approximation to the exact Bernoulli NML normalizer. For very small orbit classes ($n_j < 10$), the approximation is less tight — relevant only at the smallest $T$ values.
+2. **NML selects the best-compressing period, not necessarily the "true" period.** When residuals have their own periodicity, NML absorbs them into higher-period templates (Theorem 4). This is principled but may not match a physicist's intuition.
+3. **Asymptotic NML complexity.** The $\frac{1}{2}\log_2 n_j$ complexity term is an asymptotic approximation to the Bernoulli NML normalizer. For very small orbit classes ($n_j < 10$), the approximation is less tight — relevant only at the smallest $T$ values.
 4. **Bernoulli i.i.d. assumption.** Within each orbit class, the NML criterion treats observations as i.i.d. Bernoulli. In reality, successive observations within an orbit class are separated by $p$ time steps and may have temporal correlations. Under ergodicity (A1), these correlations do not affect the asymptotic rate, but they may affect finite-sample behavior.
 
 ### 5.5 Future Work
@@ -350,9 +359,9 @@ The method identifies *where* defects are but not *how* they interact. It does n
 
 ## 6. Conclusion
 
-We have proved that NML model selection over relative-periodic CA backgrounds is consistent: the selected period converges to a unique limit as the observation window grows (Theorem 3). The proof requires only ergodic orbit-class frequencies — no assumption on defect geometry — and is dimension-agnostic, resting on the orbit-class reduction that decomposes spatiotemporal fitting into independent Bernoulli estimation. When defects are aperiodic, NML recovers the true background period (Theorem 4); when defects are periodic, NML correctly absorbs them into the template.
+We have proved that Bernoulli NML model selection over relative-periodic CA backgrounds stabilizes: the selected period eventually locks to a unique winner as the observation window grows (Theorem 3), though the selected period need not correspond to any external notion of "true background period" (Theorem 4). The proof requires only ergodic orbit-class frequencies — no assumption on defect geometry — and is dimension-agnostic, resting on the orbit-class reduction that decomposes spatiotemporal fitting into independent Bernoulli estimation. When residuals are aperiodic, NML recovers the true background period (Theorem 5); when residuals are periodic, NML correctly absorbs them into the template.
 
-Cross-dimensional experiments on 1D elementary CA, 2D totalistic rules, and 3D totalistic rules confirm the convergence prediction, with NML-selected periods stabilizing and margins growing monotonically. As an application, the framework identifies 2D rules with persistent structured defects exhibiting extensive scaling — candidates for further computational-mechanics analysis.
+Cross-dimensional experiments on 1D elementary CA, 2D totalistic rules, and 3D totalistic rules are consistent with the stabilization prediction, with NML-selected periods locking and margins growing monotonically over the observed range. As an application, the framework identifies 2D rules with persistent structured projection residuals exhibiting extensive scaling — candidates for further computational-mechanics analysis.
 
 ---
 
@@ -391,7 +400,7 @@ All code is open-source. Key parameters:
 - Multi-seed: seeds=[11, 42, 73, 99, 137, 200, 314, 500, 777, 1024]
 - Size scaling: grids=[32, 64, 96, 128, 192], steps=100, 5 seeds
 - 400-step verification: 64×64, steps=400, seed=11
-- Model selector: exact Bernoulli NML (orbit-class NLL + asymptotic parametric complexity)
+- Model selector: Bernoulli NML (orbit-class NLL + asymptotic parametric complexity)
 
 ## Appendix B: Geometric Diagnostics
 
