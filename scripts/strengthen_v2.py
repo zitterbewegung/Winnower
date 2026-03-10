@@ -120,7 +120,8 @@ def experiment_multiseed_scaling(steps=100, n_seeds=5):
                 if end_density < 0.02 or end_density > 0.98:
                     continue
 
-                # Find best MDL period
+                # Find best MDL period (shift=(0,0) only — the 2D survey confirmed
+                # all top rules have zero shift for this rule family)
                 best_mdl = float("inf")
                 best_p = 1
                 for p in range(1, 9):

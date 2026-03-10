@@ -77,6 +77,8 @@ def survey_rule(
         "defect_rate": round(best_fit.defect_rate, 5),
         "run_length_bits": best_fit.run_length_bits,
         "lz4_bits": best_fit.lz4_bits,
+        "template_bits": best_fit.template_bits,
+        "mdl_bits": round(best_fit.mdl_bits, 1),
         "rule_error": round(best_fit.rule_error, 5) if best_fit.rule_error is not None else None,
         "has_nonzero_shift": best_shift != (0, 0),
         "total_sites": best_fit.total_sites,
@@ -124,7 +126,7 @@ def main():
     print(f"\nDone in {elapsed:.1f}s. {len(results)} non-trivial rules, {trivial_count} trivial (died/filled).")
 
     df = pd.DataFrame.from_records(results)
-    df = df.sort_values("defect_rate").reset_index(drop=True)
+    df = df.sort_values("mdl_bits").reset_index(drop=True)
 
     out_path = Path("outputs/survey_2d_rules.csv")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -132,7 +134,7 @@ def main():
     print(f"Saved to {out_path}")
 
     # Print top 30
-    print("\n=== TOP 30 BY DEFECT RATE ===")
+    print("\n=== TOP 30 BY MDL BITS ===")
     print(df.head(30).to_string(index=False))
 
     # Print top rules with nonzero shift (most interesting)

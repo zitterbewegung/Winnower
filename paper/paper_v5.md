@@ -91,7 +91,7 @@ The first term is the asymptotic parametric complexity for $k$ Bernoulli paramet
 
 **Proposition 2 (Finite-Candidate Stabilization).** Within a fixed candidate set $\{1, \ldots, P_{\max}\}$, the MDL-selected period $p^*$ stabilizes for sufficiently large $T$: there exists $T_0$ such that $p^*(T) = p^*(T_0)$ for all $T > T_0$, provided the empirical per-orbit defect rates converge.
 
-*Proof sketch.* For fixed candidates, the MDL score for each period is a continuous function of $T$ (logarithmic penalty + defect encoding that grows linearly). Two such functions can cross at most finitely many times on $[1, \infty)$, so the minimizer eventually becomes constant. $\square$
+*Proof sketch.* Each new observation length $T$ yields a fresh spacetime and MDL scores, so the scores are not literally continuous functions of $T$. However, under the assumption that empirical per-orbit defect rates converge as $T \to \infty$, the MDL score for each candidate period converges to a well-defined limit (logarithmic penalty growing as $O(\log T)$ plus defect encoding growing as $\Theta(T)$). Since the per-site defect-encoding rates generically differ between candidates, the linear terms eventually dominate, and the ranking stabilizes. $\square$
 
 This is confirmed empirically: for all three persistent-defect rules, the MDL-optimal period stabilizes by $T = 600$ with margins increasing monotonically thereafter (Section 5.3).
 

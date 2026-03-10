@@ -60,14 +60,15 @@ def template_bits_raw(period: int, spatial_shape: tuple[int, ...]) -> int:
 
 
 def template_bits_nml(period: int, spatial_shape: tuple[int, ...], steps: int) -> float:
-    """Parametric complexity (NML-style) for the background template.
+    """MDL-motivated parametric penalty for the background template.
 
-    Each of the ``k = period * prod(spatial_shape)`` binary template bits is
+    Each of the ``k = period * prod(spatial_shape)`` template parameters is
     estimated from ``steps / period`` observations by majority vote.  The
-    standard parametric complexity for *k* Bernoulli parameters, each with
-    *n_obs* samples, is ``(k / 2) * log2(n_obs)``.  This grows
-    logarithmically with observation length *T*, so model selection
-    stabilizes as T → ∞.
+    penalty ``(k / 2) * log2(n_obs)`` is the asymptotic NML parametric
+    complexity for *k* Bernoulli parameters.  Our template values are binary
+    choices rather than continuous Bernoulli rates, so this is an
+    *approximation* — it works as a complexity penalty but is not exact NML.
+    It grows logarithmically with *T*, so model selection stabilizes.
     """
     k = period
     for d in spatial_shape:
