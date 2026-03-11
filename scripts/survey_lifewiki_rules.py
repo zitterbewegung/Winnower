@@ -34,7 +34,7 @@ def is_trivial(spacetime: np.ndarray) -> str:
         return "dead"
     if spacetime[-1].sum() == spacetime[-1].size:
         return "all_ones"
-    if np.array_equal(spacetime[0], spacetime[-1]):
+    if len(spacetime) >= 2 and np.array_equal(spacetime[0], spacetime[-1]):
         # Could be static or low-period
         if np.array_equal(spacetime[0], spacetime[1]):
             return "static"

@@ -280,17 +280,18 @@ We also survey all 106 named Life-like rules from the LifeWiki [13] using the ge
 
 **Setup.** 64×64 torus, density 0.5, seed 42, periods 1–8, shifts $-2$ to $+2$ in each spatial dimension. The general-purpose Life-like simulator supports arbitrary B/S rulestrings via lookup tables.
 
-**Results at T=100** (105 nontrivial rules):
+**Results at T=100.** Of 106 rules, 1 is trivial (Replicator dies to all zeros), leaving 105 nontrivial:
 
 | Period | Count | Notable Rules |
 |--------|-------|---------------|
 | p=1 | 97 | Life, HighLife, Day & Night, Coral, Diamoeba, ... |
 | p=2 | 7 | B01245/S01245, Oils, B026/S1, Long Life, Majority, ... |
 | p=8 | 1 | Fredkin (B1357/S02468) |
+| **Total** | **105** | (+ 1 trivial = 106) |
 
 All selections are `stable_winner` (margin > 2 bits). Six rules select nonzero shift (drifting backgrounds): Seeds (1,0), Live Free or Die (0,-1), Gnarl (0,2), B25/S4 (1,0), Dance (0,-1), Feux (2,0).
 
-**Results at T=400** (103 nontrivial rules):
+**Results at T=400.** Of 106 rules, 3 are trivial (Replicator dies; Iceballs saturates to all-ones; Lifeguard 2 dies), leaving 103 nontrivial:
 
 | Period | Count | Notable Rules |
 |--------|-------|---------------|
@@ -298,6 +299,7 @@ All selections are `stable_winner` (margin > 2 bits). Six rules select nonzero s
 | p=2 | 7 | +Diamoeba, +Maze with Mice; −Serviettes |
 | p=4 | 1 | B017/S01 (was p=2 at T=100) |
 | p=8 | 1 | Fredkin |
+| **Total** | **103** | (+ 3 trivial = 106) |
 
 Four rules changed period between T=100 and T=400 (two additional rules — Iceballs and Lifeguard 2 — became trivial, accounting for the nontrivial count dropping from 105 to 103):
 
