@@ -1,169 +1,189 @@
 # Claim Ledger
 
-Every major claim in paper_v6.md, classified and assessed.
+Current status of major claims in `paper/paper_v8.md`.
 
 ---
 
 ## Theorem 1 (Optimal Hamming Projection) — Section 2.2
 
-**Claim:** Majority vote on each orbit class minimizes Hamming distance to B(p,s). Minimum is sum_j min(n_j^(0), n_j^(1)). Unique iff no ties.
+**Claim:** For a fixed orbit partition, the Hamming-optimal orbit-constant background is obtained by majority vote on each orbit class. The minimum residual count is `sum_j min(n_j^(0), n_j^(1))`. The minimizer is unique iff no orbit class has an exact tie.
 
 **Status:** CORRECT AS STATED
 
-**Proof status:** Complete. The decomposition over orbit classes is additive because orbit classes partition spacetime, and B is constant on each class. Each class contributes independently. QED.
+**Why:** The Hamming objective decomposes additively over orbit classes, and each class is an independent one-bit optimization.
 
-**Abstract/intro update needed:** No.
+**Residual caution:** None beyond finite-set formalization details.
 
 ---
 
-## Theorem 2 (Monotonicity) — Section 2.3
+## Theorem 2 (Monotonicity under Velocity-Matched Refinement) — Section 2.3
 
-**Claim:** If p2 = m * p1 with the same shift s, then the orbit partition under p2 refines the partition under p1, and d*(p2,s) <= d*(p1,s).
+**Claim:** If `p2 = m * p1` and `s2^(i) = m * s1^(i) mod D_i` for each spatial dimension, then the `(p2, s2)` orbit partition refines the `(p1, s1)` partition, hence the optimal residual count cannot increase.
 
-**Status:** FALSE AS STATED
+**Status:** CORRECT AS STATED
 
-**Counterexample:** D=4 (width 4), T=4, p1=1, s=1, p2=2, s=1.
-Spacetime = checkerboard (diagonal stripes):
-```
-0 1 0 1
-1 0 1 0
-0 1 0 1
-1 0 1 0
-```
-- Under (p1=1, s=1): 4 orbit classes (diagonals). Spacetime is exactly periodic. d*(1,1) = 0.
-- Under (p2=2, s=1): 8 orbit classes. Each spans TWO different p1-diagonals. The p2-orbit of (0,0) contains {(0,0)=0, (2,1)=1}, which are from different p1-classes with different values. d*(2,1) = 4.
+**Why:** Under the velocity-matching condition, the second periodicity map is the `m`-fold iterate of the first, so every fine orbit is contained in a coarse orbit.
 
-So d*(2,1) = 4 > 0 = d*(1,1). Monotonicity fails.
-
-**Root cause:** The map tau_2: (t,x) -> (t+2, (x+1) mod 4) is NOT a power of tau_1: (t,x) -> (t+1, (x+1) mod 4). The 2nd power of tau_1 is (t+2, (x+2) mod 4), which has shift 2, not 1. So the p2 partition is transverse to, not a refinement of, the p1 partition.
-
-**Strongest corrected replacement:**
-
-**Theorem 2 (Corrected Monotonicity).** If p2 = m * p1 and s2^(i) = m * s1^(i) (mod D_i) for each spatial dimension i, then the orbit partition under (p2, s2) refines the partition under (p1, s1), and d*(p2, s2) <= d*(p1, s1).
-
-*Proof:* The (p2,s2) periodicity map tau_2(t,x) = (t + m*p1, (x + m*s1) mod D) = tau_1^m(t,x). So the tau_2-orbit of any point is a subset of its tau_1-orbit. Hence the tau_2-partition refines tau_1. By Theorem 1, optimizing over a finer partition can only reduce Hamming distance. QED.
-
-**Special cases where the original "same shift" statement holds:**
-- s = 0: Then m*0 = 0 for all m. Monotonicity along {p, 2p, 3p, ...} with shift 0 is valid.
-- D_i | (m-1)*s_i for all i: Then m*s_i = s_i mod D_i.
-
-**Abstract/intro update needed:** Yes. The abstract says "higher periods monotonically more expressive." This must be qualified: "along constant-velocity chains" or "with proportionally scaled shifts."
+**Residual caution:** The theorem must not be generalized back to “same shift, larger period” without the scaling condition. That statement is false.
 
 ---
 
 ## Corollary (Overcapacity) — Section 2.3
 
-**Claim:** Along any divisibility chain p, 2p, 3p, ..., defect rate is monotonically non-increasing.
-
-**Status:** FALSE AS STATED (inherits Theorem 2 bug)
-
-**Corrected:** "Along any constant-velocity divisibility chain (mp, ms mod D) for m = 1, 2, 3, ..., defect rate is monotonically non-increasing." For shift 0, the original statement holds.
-
-**Abstract/intro update needed:** Yes.
-
----
-
-## Definition 3 (Two-Part MDL Criterion) — Section 2.4
-
-**Claim:** MDL(p,s) = (k/2) log2(T/p) + L_RL(M*). First term is "asymptotic parametric complexity for k Bernoulli parameters." "It approximates NML stochastic complexity but is not exact NML."
-
-**Status:** CORRECT AFTER EDIT
-
-**Issues:**
-1. The term (k/2) log2(T/p) is the BIC approximation (or Rissanen's asymptotic stochastic complexity), not NML. The paper correctly disclaims exact NML, but should use the term "BIC-type penalty" or "asymptotic stochastic complexity."
-2. The paper says "each estimated from floor(T/p) observations." This is the number of repetitions per orbit class, which is correct.
-3. CRITICAL MISMATCH: The code's CLI and convergence scripts actually use `nml_bits` (NLL + NML complexity), not `mdl_bits` (BIC penalty + RL bits). The paper's Theorem 3 is stated for `mdl_bits`, but the reported experiments may use `nml_bits`.
-
-**Strongest corrected replacement:** Keep the definition but rename: "BIC-type parametric penalty" instead of "asymptotic NML parametric complexity."
-
----
-
-## Proposition 1 (Run-Length Separation) — Section 2.4
-
-**Claim:** Two masks of same size and Hamming weight can have RL codelengths differing by factor Omega(log n).
+**Claim:** Along constant-velocity divisibility chains, residual count is monotonically non-increasing, so naive residual minimization overfits toward higher-capacity models.
 
 **Status:** CORRECT AS STATED
 
-**Proof status:** Adequate sketch. Clustered mask: O(log n) bits. Scattered mask with w = Theta(log n) isolated defects: Omega(w * log(n/w)) = Omega((log n)^2) bits. Ratio: Omega(log n).
-
-**Abstract/intro update needed:** No.
+**Residual caution:** The scope is exactly the velocity-matched chain, not arbitrary period scans.
 
 ---
 
-## Remark (No convergence to "true" period) — Section 2.5
+## Definition 4 (Bernoulli NML Score) — Section 2.4
 
-**Claim:** If defects have periodic structure, a larger period can absorb them and win for all large T.
+**Claim:** The score used for selection is orbit-class Bernoulli NLL plus the asymptotic per-class complexity term `sum_j (1/2) log_2 n_j`.
 
-**Status:** CORRECT AS STATED
+**Status:** CORRECT AFTER CLARIFICATION
 
-This is an important honesty statement. Should be promoted to a formal proposition (see THEORY_NOTE.md).
+**Why:** This is an asymptotic Bernoulli NML-style score, not exact finite-sample NML.
+
+**Residual caution:** The paper now says this explicitly. Any future Lean formalization should treat exact NML and asymptotic NML as different objects.
 
 ---
 
-## Theorem 3 (MDL Consistency) — Section 2.5
+## Theorem 3 (Rate-Based Elimination and Stabilization) — Section 2.5
 
-**Claim:** Under (A1) ergodic defect rates and (A2) Omega(T) runs, MDL-selected candidate stabilizes to the unique minimizer of asymptotic per-site RL rate.
+**Claim:** Under convergent orbit-class frequencies:
+
+1. `NLL(c,T) / N(T) -> lambda_c`.
+2. `NML(c,T) = lambda_c * N(T) + (k_c / 2) log_2 T + o(N(T))`.
+3. If `lambda_a < lambda_b`, then candidate `a` eventually beats candidate `b`.
+4. Every candidate whose rate exceeds `lambda*` is eventually excluded.
+5. If the rate-minimizer is unique, selection stabilizes to that unique candidate.
 
 **Status:** CORRECT AFTER EDIT
 
-**Issues:**
-1. **Proof gap:** The claim that (A2) implies L_RL(T)/T converges is asserted but not proved. Having Omega(T) runs does NOT by itself guarantee convergence of the per-site RL rate. A counterexample: a mask where half the runs have length 1 and one run has length T/2. This has Theta(T) runs, but the RL cost depends on the specific run-length distribution, not just the count.
+**Why:** The current version is the strongest theorem that the draft honestly supports from the asymptotic expansion. It no longer overclaims tie-breaking among equal-rate candidates.
 
-2. **Assumption (A2) is insufficient:** You need convergence of the empirical run-length distribution, which is a stronger ergodic condition. Or: replace RL with the NML score, for which convergence follows directly from (A1) alone.
+**What changed from earlier drafts:** The theorem is now built around pairwise eventual ordering and elimination, with full stabilization only as a corollary under a unique rate-minimizer.
 
-3. **Code/paper mismatch:** The convergence experiments use `nml_bits`, not `mdl_bits`. Theorem 3 should either be restated for the NML score, or the experiments should be re-run with `mdl_bits`.
-
-**Strongest corrected replacement (Option 1 — NML score, recommended):**
-
-**Theorem 3 (Model Selection Stabilization).** Let C be a finite candidate set. For each candidate c, define:
-  NML(c, T) = NLL_c(T) + COMP_c(T)
-where NLL_c(T) = sum_j n_j H(theta_hat_j) is the Bernoulli NLL over orbit classes, and COMP_c(T) = (k_c/2) log2(T/p_c) + O(k_c) is the asymptotic NML complexity.
-
-Assume (A1): for each candidate c, the per-site entropy h_c = lim_{T->inf} NLL_c(T)/T exists.
-
-Then the NML-selected candidate stabilizes: there exists T_0 such that c*(T) = c*(T_0) for all T > T_0. The limit minimizes h_c, with ties broken by k_c (fewer parameters preferred).
-
-*Proof:* NML(c,T) = h_c * T + (k_c/2) log T + O(1). Pairwise differences are dominated by the linear term when h values differ, and by the log term when they agree. Since |C| is finite, all comparisons stabilize. QED.
-
-**Strongest corrected replacement (Option 2 — keep RL but fix assumptions):**
-
-Add assumption (A2'): The per-site RL rate ell_c = lim_{T->inf} L_RL(M*_c(T))/T exists for each candidate c.
-
-This is a direct assumption, not derived from Omega(T) runs.
-
-**Abstract/intro update needed:** Yes — "MDL consistency" should say "model selection stabilization" and specify which score.
+**Residual caution:**
+- The theorem does not resolve equal-rate ties.
+- Logarithmic tie-breaking needs a stronger remainder hypothesis such as `o(log T)`.
+- Same-period different-shift candidates share the same complexity term, so even logarithmic tie-breaking will not separate them without extra rules.
 
 ---
 
-## Corollary (Dimension-agnostic) — Section 2.5
+## Theorem 4 (Nonidentifiability for Bernoulli NML) — Section 2.6
 
-**Claim:** Theorem 3 applies identically to 1D, 2D, 3D.
+**Claim:** For any baseline period `p0` and shift `s`, there exists a spacetime and a higher-period velocity-matched candidate such that:
 
-**Status:** CORRECT AS STATED (given Theorem 3 is corrected)
+1. the baseline candidate has positive asymptotic NLL rate,
+2. the higher-period candidate has zero asymptotic NLL rate,
+3. the higher-period candidate eventually wins under Bernoulli NML.
+
+**Status:** CORRECT AFTER EDIT
+
+**Why:** The current manuscript theorem is now matched to the proof sketch. It is an existence theorem for the Bernoulli NML selector, proved by explicit construction.
+
+**What changed from earlier drafts:** The claim is no longer phrased for a generic “MDL-type criterion” that the proof did not actually instantiate. It is now explicitly about Bernoulli NML and the two concrete candidates in the construction.
+
+**Residual caution:** The proof in the paper is still a proof sketch. The key formal burden for Aristotle/Lean is showing precisely why `B != B'` forces `lambda_c0 > 0`.
 
 ---
 
-## Empirical Claims — Section 3
+## Definition 5 (True Background Period) — Section 2.7
 
-### "MDL-selected periods stabilize" (Section 3.4)
+**Claim:** The true background period is the smallest period such that, after some finite transient time, the spacetime becomes exactly relative-periodic.
 
-**Status:** HEURISTIC / EMPIRICAL ONLY
+**Status:** CORRECT AFTER EDIT
 
-The data shows empirical stabilization over the tested range [T=50..800]. This is consistent with the (corrected) theorem but does not prove convergence. The paper correctly uses "stabilize" rather than "converge" in most places.
+**Why:** This is the right hypothesis for the proof that follows. The older “asymptotically pure orbit classes” formulation was too weak for the manuscript’s `O(1)` NLL-difference argument.
 
-**Issue:** Section 3.2.3 shows S24/B11 selected period jumping 2→4→6 as T increases, and S11/B37 jumping 2→4→8. The paper says these "then lock with growing margins." But at T=800, how do we know the period won't jump again at T=1600? We don't. The data supports "stabilization over the tested range."
+---
 
-### "Known complexity hierarchy recovered" (Section 3.1)
+## Theorem 5 (Identifiability for Eventually Exactly Periodic Backgrounds) — Section 2.7
+
+**Claim:** If the spacetime is eventually exactly relative-periodic with minimal period `p0`, then for any velocity-matched strict multiple `p = m * p0`:
+
+1. both candidates have per-site NLL rate `0`,
+2. their NLL difference is `O(1)`,
+3. the complexity gap is `((m - 1) * k_p0 / 2) log_2 T + O(1)`,
+4. therefore the higher-period model is eventually worse and NML selects `p0`.
+
+**Status:** CORRECT AFTER EDIT
+
+**Why:** The theorem now assumes exactly what the proof uses: only finitely many transient rows contribute nonzero NLL, so the NLL gap stays bounded while complexity diverges.
+
+**What changed from earlier drafts:** The theorem no longer tries to derive the `O(1)` NLL difference from mere asymptotic purity. It uses eventual exact periodicity after a finite transient.
+
+**Residual caution:** The theorem is intentionally narrower than the old prose intuition. If you want a theorem under weaker asymptotic assumptions, that will need a different argument.
+
+---
+
+## Proposition 1 (Run-Length Separation) — Section 2.8
+
+**Claim:** Two same-size binary masks with the same Hamming weight can have run-length codelengths differing by an `Omega(log n)` factor.
+
+**Status:** CORRECT AS STATED
+
+**Residual caution:** None, beyond keeping it clearly marked as a geometric diagnostic rather than a model-selection theorem.
+
+---
+
+## Theorem D.2 (RL Rate Convergence for Finite CA) — Appendix D
+
+**Claim:** For deterministic CA on a finite spatial domain, under the no-exact-frequency-ties condition, the run-length codelength per site of the Hamming-optimal residual mask converges.
+
+**Status:** PLAUSIBLE BUT ONLY SKETCHED
+
+**Why:** The proof route is coherent:
+
+1. finite deterministic CA implies eventual periodicity of the state sequence,
+2. no exact ties implies majority decisions stabilize,
+3. stabilized residual mask becomes eventually periodic,
+4. eventual periodicity implies RL-rate convergence.
+
+**Residual caution:** This is not proved at the same level of detail as Theorems 1 to 5. It is a good Aristotle target, but not yet a theorem I would call fully closed from the manuscript alone.
+
+---
+
+## Corollary D.3 (Unconditional NLL Convergence for Finite CA) — Appendix D
+
+**Claim:** For deterministic finite-domain CA, per-site Bernoulli NLL converges without any no-ties assumption.
+
+**Status:** CORRECT IN SUBSTANCE
+
+**Why:** NLL depends on orbit-class frequencies through binary entropy, and entropy is continuous even at the exact `1/2` case. Tie-breaking affects the majority-vote residual mask, not the NLL itself.
+
+**Residual caution:** Best formalized as an abstract orbit-frequency convergence statement, with CA eventual periodicity used only to discharge the convergence assumption.
+
+---
+
+## Empirical Claims — Section 3 and Section 4
+
+### Period stabilization in experiments
 
 **Status:** EMPIRICAL ONLY
 
-The paper observes Rule 54 < Rule 110 < Rule 30 by MDL ranking. This is an observation, not a theorem.
+**Claim:** The selected period locks over the tested horizon and margins grow after locking.
 
-### "Extensive defect scaling in S37/B11" (Section 4.2)
+**Assessment:** Supported over the observed `T` ranges. This is consistent with Theorem 3 but does not prove asymptotic behavior beyond the tested windows.
+
+### Rule rankings and highlighted rules
 
 **Status:** EMPIRICAL ONLY
 
-Defect density ~0.011 across grid sizes 32-192 is consistent with extensive scaling. But 5 grid sizes is not a proof of asymptotic behavior.
+**Claim:** Rule 54 < Rule 110 < Rule 30 under NML, Diamoeba/Fredkin behavior in LifeWiki survey, and the selected 2D persistent-residual rules.
+
+**Assessment:** These are observational results, not theorem-level claims.
+
+### Extensive scaling in S37/B11
+
+**Status:** EMPIRICAL ONLY
+
+**Claim:** Approximately constant defect density across tested system sizes is consistent with extensive scaling.
+
+**Assessment:** Reasonable empirical interpretation, but not an asymptotic proof.
 
 ---
 
@@ -171,24 +191,23 @@ Defect density ~0.011 across grid sizes 32-192 is consistent with extensive scal
 
 | Code entity | Paper claim | Match? |
 |---|---|---|
-| `template_bits_nml` | BIC-type penalty | Name says "NML", paper says "approximates NML" — MISLEADING NAME |
-| `nml_score_bits` | Not in Theorem 3 | Code uses this for selection; paper's theorem is about mdl_bits — MISMATCH |
-| `nml_complexity_bits` | "exact NML" in docstring | Asymptotic, not exact — OVERCLAIMED |
-| `mdl_total_bits` | Definition 3 | Matches — but labelled "legacy" in code |
-| Tie-breaking: `2*ones >= totals` | "either" in Theorem 1 | Code breaks ties toward 1; paper says "either" — MINOR |
+| `nml_score_bits` | Bernoulli NML selector | YES |
+| `mdl_bits` | Legacy RL-based criterion | YES, now clearly secondary |
+| tie break `2 * ones >= totals` | deterministic projection tie-break | YES, manuscript now says ties are broken deterministically |
+| asymptotic complexity term | asymptotic, not exact NML | YES, with explicit manuscript caveat |
 
 ---
 
-## Summary of Changes Required
+## Current Bottom Line
 
-| Claim | Status | Action |
+| Claim | Status | What remains |
 |---|---|---|
-| Theorem 1 | CORRECT | No change |
-| Theorem 2 | FALSE | Restate with velocity condition |
-| Overcapacity Cor. | FALSE | Restate with velocity condition |
-| Proposition 1 | CORRECT | No change |
-| Theorem 3 | CORRECT AFTER EDIT | Fix assumptions; align with NML score |
-| Dim-agnostic Cor. | CORRECT | No change (follows from corrected Thm 3) |
-| No true-period Remark | CORRECT | Promote to formal proposition |
-| NML terminology | OVERSTATED | Rename in code, clarify in paper |
-| Empirical claims | HEURISTIC/EMPIRICAL | Clarify language |
+| Theorem 1 | CORRECT | Lean formalization should be straightforward |
+| Theorem 2 | CORRECT | Lean formalization should be straightforward |
+| Theorem 3 | CORRECT AFTER EDIT | Lean should target pairwise comparison first |
+| Theorem 4 | CORRECT AFTER EDIT | Lean needs the construction details made explicit |
+| Theorem 5 | CORRECT AFTER EDIT | Lean should use eventual exact periodicity, not asymptotic purity |
+| Proposition 1 | CORRECT | Optional to formalize |
+| Theorem D.2 | PLAUSIBLE / SKETCHED | Needs stronger formal writeup |
+| Corollary D.3 | CORRECT IN SUBSTANCE | Good appendix formalization target |
+| Experimental claims | EMPIRICAL ONLY | Keep language modest |
