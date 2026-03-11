@@ -4,7 +4,7 @@
 
 We prove that Bernoulli NML model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes stabilizes as the observation window grows: every candidate whose asymptotic per-site NLL rate exceeds the minimum is eventually excluded (Theorem 3). When the rate-minimizing candidate is unique — which holds in all cases we test — the selected model locks to a single winner. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem 1), partition refinement along constant-velocity chains makes higher periods monotonically more expressive (Theorem 2), and the Bernoulli NML criterion's $O(\log T)$ complexity penalty is eventually dominated by $\Theta(T)$ data-fit gaps between candidates with distinct rates. We also show by explicit construction that background period recovery is impossible in general without additional assumptions (Theorem 4). The theory applies identically to 1D, 2D, and 3D automata.
 
-Cross-dimensional experiments are consistent with the stabilization prediction: selected periods lock for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (from a survey of 773 range-threshold candidates and all 106 named Life-like rules from the LifeWiki), and a 3D totalistic rule — with margins growing after the selected period locks. The LifeWiki survey demonstrates the stabilization theorem in action: Diamoeba transitions from period 1 to period 2 between T=100 and T=400 as the NLL gap crosses the complexity threshold, while Fredkin (B1357/S02468) is the only rule achieving period 8. As an application, the framework identifies 2D rules with persistent structured projection residuals, including one (S37/B11) exhibiting extensive residual scaling verified at 400 steps, across multiple seeds, and at grid sizes up to 192×192.
+Cross-dimensional experiments are consistent with the stabilization prediction: selected periods lock for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (from a survey of 773 range-threshold candidates and all 106 named Life-like rules from the LifeWiki), and a 3D totalistic rule — with margins growing after the selected period locks. The LifeWiki survey is consistent with the predicted finite-sample tradeoff: Diamoeba transitions from period 1 to period 2 between T=100 and T=400 as the NLL gap crosses the complexity threshold, while Fredkin (B1357/S02468) is the only rule achieving period 8. As an application, the framework identifies 2D rules with persistent structured projection residuals, including one (S37/B11) exhibiting extensive residual scaling verified at 400 steps, across multiple seeds, and at grid sizes up to 192×192.
 
 **Keywords:** cellular automata, normalized maximum likelihood, model selection stabilization, symmetry projection, projection residual decomposition
 
@@ -262,7 +262,7 @@ The known complexity hierarchy Rule 54 < Rule 110 < Rule 30 [1,2,3] is recovered
 | ECA-110 | 7 | 7 | 7 | 7 | 7 | 7 | 18,378 |
 | ECA-30  | 1 | 1 | 1 | 1 | 1 | 1 | 598 |
 
-All three 1D rules show *immediate* stabilization — the NML-selected period is constant from T=50 onward, with positive margins at every point. Margins grow linearly in $T$, indicating distinct per-site NLL rates ($\lambda_c$ values) and confirming that Theorem 3(iv) applies. Rule 110 shows the strongest separation (margin 18,378 bits at T=800), consistent with its pronounced period-7 Ether background.
+All three 1D rules show *immediate* stabilization — the NML-selected period is constant from T=50 onward, with positive margins at every point. Margins grow linearly in $T$, indicating distinct per-site NLL rates ($\lambda_c$ values), consistent with the conditions of Theorem 3(iii). Rule 110 shows the strongest separation (margin 18,378 bits at T=800), consistent with its pronounced period-7 Ether background.
 
 ### 3.2 2D Totalistic Rules
 
@@ -299,7 +299,7 @@ All selections are `stable_winner` (margin > 2 bits). Six rules select nonzero s
 | p=4 | 1 | B017/S01 (was p=2 at T=100) |
 | p=8 | 1 | Fredkin |
 
-Three rules changed period between T=100 and T=400:
+Four rules changed period between T=100 and T=400 (two additional rules — Iceballs and Lifeguard 2 — became trivial, accounting for the nontrivial count dropping from 105 to 103):
 
 | Rule | T=100 | T=400 | Interpretation |
 |------|-------|-------|----------------|
@@ -308,7 +308,7 @@ Three rules changed period between T=100 and T=400:
 | B017/S01 | p=2 | **p=4** | Deeper periodic structure revealed |
 | Serviettes (B234/S) | p=2 | **p=1** | Transient period-2 signal; at T=400 complexity cost dominates |
 
-This demonstrates Theorem 3 in action: the NLL improvement for genuine periodic structure grows as $\Theta(T)$ while complexity grows as $O(\log T)$, so real periodic signals eventually overcome the penalty. Conversely, spurious signals (Serviettes) are correctly eliminated as the horizon grows. Among the 106 named rules, **Fredkin's period-8 selection stands out** — its parity-rule replication cycle produces the only period $>4$ in the entire catalog.
+This is consistent with the predicted tradeoff in Theorem 3: the NLL improvement for genuine periodic structure grows as $\Theta(T)$ while complexity grows as $O(\log T)$, so real periodic signals eventually overcome the penalty. Conversely, spurious signals (Serviettes) are correctly eliminated as the horizon grows. Among the 106 named rules, **Fredkin's period-8 selection stands out** — its parity-rule replication cycle produces the only period $>4$ in the entire catalog.
 
 #### 3.2.2 Multi-Seed Robustness
 

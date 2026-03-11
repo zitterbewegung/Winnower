@@ -1,50 +1,54 @@
 # Author Action Items for paper_v8.md
 
-Only items requiring manual verification or decision. Items marked [AUTHOR VERIFY] in the manuscript are listed here.
+Only items requiring manual verification or decision.
 
 ---
 
-## 1. Theorem 3 Assumption Verification
-**Location**: Section 2.5, Assumption (A1)
-**Issue**: Theorem 3(ii) requires that per-site NLL rates λ_c = lim NLL_c(T)/N(T) exist. The proof that finite deterministic CA satisfy this is in Appendix D but relies on eventual periodicity of the CA state. Verify this holds for all rules in the experimental section, or add a sentence noting which rules have been verified.
-**Action**: Run convergence diagnostic (rate vs T plot) for each tested rule and confirm rates stabilize.
+## 1. [AUTHOR INSERT REPO URL] and [AUTHOR INSERT COMMIT HASH]
+**Location**: Appendix A
+**Action**: Fill with repository URL and commit hash before submission.
 
-## 2. Theorem 3 Part (iii) — Uniqueness of Rate-Minimizer
-**Location**: Section 2.5, Theorem 3(iii)
-**Issue**: Full stabilization to a unique winner requires the rate-minimizer to be unique. The paper states "which holds in all cases we test." Verify this claim by checking that the margin between best and second-best rates is strictly positive for all reported experiments.
-**Action**: Confirm margin > 0 for all rules in Tables 1–3.
-
-## 3. 3D Margin Non-Monotonicity
-**Location**: Section 3.3
-**Issue**: v7 implied margins are monotonically increasing. v8 corrects this for 3D (margins drop T=10→T=20). Verify the exact T values and margin magnitudes from the experimental output.
-**Action**: Re-run 3D analysis and confirm the stated margin trajectory.
-
-## 4. Section 3.1 — "Best Across All Scanned Shifts"
-**Location**: Section 3.1 heading and description
-**Issue**: Changed from "shift = 0" to "best across all scanned shifts." Verify that the 1D experiments actually scan multiple shifts (not just s=0).
-**Action**: Check `cli.py analyze` to confirm shift scanning range for 1D.
-
-## 5. Appendix C Horizon Markers
+## 2. [AUTHOR VERIFY HORIZON] in Appendix C
 **Location**: Appendix C
-**Issue**: Placeholders for "[AUTHOR VERIFY: horizon T_0 for rule X]" need to be filled with actual stabilization horizons from experimental output.
-**Action**: Fill in T_0 values from convergence traces.
+**Issue**: Verify NML vs MDL comparison horizons (T=800 for 1D/2D, T=80 for 3D).
 
-## 6. Reference [10] — Shtarkov Citation
-**Location**: Definition 4
-**Issue**: Added reference to Shtarkov (1987) for the NML normalizing constant. Verify the exact citation: "Yu. M. Shtarkov. Universal sequential coding of single messages. *Problems of Information Transmission*, 23(3):3–17, 1987."
-**Action**: Confirm bibliographic details.
+## 3. Theorem 3 Assumption (A1) — Wording
+**Location**: Section 2.5
+**Issue**: v8 uses "convergent orbit-class frequencies" (vs "ergodic" in v7). Confirm this is the intended, weaker statement.
 
-## 7. Survey Scope — "773 Non-Trivial Candidates"
-**Location**: Abstract, Section 3.2
-**Issue**: v8 states "773 non-trivial candidates" (changed from "458 non-trivial from 621"). Verify the exact count from `outputs/survey_2d_rules.csv`.
-**Action**: Count rows in survey CSV with non-trivial evolution.
+## 4. Theorem 3(iii) — Unique Rate-Minimizer
+**Location**: Section 2.5
+**Issue**: Claims uniqueness "holds in all cases we test." Verify margin > 0 for all reported experiments.
 
-## 8. S37/B11 Scaling — Grid Sizes
-**Location**: Abstract, Section 4.2
-**Issue**: Claims "grid sizes up to 192×192." Verify this from the strengthen_v2.py output.
-**Action**: Check `outputs/` for S37/B11 scaling data.
+## 5. 3D Margin Non-Monotonicity
+**Location**: Section 3.3
+**Issue**: Margins drop T=10→T=20 before period switches. Verify exact values from experimental output.
 
-## 9. Appendix D — RL Convergence "No Ties" Assumption
-**Location**: Appendix D, Theorem D.1
-**Issue**: The RL convergence proof assumes no orbit class has exact frequency ties (θ_j = 0.5). While generically true, verify no tested rule triggers this edge case.
-**Action**: Check orbit-class frequencies for all reported rules.
+## 6. Shtarkov Citation
+**Location**: Definition 4, Reference [10]
+**Issue**: Verify: "Yu. M. Shtarkov. Universal sequential coding of single messages. *Problems of Information Transmission*, 23(3):3–17, 1987."
+
+## 7. Fredkin Period-8 Interpretation
+**Location**: Section 3.2.1b
+**Issue**: Fredkin (B1357/S02468) produces exact negation every step (period-2 for cell states), but NML selects period 8. Verify whether this is due to torus geometry interaction or a genuine period-8 orbit-class structure.
+
+## 8. Diamoeba Margin at T=400
+**Location**: Section 3.2.1b, Table
+**Issue**: Margin is 369 bits — smallest among all stable_winner rules at T=400. Confirm correct and note significance.
+
+## 9. Serviettes Transition Direction
+**Location**: Section 3.2.1b
+**Issue**: Serviettes goes p=2→p=1 at T=400. Verify interpretation: transient signal eliminated vs genuine dynamics change.
+
+## 10. Two Rules Became Trivial at T=400
+**Location**: Section 3.2.1b
+**Issue**: Iceballs (B25678/S5678→all_ones) and Lifeguard 2 (B3/S4567→dead) became trivial at T=400 but were nontrivial at T=100. This explains the nontrivial count drop from 105 to 103. Currently mentioned only in passing — consider adding explicit note.
+
+## 11. Appendix D — RL No-Ties Assumption
+**Location**: Appendix D
+**Issue**: RL convergence proof assumes θ_j ≠ 0.5. Verify no tested rule triggers this edge case.
+
+## Items Already Resolved
+- Period count consistency: 105 nontrivial at T=100 (97+7+1), 103 at T=400 (94+7+1+1). ✓
+- "Three vs four rules changed": fixed to "four" in paper_v8.md. ✓
+- All selections stable_winner at both horizons. ✓
