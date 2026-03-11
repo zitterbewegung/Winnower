@@ -16,7 +16,7 @@ Cellular automata (CA) generate complex spatiotemporal patterns from simple loca
 
 The computational mechanics program [1,2] builds local epsilon-machine models that identify domains, particles, and their interactions. Redeker [3] formalized particle catalogs via de Bruijn diagrams. Rupe and Crutchfield [4] generalized local causal states to arbitrary dimensions. Shalizi et al. [7] developed automatic coherent-structure filters. These methods build rich local models at significant computational cost.
 
-We take a different approach: rather than building local models, we ask a global model-selection question. *Given a finite family of relative-periodic templates, which template best describes the data?* We show that this question has a clean answer — the NML-optimal period stabilizes — and that the stabilization proof is dimension-agnostic, applying uniformly to 1D, 2D, and 3D automata.
+We take a different approach: rather than building local models, we ask a global model-selection question. *Given a finite family of relative-periodic templates, which template best describes the data?* We show that this question has a clean asymptotic answer: every candidate whose per-site NLL rate is suboptimal is eventually excluded, and if the rate-minimizer is unique then the NML-optimal candidate stabilizes. The proof is dimension-agnostic, applying uniformly to 1D, 2D, and 3D automata.
 
 ### 1.1 Contributions
 
@@ -38,7 +38,7 @@ We take a different approach: rather than building local models, we ask a global
 | Dimensionality | Case-by-case | Dimension-agnostic |
 | Cost | Higher | $O(|U|)$ per candidate |
 
-Packard and Wolfram [5] surveyed 2D rules qualitatively. Boccara and Roger [6] identified period-2 families. Zenil [8] used compression for CA classification. Our contribution is a *stabilization theorem* for period selection that applies across dimensions, with the surveys as empirical evidence.
+Packard and Wolfram [5] surveyed 2D rules qualitatively. Boccara and Roger [6] identified period-2 families. Zenil [8] used compression for CA classification. Our contribution is a *rate-based elimination and stabilization theorem* for selection over relative-periodic candidates that applies across dimensions, with the surveys as empirical evidence.
 
 ---
 
@@ -106,33 +106,57 @@ The complexity term $\frac{1}{2} \log_2 n_j$ is the asymptotic NML parametric co
 
 This is the main theoretical result.
 
-**Theorem 3 (Stabilization of Bernoulli NML Selection).** Let $\mathcal{C} = \{(p_1, \mathbf{s}_1), \ldots, (p_m, \mathbf{s}_m)\}$ be a fixed finite candidate set. For each candidate $c \in \mathcal{C}$, let $k_c = p_c \prod_i D_i$ be the number of orbit classes and let $n_j(T)$ denote the size of the $j$-th orbit class at observation length $T$. Assume:
+**Theorem 3 (Rate-Based Elimination and Stabilization of Bernoulli NML Selection).** Let $\mathcal{C} = \{(p_1, \mathbf{s}_1), \ldots, (p_m, \mathbf{s}_m)\}$ be a fixed finite candidate set. For each candidate $c \in \mathcal{C}$, let $k_c = p_c \prod_i D_i$ be the number of orbit classes and let $n_j(T)$ denote the size of the $j$-th orbit class at observation length $T$. Assume:
 
 (A1) *Convergent orbit-class frequencies*: for each candidate $c$ and each orbit class $j$, the empirical frequency $\hat{\theta}_j(T) \to \theta_j^*$ as $T \to \infty$.
 
 Define the *per-site NLL rate* $\lambda_c = \frac{1}{k_c} \sum_{j=1}^{k_c} H_b(\theta_j^*)$, and let $\lambda^* = \min_{c \in \mathcal{C}} \lambda_c$. Then:
 
-(i) The NML score decomposes as $\text{NML}(c, T) = \lambda_c \cdot N(T) + \frac{k_c}{2}\log_2 T + o(N(T))$.
+(i) The per-site NLL converges:
 
-(ii) *(Elimination.)* Every candidate $c$ with $\lambda_c > \lambda^*$ is eventually excluded: there exists $T_c$ such that $c \notin \arg\min_{c' \in \mathcal{C}} \text{NML}(c', T)$ for all $T > T_c$.
+$$\frac{\text{NLL}(c, T)}{N(T)} \to \lambda_c.$$
 
-(iii) *(Stabilization under unique rate-minimizer.)* If $\lambda^*$ is achieved by a unique candidate $c^*$, then NML selection stabilizes: there exists $T_0$ such that $\arg\min \text{NML}(\cdot, T) = \{c^*\}$ for all $T > T_0$.
+Moreover,
+
+$$\text{NML}(c, T) = \lambda_c \cdot N(T) + \frac{k_c}{2}\log_2 T + o(N(T)).$$
+
+(ii) *(Pairwise comparison.)* If $\lambda_{c_1} < \lambda_{c_2}$, then:
+
+$$\text{NML}(c_1, T) < \text{NML}(c_2, T)$$
+
+for all sufficiently large $T$.
+
+(iii) *(Elimination.)* Every candidate $c$ with $\lambda_c > \lambda^*$ is eventually excluded: there exists $T_c$ such that $c \notin \arg\min_{c' \in \mathcal{C}} \text{NML}(c', T)$ for all $T > T_c$.
+
+(iv) *(Stabilization under unique rate-minimizer.)* If $\lambda^*$ is achieved by a unique candidate $c^*$, then NML selection stabilizes: there exists $T_0$ such that $\arg\min \text{NML}(\cdot, T) = \{c^*\}$ for all $T > T_0$.
 
 *Proof.* Under (A1), each $\hat{\theta}_j(T) \to \theta_j^*$. Since $H_b$ is continuous on $[0,1]$, we have $H_b(\hat{\theta}_j(T)) = H_b(\theta_j^*) + o(1)$. Each orbit class has $n_j(T) = T/p_c + O(1)$ observations, so:
 
 $$n_j(T) \cdot H_b(\hat{\theta}_j(T)) = \frac{T}{p_c} \cdot H_b(\theta_j^*) + o(T).$$
 
-Summing over $j = 1, \ldots, k_c$: $\text{NLL}(c, T) = \frac{T}{p_c} \sum_j H_b(\theta_j^*) + o(T) = \lambda_c \cdot N(T) + o(N(T))$, since $N(T)/k_c = T/p_c$.
+Summing over $j = 1, \ldots, k_c$ gives:
+
+$$\text{NLL}(c, T) = \frac{T}{p_c} \sum_j H_b(\theta_j^*) + o(T) = \lambda_c \cdot N(T) + o(N(T)),$$
+
+since $N(T)/k_c = T/p_c$. Dividing by $N(T)$ proves the first claim in (i).
 
 For the complexity: $\sum_j \frac{1}{2} \log_2 n_j(T) = \frac{k_c}{2} \log_2(T/p_c) + O(1) = \frac{k_c}{2} \log_2 T + O(1)$. Combining gives (i).
 
-For (ii): if $\lambda_c > \lambda_{c'}$ for some $c'$, then $\text{NML}(c, T) - \text{NML}(c', T) = (\lambda_c - \lambda_{c'}) \cdot N(T) + o(N(T)) \to +\infty$, since $(\lambda_c - \lambda_{c'}) > 0$ and the remainder is $o(N(T))$. So $c$ is eventually beaten by $c'$.
+For (ii), subtract the two expansions:
 
-For (iii): if $c^*$ is the unique minimizer of $\lambda_c$, then for every other $c$, $\lambda_c > \lambda^*$, and by (ii), $c$ is eventually excluded. $\square$
+$$\text{NML}(c_2, T) - \text{NML}(c_1, T) = (\lambda_{c_2} - \lambda_{c_1}) \cdot N(T) + o(N(T)).$$
 
-**Remark (Tie-breaking at the logarithmic level).** When multiple candidates share the minimal rate $\lambda^*$, Theorem 3 guarantees only that the set of potentially selected candidates narrows to the rate-minimizers. Resolving ties at the $O(\log T)$ level requires a stronger assumption — for instance, that $\text{NLL}_c(T) = \lambda_c \cdot N(T) + o(\log T)$ — under which the complexity penalty $\frac{k_c}{2} \log_2 T$ breaks ties in favor of fewer parameters (lower $k_c$). Since $k_c = p_c \prod_i D_i$, candidates with the same period have the same $k_c$, so same-period ties (differing only in shift) cannot be resolved even under this strengthened assumption; a deterministic tie-break (e.g., lexicographic on shift) may be imposed. For finite deterministic CA, orbit-class frequencies converge at rate $O(1/T)$, but the resulting NLL correction is $O(\log T)$ (from orbit classes that are asymptotically pure but have $O(1)$ transient defects), which is the same order as the complexity term; whether ties are resolved depends on the specific transient structure.
+Since $\lambda_{c_2} - \lambda_{c_1} > 0$ and $N(T) \to \infty$, the right-hand side tends to $+\infty$, so $\text{NML}(c_1, T) < \text{NML}(c_2, T)$ for all sufficiently large $T$.
 
-**Remark (Empirical rate gaps).** In all experiments reported in Section 3, the margins between the NML-selected candidate and the runner-up grow linearly in $T$, indicating distinct $\lambda_c$ values. Conclusion (iii) therefore applies without additional assumptions.
+For (iii), if $\lambda_c > \lambda^*$, choose any $c' \in \mathcal{C}$ with $\lambda_{c'} = \lambda^*$. By (ii), $\text{NML}(c', T) < \text{NML}(c, T)$ for all sufficiently large $T$, so $c$ is eventually excluded.
+
+For (iv), if $c^*$ is the unique minimizer of $\lambda_c$, then for every other $c$, we have $\lambda_{c^*} < \lambda_c$, so by (ii), $\text{NML}(c^*, T) < \text{NML}(c, T)$ for all sufficiently large $T$. Taking the maximum over the finitely many competitors gives a single $T_0$ after which $\arg\min \text{NML}(\cdot, T) = \{c^*\}$. $\square$
+
+**Remark (What Theorem 3 does and does not prove).** Theorem 3 proves pairwise eventual ordering between candidates with distinct rates, hence elimination of all non-rate-minimizers, and full stabilization only when the rate-minimizer is unique. It does *not* resolve ties among candidates with the same minimal rate $\lambda^*$.
+
+**Remark (Tie-breaking at the logarithmic level).** Resolving ties among rate-minimizers at the $O(\log T)$ level requires a stronger assumption — for instance, that $\text{NLL}_c(T) = \lambda_c \cdot N(T) + o(\log T)$ — under which the complexity penalty $\frac{k_c}{2} \log_2 T$ breaks ties in favor of fewer parameters (lower $k_c$). Since $k_c = p_c \prod_i D_i$, candidates with the same period have the same $k_c$, so same-period ties (differing only in shift) cannot be resolved even under this strengthened assumption; a deterministic tie-break (e.g., lexicographic on shift) may be imposed. For finite deterministic CA, orbit-class frequencies converge at rate $O(1/T)$, but the resulting NLL correction is $O(\log T)$ (from orbit classes that are asymptotically pure but have $O(1)$ transient defects), which is the same order as the complexity term; whether ties are resolved depends on the specific transient structure.
+
+**Remark (Empirical rate gaps).** In all experiments reported in Section 3, the margins between the NML-selected candidate and the runner-up grow linearly in $T$, indicating distinct $\lambda_c$ values. Conclusion (iv) therefore matches the observed regime.
 
 **Corollary (Dimension-agnostic).** Theorem 3 makes no reference to spatial dimension $n$. It applies identically to 1D rings, 2D tori, 3D tori, or any periodic lattice.
 
@@ -140,41 +164,61 @@ For (iii): if $c^*$ is the unique minimizer of $\lambda_c$, then for every other
 
 ### 2.6 Nonidentifiability
 
-**Theorem 4 (Nonidentifiability of Background Period).** For any period $p_0$, shift $\mathbf{s}$, and MDL-type criterion with $O(\log T)$ penalty and $\Theta(T)$ data-fit cost, there exist spacetimes for which the criterion does not select $p_0$ for any sufficiently large $T$.
+**Theorem 4 (Nonidentifiability of Background Period for Bernoulli NML).** For any period $p_0$ and shift $\mathbf{s}$, there exist an integer $q > 1$ and a binary spacetime $U$ such that, for the candidates
+
+$$c_0 = (p_0, \mathbf{s}), \qquad c_1 = (q \cdot p_0, q \cdot \mathbf{s} \bmod \mathbf{D}),$$
+
+the following hold:
+
+(i) $\lambda_{c_0} > 0$,
+
+(ii) $\lambda_{c_1} = 0$,
+
+(iii) $\text{NML}(c_1, T) < \text{NML}(c_0, T)$ for all sufficiently large $T$.
 
 *Proof sketch.* Construct a spacetime $U$ as follows. Let $B$ be an exactly $(p_0, \mathbf{s})$-periodic binary field. Choose an integer $q > 1$ and a second $(p_0, \mathbf{s})$-periodic field $B' \neq B$. Define $U[t, \mathbf{x}] = B[t, \mathbf{x}]$ when $\lfloor t / p_0 \rfloor \not\equiv 0 \pmod{q}$, and $U[t, \mathbf{x}] = B'[t, \mathbf{x}]$ otherwise.
 
-Under candidate $(p_0, \mathbf{s})$: the template must choose one value per orbit class, but the orbit classes that include both $B$-steps and $B'$-steps have mixed values. The per-site NLL rate satisfies $\lambda_{p_0} > 0$ (since some orbit classes have $\theta_j^* \notin \{0,1\}$).
+Under candidate $c_0 = (p_0, \mathbf{s})$: the template must choose one value per orbit class, but the orbit classes that include both $B$-steps and $B'$-steps have mixed values. Since $B' \neq B$, at least one $(p_0,\mathbf{s})$-orbit class mixes two symbols with asymptotic frequencies $1/q$ and $(q-1)/q$, so $\lambda_{c_0} > 0$.
 
-Under candidate $(q \cdot p_0, q \cdot \mathbf{s} \bmod \mathbf{D})$: the template has $q$ independent layers (one per residue class of $\lfloor t/p_0 \rfloor \bmod q$). Each layer sees a constant pattern, so all orbit classes are pure: $\lambda_{q \cdot p_0} = 0$. The complexity increases to $\frac{q \cdot k_{p_0}}{2} \log_2 T$, but this is $O(\log T)$ against $\lambda_{p_0} \cdot N(T) = \Theta(T)$.
+Under candidate $c_1 = (q \cdot p_0, q \cdot \mathbf{s} \bmod \mathbf{D})$: the template has $q$ independent layers (one per residue class of $\lfloor t/p_0 \rfloor \bmod q$). Each layer sees a constant pattern, so all orbit classes are pure: $\lambda_{c_1} = 0$.
 
-By Theorem 3(ii), the higher-period candidate eventually wins. $\square$
+By Theorem 3(ii), $c_1$ eventually beats $c_0$, proving (iii). $\square$
 
 The observed spacetime does not intrinsically separate into "background" plus "residual" without additional assumptions. The selected period is the one that best compresses the *entire* spacetime, not necessarily the one matching an external notion of "true background period."
 
-### 2.7 Identifiability for Exactly Periodic Backgrounds
+### 2.7 Identifiability for Eventually Exactly Periodic Backgrounds
 
-**Definition 5.** The *true background period* $p_0$ of a CA spacetime is the smallest period such that all orbit classes under $(p_0, \mathbf{s})$ have asymptotic frequency $\theta_j^* \in \{0, 1\}$ — that is, the background is an exact relative-periodic orbit modulo finite transients.
+**Definition 5.** The *true background period* $p_0$ of a CA spacetime is the smallest period for which there exist a shift $\mathbf{s}$ and a transient time $T_0$ such that
 
-**Theorem 5 (Identifiability for Exactly Periodic Backgrounds).** Let $p_0$ be the true background period (Definition 5) for some shift $\mathbf{s}$. Assume (A1). Then for any velocity-matched strict multiple $p = m \cdot p_0$ ($m > 1$) with shift $m \cdot \mathbf{s} \bmod \mathbf{D}$:
+$$U[t + p_0, \mathbf{x} + \mathbf{s} \bmod \mathbf{D}] = U[t, \mathbf{x}]$$
+
+for all $t \geq T_0$ and all spatial indices $\mathbf{x}$. That is, after a finite transient the spacetime is exactly relative-periodic with period $p_0$.
+
+**Theorem 5 (Identifiability for Eventually Exactly Periodic Backgrounds).** Let $p_0$ be the true background period (Definition 5) for some shift $\mathbf{s}$, witnessed by a transient time $T_0$. Then for any velocity-matched strict multiple $p = m \cdot p_0$ ($m > 1$) with shift $m \cdot \mathbf{s} \bmod \mathbf{D}$:
 
 (i) The per-site NLL rates are equal: $\lambda_p = \lambda_{p_0} = 0$.
 
-(ii) The NML score difference satisfies $\text{NML}(p, T) - \text{NML}(p_0, T) = \frac{(m-1) k_{p_0}}{2} \log_2 T + O(1) \to +\infty$.
+(ii) The NLL difference satisfies:
 
-(iii) Therefore NML selects $p_0$ over $p$ for all sufficiently large $T$.
+$$\text{NLL}(p, T) - \text{NLL}(p_0, T) = O(1).$$
 
-*Proof.* Since all orbit classes under $p_0$ have $\theta_j^* \in \{0,1\}$, we have $H_b(\theta_j^*) = 0$ for all $j$, giving $\lambda_{p_0} = 0$. Under the velocity-matched multiple $p = m \cdot p_0$, each orbit class of $p_0$ splits into $m$ sub-classes (Theorem 2 proof). These sub-classes inherit the same asymptotic purity, so $\lambda_p = 0$ as well.
+(iii) The NML score difference satisfies:
 
-Both candidates therefore have $\text{NLL} = o(N(T))$ (the contribution from finite transients). The NLL difference $|\text{NLL}(p,T) - \text{NLL}(p_0,T)|$ is bounded by $O(1)$: splitting a pure orbit class with $a_j$ transient defects into $m$ sub-classes changes the NLL by at most $a_j \cdot \log_2 m$, a constant independent of $T$.
+$$\text{NML}(p, T) - \text{NML}(p_0, T) = \frac{(m-1) k_{p_0}}{2} \log_2 T + O(1) \to +\infty.$$
+
+(iv) Therefore NML selects $p_0$ over $p$ for all sufficiently large $T$.
+
+*Proof.* After time $T_0$, the spacetime is exactly $(p_0,\mathbf{s})$-periodic, so every $(p_0,\mathbf{s})$-orbit class is pure outside the finite prefix $t < T_0$. Hence $\lambda_{p_0} = 0$. The same exact periodicity implies exact $(p, m\mathbf{s})$-periodicity for every multiple $p = m \cdot p_0$, so $\lambda_p = 0$ as well. This proves (i).
+
+Only orbit classes intersecting the finite transient prefix $t < T_0$ contribute nonzero NLL. There are finitely many such classes. For each such class, passing from $p_0$ to $p = m \cdot p_0$ splits one class into $m$ sub-classes, but the total number of transient disagreements in that class stays fixed. The change in Bernoulli MLE codelength from such a split is bounded by a constant depending only on the transient counts and on $m$, not on $T$. Summing over the finitely many transient classes gives (ii).
 
 Meanwhile, the complexity difference is:
 
 $$\text{COMP}(p,T) - \text{COMP}(p_0,T) = \frac{m \cdot k_{p_0}}{2} \log_2 \frac{T}{m \cdot p_0} - \frac{k_{p_0}}{2} \log_2 \frac{T}{p_0} + O(1) = \frac{(m-1) k_{p_0}}{2} \log_2 T + O(1).$$
 
-Since the complexity difference grows as $\Theta(\log T)$ while the NLL difference is $O(1)$, the NML score for the higher-period model eventually exceeds that for $p_0$. $\square$
+Combining this with (ii) gives (iii). Since the score difference tends to $+\infty$, the higher-period model is eventually worse, proving (iv). $\square$
 
-**Remark.** Theorems 4 and 5 are complementary: when the background is exactly periodic (all orbit classes pure), NML recovers the true period (Theorem 5); when residuals have their own periodic structure, NML absorbs them into higher-period templates (Theorem 4). The distinction between "background periodicity" and "residual periodicity" is not intrinsic to the observation.
+**Remark.** Theorems 4 and 5 are complementary: when the background is eventually exactly periodic after a finite transient, NML recovers the true period (Theorem 5); when residuals have their own periodic structure, NML absorbs them into higher-period templates (Theorem 4). The distinction between "background periodicity" and "residual periodicity" is not intrinsic to the observation.
 
 ### 2.8 Geometric Diagnostics: Run-Length and LZ4
 
@@ -218,7 +262,7 @@ The known complexity hierarchy Rule 54 < Rule 110 < Rule 30 [1,2,3] is recovered
 | ECA-110 | 7 | 7 | 7 | 7 | 7 | 7 | 18,378 |
 | ECA-30  | 1 | 1 | 1 | 1 | 1 | 1 | 598 |
 
-All three 1D rules show *immediate* stabilization — the NML-selected period is constant from T=50 onward, with positive margins at every point. Margins grow linearly in $T$, indicating distinct per-site NLL rates ($\lambda_c$ values) and confirming that Theorem 3(iii) applies. Rule 110 shows the strongest separation (margin 18,378 bits at T=800), consistent with its pronounced period-7 Ether background.
+All three 1D rules show *immediate* stabilization — the NML-selected period is constant from T=50 onward, with positive margins at every point. Margins grow linearly in $T$, indicating distinct per-site NLL rates ($\lambda_c$ values) and confirming that Theorem 3(iv) applies. Rule 110 shows the strongest separation (margin 18,378 bits at T=800), consistent with its pronounced period-7 Ether background.
 
 ### 3.2 2D Totalistic Rules
 
@@ -378,7 +422,7 @@ The orbit-class reduction (Theorem 1) transforms a seemingly complex spatiotempo
 1. **Hamming-optimal decomposition** in $O(|U|)$ time per candidate model, for any dimension.
 2. **A formal explanation** of overcapacity (Theorem 2), showing why naive defect-rate ranking is inadequate.
 3. **A stabilization theorem** (Theorem 3) proving that every suboptimal candidate is eventually excluded, and that when the rate-minimizer is unique, NML selection locks to a single winner. The proof requires only convergent orbit-class frequencies and no assumption on residual geometry.
-4. **A nonidentifiability result** (Theorem 4) showing by explicit construction that background period recovery is impossible in general, with recovery guaranteed only when the background is exactly periodic (Theorem 5).
+4. **A nonidentifiability result** (Theorem 4) showing by explicit construction that background period recovery is impossible in general, with recovery guaranteed when the background is eventually exactly periodic after a finite transient (Theorem 5).
 
 The key insight is that the *same* theoretical framework — orbit classes → Bernoulli estimation → NML stabilization — applies without modification across spatial dimensions.
 
@@ -420,7 +464,7 @@ The method identifies *where* residuals are but not *how* they interact. It does
 
 ## 6. Conclusion
 
-We have proved that Bernoulli NML model selection over relative-periodic CA backgrounds stabilizes: every candidate whose per-site NLL rate exceeds the minimum is eventually excluded (Theorem 3). When the rate-minimizing candidate is unique — as it is in all cases we test — the selected model locks to a single winner, though the selected period need not correspond to any external notion of "true background period" (Theorem 4). The proof requires only convergent orbit-class frequencies — no assumption on residual geometry — and is dimension-agnostic, resting on the orbit-class reduction that decomposes spatiotemporal fitting into independent Bernoulli estimation. When the background is exactly periodic, NML recovers the true period (Theorem 5); when residuals are periodic, NML correctly absorbs them into the template.
+We have proved that Bernoulli NML model selection over relative-periodic CA backgrounds stabilizes: every candidate whose per-site NLL rate exceeds the minimum is eventually excluded (Theorem 3). When the rate-minimizing candidate is unique — as it is in all cases we test — the selected model locks to a single winner, though the selected period need not correspond to any external notion of "true background period" (Theorem 4). The proof requires only convergent orbit-class frequencies — no assumption on residual geometry — and is dimension-agnostic, resting on the orbit-class reduction that decomposes spatiotemporal fitting into independent Bernoulli estimation. When the background is eventually exactly periodic after a finite transient, NML recovers the true period (Theorem 5); when residuals are periodic, NML correctly absorbs them into the template.
 
 Cross-dimensional experiments on 1D elementary CA, selected 2D totalistic rules, and a 3D totalistic rule are consistent with the stabilization prediction, with NML-selected periods locking and margins growing after stabilization. As an application, the framework identifies 2D rules with persistent structured projection residuals exhibiting extensive scaling — candidates for further computational-mechanics analysis.
 
