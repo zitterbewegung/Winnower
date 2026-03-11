@@ -21,6 +21,16 @@ from .repair_nd import (
     extract_components_nd,
     summarise_components_nd,
 )
+from .selection import (
+    PeriodScore,
+    ResidualDiagnostics,
+    SelectionResult,
+    SelectionStatus,
+    select_period,
+    select_period_nd,
+    analyze_residual,
+    selection_summary,
+)
 
 __all__ = [
     # 1D ECA
@@ -51,4 +61,13 @@ __all__ = [
     "scan_relative_periodicity_nd",
     "extract_components_nd",
     "summarise_components_nd",
+    # Selection (period-first)
+    "PeriodScore",
+    "ResidualDiagnostics",
+    "SelectionResult",
+    "SelectionStatus",
+    "select_period",
+    "select_period_nd",
+    "analyze_residual",
+    "selection_summary",
 ]

@@ -7,6 +7,7 @@ import typer
 from .eca import random_initial_state, simulate_eca
 from .plotting import plot_decomposition, plot_spacetime, plot_spectrum, save_figure
 from .repair import extract_components, scan_relative_periodicity, summarise_components
+from .selection import select_period, select_period_nd, selection_summary
 
 from .ca2d import LIFE_RULES, random_initial_grid, simulate_2d, rule_consistency_rate_2d
 from .ca3d import RULES_3D, random_initial_volume, simulate_3d, rule_consistency_rate_3d
@@ -50,21 +51,34 @@ def analyze(
     initial = random_initial_state(width=width, density=density, seed=seed)
     spacetime = simulate_eca(rule=rule, initial=initial, steps=steps)
 
+    # Stage A: period-first selection
+    result = select_period(
+        spacetime,
+        shifts=range(-shift_radius, shift_radius + 1),
+        periods=range(1, max_period + 1),
+        rule=rule,
+    )
+    best_fit = result.best_fit
+    summary = selection_summary(result)
+
+    # Also produce the full scan frame for spectrum plots
     frame, fits = scan_relative_periodicity(
         spacetime,
         shifts=range(-shift_radius, shift_radius + 1),
         periods=range(1, max_period + 1),
         rule=rule,
     )
-    best = frame.sort_values(["nml_bits", "defect_rate"]).iloc[0]
-    best_key = (int(best["shift"]), int(best["period"]))
-    best_fit = fits[best_key]
 
     labels, _ = extract_components(best_fit.defect_mask, min_size=6)
     components = summarise_components(labels)
 
     frame.to_csv(output_dir / f"rule_{rule}_spectrum.csv", index=False)
     components.to_csv(output_dir / f"rule_{rule}_components.csv", index=False)
+
+    # Write structured selection summary
+    import json
+    with open(output_dir / f"rule_{rule}_selection.json", "w") as f:
+        json.dump(summary, f, indent=2, default=str)
 
     fig, _ = plot_spacetime(spacetime, title=f"Rule {rule} spacetime")
     save_figure(fig, output_dir / f"rule_{rule}_spacetime.png")
@@ -78,6 +92,17 @@ def analyze(
     fig, _ = plot_decomposition(best_fit, source=spacetime, title_prefix=f"Rule {rule} ")
     save_figure(fig, output_dir / f"rule_{rule}_decomposition.png")
 
+    typer.echo(f"Selected period: {result.selected.period} "
+               f"(shift={result.selected.best_shift}, "
+               f"status={result.status.value}, "
+               f"margin={result.margin:.1f} bits)")
+    if result.runner_up:
+        typer.echo(f"Runner-up period: {result.runner_up.period} "
+                   f"(+{result.margin:.1f} bits)")
+    if result.residual:
+        typer.echo(f"Residual: {result.residual.n_components} components, "
+                   f"RL={result.residual.run_length_bits} bits, "
+                   f"defect_rate={result.residual.defect_rate:.4f}")
     typer.echo(f"Wrote outputs to {output_dir.resolve()}")
 
 
@@ -107,6 +132,18 @@ def analyze2d(
         return rule_consistency_rate_2d(bg, survive, birth)
 
     shift_range = range(-shift_radius, shift_radius + 1)
+
+    # Stage A: period-first selection
+    result = select_period_nd(
+        spacetime,
+        shift_ranges=[shift_range, shift_range],
+        periods=range(1, max_period + 1),
+        rule_error_fn=rule_error_fn,
+    )
+    best_fit = result.best_fit
+    summary = selection_summary(result)
+
+    # Also produce full scan for spectrum plots
     frame, fits = scan_relative_periodicity_nd(
         spacetime,
         shift_ranges=[shift_range, shift_range],
@@ -114,16 +151,15 @@ def analyze2d(
         rule_error_fn=rule_error_fn,
     )
 
-    best = frame.sort_values(["nml_bits", "defect_rate"]).iloc[0]
-    best_shift = (int(best["shift_0"]), int(best["shift_1"]))
-    best_period = int(best["period"])
-    best_fit = fits[(best_shift, best_period)]
-
     labels, _ = extract_components_nd(best_fit.defect_mask, min_size=4)
     components = summarise_components_nd(labels)
 
     frame.to_csv(output_dir / f"{rule}_spectrum.csv", index=False)
     components.to_csv(output_dir / f"{rule}_components.csv", index=False)
+
+    import json
+    with open(output_dir / f"{rule}_selection.json", "w") as f:
+        json.dump(summary, f, indent=2, default=str)
 
     fig, _ = plot_2d_slices(spacetime, title=f"2D CA '{rule}' time slices")
     save_figure(fig, output_dir / f"{rule}_slices.png")
@@ -140,8 +176,13 @@ def analyze2d(
     fig, _ = plot_2d_decomposition(best_fit, source=spacetime, title_prefix=f"'{rule}' ")
     save_figure(fig, output_dir / f"{rule}_decomposition.png")
 
-    typer.echo(f"Best fit: shift=({best_shift[0]},{best_shift[1]}), period={best_period}, "
-               f"defect_rate={best_fit.defect_rate:.4f}")
+    typer.echo(f"Selected period: {result.selected.period} "
+               f"(shift={result.selected.best_shift}, "
+               f"status={result.status.value}, "
+               f"margin={result.margin:.1f} bits)")
+    if result.runner_up:
+        typer.echo(f"Runner-up period: {result.runner_up.period} "
+                   f"(+{result.margin:.1f} bits)")
     typer.echo(f"Wrote outputs to {output_dir.resolve()}")
 
 
@@ -172,6 +213,18 @@ def analyze3d(
         return rule_consistency_rate_3d(bg, survive, birth)
 
     shift_range = range(-shift_radius, shift_radius + 1)
+
+    # Stage A: period-first selection
+    result = select_period_nd(
+        spacetime,
+        shift_ranges=[shift_range, shift_range, shift_range],
+        periods=range(1, max_period + 1),
+        rule_error_fn=rule_error_fn,
+    )
+    best_fit = result.best_fit
+    summary = selection_summary(result)
+
+    # Also produce full scan for spectrum plots
     frame, fits = scan_relative_periodicity_nd(
         spacetime,
         shift_ranges=[shift_range, shift_range, shift_range],
@@ -179,16 +232,15 @@ def analyze3d(
         rule_error_fn=rule_error_fn,
     )
 
-    best = frame.sort_values(["nml_bits", "defect_rate"]).iloc[0]
-    best_shift = (int(best["shift_0"]), int(best["shift_1"]), int(best["shift_2"]))
-    best_period = int(best["period"])
-    best_fit = fits[(best_shift, best_period)]
-
     labels, _ = extract_components_nd(best_fit.defect_mask, min_size=4)
     components = summarise_components_nd(labels)
 
     frame.to_csv(output_dir / f"{rule}_spectrum.csv", index=False)
     components.to_csv(output_dir / f"{rule}_components.csv", index=False)
+
+    import json
+    with open(output_dir / f"{rule}_selection.json", "w") as f:
+        json.dump(summary, f, indent=2, default=str)
 
     fig, _ = plot_3d_slices(spacetime, title=f"3D CA '{rule}' time slices (z-midplane)")
     save_figure(fig, output_dir / f"{rule}_slices.png")
@@ -202,8 +254,13 @@ def analyze3d(
     fig, _ = plot_3d_decomposition(best_fit, source=spacetime, title_prefix=f"'{rule}' ")
     save_figure(fig, output_dir / f"{rule}_decomposition.png")
 
-    typer.echo(f"Best fit: shift=({best_shift[0]},{best_shift[1]},{best_shift[2]}), period={best_period}, "
-               f"defect_rate={best_fit.defect_rate:.4f}")
+    typer.echo(f"Selected period: {result.selected.period} "
+               f"(shift={result.selected.best_shift}, "
+               f"status={result.status.value}, "
+               f"margin={result.margin:.1f} bits)")
+    if result.runner_up:
+        typer.echo(f"Runner-up period: {result.runner_up.period} "
+                   f"(+{result.margin:.1f} bits)")
     typer.echo(f"Wrote outputs to {output_dir.resolve()}")
 
 

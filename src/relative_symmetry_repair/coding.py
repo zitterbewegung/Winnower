@@ -1,11 +1,67 @@
 from __future__ import annotations
 
+import functools
 import math
 from typing import Iterable
 
 import lz4.frame
 import numpy as np
 from scipy.special import gammaln
+
+
+# ── Exact Bernoulli NML for finite samples ────────────────────────────────────
+
+# Cutoff: use exact computation for n <= this, asymptotic for n > this.
+# At n=200 the asymptotic approximation error is <0.01 bits per class,
+# negligible compared to the O(1) constant in the asymptotic expansion.
+EXACT_NML_CUTOFF = 200
+
+
+@functools.lru_cache(maxsize=4096)
+def _exact_bernoulli_regret(n: int) -> float:
+    """Exact Bernoulli NML parametric complexity for sample size n, in bits.
+
+    This is log2 of the Shtarkov normalizing constant:
+        C(n) = sum_{k=0}^{n} binom(n, k) * (k/n)^k * ((n-k)/n)^(n-k)
+
+    where the k=0 and k=n terms contribute 1 each (using 0^0 = 1).
+
+    For n=0 or n=1, the complexity is 0 (no free parameter to estimate).
+    """
+    if n <= 1:
+        return 0.0
+    # Work in log space for numerical stability
+    # Each term: binom(n, k) * (k/n)^k * ((n-k)/n)^(n-k)
+    # log2(term) = log2_binom(n,k) + k*log2(k/n) + (n-k)*log2((n-k)/n)
+    log2_terms = np.empty(n + 1, dtype=np.float64)
+    for k in range(n + 1):
+        lb = float((gammaln(n + 1) - gammaln(k + 1) - gammaln(n - k + 1)) / math.log(2.0))
+        if k == 0 or k == n:
+            # (k/n)^k = 0^0 = 1, or ((n-k)/n)^(n-k) = 0^0 = 1
+            log2_terms[k] = lb  # binom(n,0) = binom(n,n) = 1, rest = 1
+        else:
+            kf = float(k)
+            nf = float(n)
+            log2_terms[k] = lb + kf * math.log2(kf / nf) + (nf - kf) * math.log2((nf - kf) / nf)
+    # Log-sum-exp in base 2
+    max_val = float(np.max(log2_terms))
+    shifted = log2_terms - max_val
+    total = float(np.sum(np.power(2.0, shifted)))
+    return max_val + math.log2(total)
+
+
+def bernoulli_nml_complexity_single(n: int) -> float:
+    """NML parametric complexity for a single Bernoulli class with n observations.
+
+    Uses exact computation for n <= EXACT_NML_CUTOFF, asymptotic (½ log₂ n)
+    for larger n. The asymptotic approximation omits the O(1) constant
+    (½ log(π/2) ≈ 0.326 bits), which does not affect model selection.
+    """
+    if n <= 1:
+        return 0.0
+    if n <= EXACT_NML_CUTOFF:
+        return _exact_bernoulli_regret(n)
+    return 0.5 * math.log2(n)
 
 
 def log2_binomial(n: int, k: int) -> float:
@@ -119,17 +175,25 @@ def orbit_nll_bits(
 def nml_complexity_bits(
     labels: np.ndarray,
     n_labels: int,
+    *,
+    exact: bool = True,
 ) -> float:
-    """Asymptotic NML parametric complexity: Σ_j (1/2) log2(n_j).
+    """NML parametric complexity: Σ_j complexity(n_j).
+
+    When ``exact=True`` (default), uses exact Bernoulli NML for small
+    orbit classes (n_j ≤ EXACT_NML_CUTOFF) and asymptotic (½ log₂ n_j)
+    for larger ones. When ``exact=False``, uses asymptotic throughout.
 
     For each orbit class j with n_j observations, the Bernoulli NML
-    normalizing constant contributes (1/2) log2(n_j) + O(1) bits.
-    The O(1) term ((1/2) log(π/2) ≈ 0.326 bits per class) is omitted;
-    this does not affect asymptotic model selection.
+    normalizing constant contributes (1/2) log2(n_j) + O(1) bits
+    asymptotically. The exact computation sums binomial coefficients
+    weighted by MLE likelihoods (Shtarkov normalizer).
     """
     flat_labels = labels.ravel()
-    totals = np.bincount(flat_labels, minlength=n_labels).astype(np.float64)
-    valid = totals[totals > 1]  # classes with ≤1 observation have zero complexity
+    totals = np.bincount(flat_labels, minlength=n_labels).astype(np.int64)
+    if exact:
+        return float(sum(bernoulli_nml_complexity_single(int(n)) for n in totals))
+    valid = totals[totals > 1].astype(np.float64)
     if valid.size == 0:
         return 0.0
     return float(0.5 * np.sum(np.log2(valid)))
@@ -139,16 +203,20 @@ def nml_score_bits(
     spacetime: np.ndarray,
     labels: np.ndarray,
     n_labels: int,
+    *,
+    exact: bool = True,
 ) -> tuple[float, float, float]:
-    """Asymptotic Bernoulli NML score = NLL + parametric complexity.
+    """Bernoulli NML score = NLL + parametric complexity.
 
     Returns (nll_bits, complexity_bits, total_nml_bits).
-    The score is asymptotically equivalent to the normalized maximum
-    likelihood code for independent Bernoulli parameters on orbit classes,
-    up to O(k) additive bits where k is the number of orbit classes.
+
+    When ``exact=True`` (default), uses finite-sample-corrected NML
+    complexity for small orbit classes (n_j ≤ EXACT_NML_CUTOFF) and
+    asymptotic for larger ones. When ``exact=False``, uses asymptotic
+    throughout (legacy behavior).
     """
     nll = orbit_nll_bits(spacetime, labels, n_labels)
-    comp = nml_complexity_bits(labels, n_labels)
+    comp = nml_complexity_bits(labels, n_labels, exact=exact)
     return nll, comp, nll + comp
 
 

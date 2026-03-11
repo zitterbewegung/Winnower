@@ -91,12 +91,22 @@ The generated PNGs now use a consistent visual language:
 - `lz4_bits`: practical compressor proxy for the defect mask.
 - `rule_error`: local-rule inconsistency rate of the fitted background under the original ECA rule. Lower means the fitted background behaves more like a true CA orbit instead of only matching the spacetime statistically.
 
-The CLI chooses the displayed best-fit decomposition by sorting on:
-1. lowest `defect_rate`
-2. then lowest `rule_error`
-3. then lowest `run_length_bits`
+### Selection criterion
 
-This ordering matters. Two fits can have similar defect counts but very different defect geometry, and the run-length plot makes that visible.
+The CLI selects the best background using **period-first Bernoulli NML** selection:
+
+1. For each period, the best shift is the one minimizing the NML score (NLL + parametric complexity).
+2. The best period is the one with the lowest period-level NML score.
+3. Shift is secondary — it is the best shift *within* the selected period.
+
+The NML complexity uses **finite-sample correction** for small orbit classes (n ≤ 200), computing the exact Shtarkov normalizing constant via binomial sums. For larger orbit classes, it falls back to the standard asymptotic approximation (½ log₂ n).
+
+The CLI reports a **selection status**: `stable_winner` (clear margin), `near_tie` (margin < 2 bits), or `unresolved` (margin ≤ 0).
+
+### Two-stage pipeline
+
+- **Stage A (selection)**: Bernoulli NML selects the period and shift. This is the primary selector.
+- **Stage B (residual diagnostics)**: Run-length bits, LZ4 bits, and connected-component analysis characterize the residual mask geometry. These are diagnostics, not part of the selector.
 
 ## What To Look For In The Checked-In PNGs
 

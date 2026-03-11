@@ -1,0 +1,1642 @@
+[
+  {
+    "rulestring": "B0123478/S01234678",
+    "name": "AntiLife",
+    "description": "The black/white reversal of Conway's Game of Life.",
+    "birth": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      8
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B0123478/S34678",
+    "name": "InverseLife",
+    "description": "A rule by Jason Rampe, showing similar oscillators and gliders to Conway's Game of Life. The black/white reversal of B36",
+    "birth": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      8
+    ],
+    "survive": [
+      3,
+      4,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B01245/S01245",
+    "name": "B01245/S01245",
+    "description": "A strobing rule which makes spearheaders form from chaotic oscillating boundaries.",
+    "birth": [
+      0,
+      1,
+      2,
+      4,
+      5
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B01356/S012345",
+    "name": "Wickstretcher And The Parasites[1]",
+    "description": "An explosive strobing rule which forms different wickstretchers of different speeds and sizes, mostly accompanied by a \"",
+    "birth": [
+      0,
+      1,
+      3,
+      5,
+      6
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B014/S2",
+    "name": "Oils",
+    "description": "An exploding rule that forms many wickstrechers, along with other patterns such as a c/16 diagonal spaceship.",
+    "birth": [
+      0,
+      1,
+      4
+    ],
+    "survive": [
+      2
+    ]
+  },
+  {
+    "rulestring": "B017/S01",
+    "name": "B017/S01",
+    "description": "",
+    "birth": [
+      0,
+      1,
+      7
+    ],
+    "survive": [
+      0,
+      1
+    ]
+  },
+  {
+    "rulestring": "B026/S1",
+    "name": "B026/S1",
+    "description": "Simulates range-2 wolfram rule 2166637080",
+    "birth": [
+      0,
+      2,
+      6
+    ],
+    "survive": [
+      1
+    ]
+  },
+  {
+    "rulestring": "B028/S0124",
+    "name": "Invertamaze",
+    "description": "A strobing rule which makes mazes that invert themselves each generation (SEIZURE WARNING).",
+    "birth": [
+      0,
+      2,
+      8
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      4
+    ]
+  },
+  {
+    "rulestring": "B08/S4",
+    "name": "Neon Blobs",
+    "description": "A strobing rule in which patterns become neon-like explosive patterns.",
+    "birth": [
+      0,
+      8
+    ],
+    "survive": [
+      4
+    ]
+  },
+  {
+    "rulestring": "B1/S012345678",
+    "name": "H-trees",
+    "description": "An exploding rule where H-shaped branches grow from pattern borders.",
+    "birth": [
+      1
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B1/S014567",
+    "name": "Fuzz",
+    "description": "An exploding rule in which solid patterns appear.",
+    "birth": [
+      1
+    ],
+    "survive": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "rulestring": "B1/S1",
+    "name": "Gnarl",
+    "description": "A simple exploding rule by Kellie Evans that forms complex patterns from even a single live cell.",
+    "birth": [
+      1
+    ],
+    "survive": [
+      1
+    ]
+  },
+  {
+    "rulestring": "B1/S134567",
+    "name": "Snakeskin",
+    "description": "A rule in which patterns explode and form snake-like patterns.",
+    "birth": [
+      1
+    ],
+    "survive": [
+      1,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "rulestring": "B12678/S15678",
+    "name": "Solid islands grow amongst static",
+    "description": "A rule in which patterns grow exponentially and form solid patterns inside static-like patterns.",
+    "birth": [
+      1,
+      2,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      1,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B1357/S1357",
+    "name": "Replicator",
+    "description": "A rule in which every pattern is a replicator.",
+    "birth": [
+      1,
+      3,
+      5,
+      7
+    ],
+    "survive": [
+      1,
+      3,
+      5,
+      7
+    ]
+  },
+  {
+    "rulestring": "B1357/S02468",
+    "name": "Fredkin",
+    "description": "A rule in which, like Replicator, every pattern is a replicator. Also known as \"Replicator 2\".",
+    "birth": [
+      1,
+      3,
+      5,
+      7
+    ],
+    "survive": [
+      0,
+      2,
+      4,
+      6,
+      8
+    ]
+  },
+  {
+    "rulestring": "B1358/S0247",
+    "name": "Feux",
+    "description": "An explosive rule where patterns turn into replicators and flash in and out of existence.",
+    "birth": [
+      1,
+      3,
+      5,
+      8
+    ],
+    "survive": [
+      0,
+      2,
+      4,
+      7
+    ]
+  },
+  {
+    "rulestring": "B168/S236",
+    "name": "Forrest of Ls",
+    "description": "An explosive rule where the insides of patterns slowy stablize into still formations.",
+    "birth": [
+      1,
+      6,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      6
+    ]
+  },
+  {
+    "rulestring": "B2/S",
+    "name": "Seeds",
+    "description": "An exploding rule by Brian Silverman in which every cell dies in every generation. It has many simple orthogonal spacesh",
+    "birth": [
+      2
+    ],
+    "survive": []
+  },
+  {
+    "rulestring": "B2/S0",
+    "name": "Live Free or Die",
+    "description": "An exploding rule in which only cells with no neighbors survive. It has many spaceships, puffers, and oscillators, some ",
+    "birth": [
+      2
+    ],
+    "survive": [
+      0
+    ]
+  },
+  {
+    "rulestring": "B2/S13",
+    "name": "B2/S13",
+    "description": "An exploding rule, one of the few B2 life-like rules that has a replicator.",
+    "birth": [
+      2
+    ],
+    "survive": [
+      1,
+      3
+    ]
+  },
+  {
+    "rulestring": "B2/S2345",
+    "name": "B2/S2345",
+    "description": "An exploding rule, with still lifes that may form indestructible barriers to growth, which can be used as casing for sin",
+    "birth": [
+      2
+    ],
+    "survive": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B2/S23456",
+    "name": "B2/S23456",
+    "description": "Similar to B2/S2345[3]",
+    "birth": [
+      2
+    ],
+    "survive": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "rulestring": "B2/S2345678",
+    "name": "B2/S2345678",
+    "description": "Similar to B2/S2345[4]",
+    "birth": [
+      2
+    ],
+    "survive": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B234/S",
+    "name": "Serviettes[5]",
+    "description": "An exploding rule in which every cell dies in every generation (like Seeds). This rule is of interest because of the fab",
+    "birth": [
+      2,
+      3,
+      4
+    ],
+    "survive": []
+  },
+  {
+    "rulestring": "B25/S4",
+    "name": "B25/S4",
+    "description": "An exploding rule, it has a one-dimensional asymmetric replicator.",
+    "birth": [
+      2,
+      5
+    ],
+    "survive": [
+      4
+    ]
+  },
+  {
+    "rulestring": "B25678/S5678",
+    "name": "Iceballs",
+    "description": "Small masses of solid living cells flicker in and out of existence. Some reach a critical mass and begin to slowly grow.",
+    "birth": [
+      2,
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S012345678",
+    "name": "Life without death",
+    "description": "An expanding rule that produces complex flakes, featuring dense wickstretchers named \"ladders\". Also known as \"Flakes\" o",
+    "birth": [
+      3
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S023",
+    "name": "DotLife",
+    "description": "An exploding rule closely related to Conway's Life. The B-heptomino is a common infinite growth pattern in this rule, th",
+    "birth": [
+      3
+    ],
+    "survive": [
+      0,
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B3/S0248",
+    "name": "Star Trek",
+    "description": "A rule with several spaceships of various speeds.",
+    "birth": [
+      3
+    ],
+    "survive": [
+      0,
+      2,
+      4,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S12",
+    "name": "Flock",
+    "description": "Patterns tend to quickly settle into dominoes, duoplets and period 2 oscillators. There is a common period 14 shuttle os",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2
+    ]
+  },
+  {
+    "rulestring": "B3/S1234",
+    "name": "Mazectric",
+    "description": "An expanding rule that crystalizes to form maze-like designs that tend to be straighter (ie. have longer \"halls\") than t",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "rulestring": "B3/S12345",
+    "name": "Maze",
+    "description": "An expanding rule that crystalizes to form maze-like designs.",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B3/S123678",
+    "name": "Magnezones",
+    "description": "An explosive rule that is liquid with four types of crystals appearing in the liquid.",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S1237",
+    "name": "SnowLife",
+    "description": "",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      7
+    ]
+  },
+  {
+    "rulestring": "B3/S124",
+    "name": "Corrosion of Conformity",
+    "description": "A rule similar to Mazectric but without S3. A slow burn from almost any starting pattern, resulting in a rusting away of",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2,
+      4
+    ]
+  },
+  {
+    "rulestring": "B3/S128",
+    "name": "EightFlock",
+    "description": "",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      2,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S13",
+    "name": "LowLife",
+    "description": "",
+    "birth": [
+      3
+    ],
+    "survive": [
+      1,
+      3
+    ]
+  },
+  {
+    "rulestring": "B3/S2",
+    "name": "B3/S2",
+    "description": "This rule has 6 small still lifes, the tub, the hive, the aircraft carrier, the loaf, the mango, and the pond. However, ",
+    "birth": [
+      3
+    ],
+    "survive": [
+      2
+    ]
+  },
+  {
+    "rulestring": "B3/S23",
+    "name": "Conway's Life",
+    "description": "A chaotic rule that is by far the most well-known and well-studied. It exhibits highly complex behavior.",
+    "birth": [
+      3
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B3/S2378",
+    "name": "B3/S2378",
+    "description": "",
+    "birth": [
+      3
+    ],
+    "survive": [
+      2,
+      3,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S238",
+    "name": "EightLife",
+    "description": "Also known as \"Pulsar Life\".",
+    "birth": [
+      3
+    ],
+    "survive": [
+      2,
+      3,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S245678",
+    "name": "Shoots and Roots",
+    "description": "Shoots are slow growing, well-ordered patterns, while Roots grow faster than shoots, and explosive as they grow.",
+    "birth": [
+      3
+    ],
+    "survive": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3/S4567",
+    "name": "Lifeguard 2",
+    "description": "",
+    "birth": [
+      3
+    ],
+    "survive": [
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "rulestring": "B3/S45678",
+    "name": "Coral",
+    "description": "An exploding rule in which patterns grow slowly and form coral-like textures.",
+    "birth": [
+      3
+    ],
+    "survive": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B34/S34",
+    "name": "3-4 Life",
+    "description": "An exploding rule that was initially thought to be a stable alternative to Conway's Life, until computer simulation foun",
+    "birth": [
+      3,
+      4
+    ],
+    "survive": [
+      3,
+      4
+    ]
+  },
+  {
+    "rulestring": "B34/S35",
+    "name": "Dance",
+    "description": "",
+    "birth": [
+      3,
+      4
+    ],
+    "survive": [
+      3,
+      5
+    ]
+  },
+  {
+    "rulestring": "B34/S456",
+    "name": "Bacteria[6]",
+    "description": "",
+    "birth": [
+      3,
+      4
+    ],
+    "survive": [
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "rulestring": "B345/S0456",
+    "name": "Never happy",
+    "description": "An explosive rule where patterns slowly form diamond-like shapes and slowly explode.",
+    "birth": [
+      3,
+      4,
+      5
+    ],
+    "survive": [
+      0,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "rulestring": "B345/S2",
+    "name": "Blinkers",
+    "description": "",
+    "birth": [
+      3,
+      4,
+      5
+    ],
+    "survive": [
+      2
+    ]
+  },
+  {
+    "rulestring": "B345/S4567",
+    "name": "Assimilation",
+    "description": "A very stable rule that forms permanent diamond-shaped patterns with partially filled interiors. Like in 2\u00d72, patterns m",
+    "birth": [
+      3,
+      4,
+      5
+    ],
+    "survive": [
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "rulestring": "B345/S5",
+    "name": "Long Life",
+    "description": "A stable rule that gets its name from the fact that it has many simple extremely high period oscillators.",
+    "birth": [
+      3,
+      4,
+      5
+    ],
+    "survive": [
+      5
+    ]
+  },
+  {
+    "rulestring": "B34568/S15678",
+    "name": "Spiral and polygonal growth",
+    "description": "A rule with \"plow\" structures that move along an edge of a polygon, increasing its size (turning corners and thickening ",
+    "birth": [
+      3,
+      4,
+      5,
+      6,
+      8
+    ],
+    "survive": [
+      1,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3457/S4568",
+    "name": "Gems",
+    "description": "An exploding rule with many smaller high-period oscillators and a c/5648 spaceship.",
+    "birth": [
+      3,
+      4,
+      5,
+      7
+    ],
+    "survive": [
+      4,
+      5,
+      6,
+      8
+    ]
+  },
+  {
+    "rulestring": "B34578/S456",
+    "name": "Gems Minor",
+    "description": "An exploding rule with many smaller high-period oscillators and a c/2068 spaceship.",
+    "birth": [
+      3,
+      4,
+      5,
+      7,
+      8
+    ],
+    "survive": [
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "rulestring": "B35/S23",
+    "name": "Grounded Life",
+    "description": "A stable rule \"one outer-totalistic condition away from Life\", where neither of the standard spaceships works, and the m",
+    "birth": [
+      3,
+      5
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B35/S234578",
+    "name": "Land Rush",
+    "description": "Expanding chaos organizing itself into plowed fields.",
+    "birth": [
+      3,
+      5
+    ],
+    "survive": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B35/S236",
+    "name": "Eppstein",
+    "description": "An exploding rule explored by Dean Hickerson and David Eppstein.[8]",
+    "birth": [
+      3,
+      5
+    ],
+    "survive": [
+      2,
+      3,
+      6
+    ]
+  },
+  {
+    "rulestring": "B3567/S15678",
+    "name": "Bugs[6]",
+    "description": "An explosive rule with many high density spaceships.",
+    "birth": [
+      3,
+      5,
+      6,
+      7
+    ],
+    "survive": [
+      1,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B35678/S34567",
+    "name": "Cheerios",
+    "description": "An explosive rule where patterns explode while \"cheerios\" form in the chaotic mess.",
+    "birth": [
+      3,
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "rulestring": "B35678/S4678",
+    "name": "Holstein[9]",
+    "description": "A self-complementary rule. Black regions are surrounded by froth and tend to eventually collapse starting from the corne",
+    "birth": [
+      3,
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      4,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B35678/S5678",
+    "name": "Diamoeba",
+    "description": "A chaotic pattern that forms large diamonds with chaotically oscillating boundaries. Known to have quadratically-growing",
+    "birth": [
+      3,
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B357/S1358",
+    "name": "Amoeba",
+    "description": "A chaotic rule that is well balanced between life and death; it forms patterns with chaotic interiors and wildly moving ",
+    "birth": [
+      3,
+      5,
+      7
+    ],
+    "survive": [
+      1,
+      3,
+      5,
+      8
+    ]
+  },
+  {
+    "rulestring": "B357/S238",
+    "name": "Pseudo Life",
+    "description": "A chaotic rule with evolution that resembles Conway's Life, but few patterns from Life work in this rule because the gli",
+    "birth": [
+      3,
+      5,
+      7
+    ],
+    "survive": [
+      2,
+      3,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3578/S24678",
+    "name": "Geology",
+    "description": "A very well-balanced and chaotic rule that forms large \"continents\" of live cells surrounded by chaos at a roughly 50% d",
+    "birth": [
+      3,
+      5,
+      7,
+      8
+    ],
+    "survive": [
+      2,
+      4,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B36/S12",
+    "name": "HighFlock",
+    "description": "",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      1,
+      2
+    ]
+  },
+  {
+    "rulestring": "B36/S125",
+    "name": "2\u00d72",
+    "description": "A chaotic rule with many simple still lifes, oscillators and spaceships. Its name comes from the fact that it sends patt",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      1,
+      2,
+      5
+    ]
+  },
+  {
+    "rulestring": "B36/S128",
+    "name": "IronFlock",
+    "description": "",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      1,
+      2,
+      8
+    ]
+  },
+  {
+    "rulestring": "B36/S23",
+    "name": "HighLife",
+    "description": "A chaotic rule very similar to Conway's Life that is of interest because it has a simple replicator.",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B36/S234578",
+    "name": "Land Rush 2",
+    "description": "An exploding rule that got confused with Land Rush, likely due to a typo.  It does contain a period 4 orthogonal c/2 shi",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B36/S235",
+    "name": "Virus",
+    "description": "An exploding rule where the T-tetromino is a blinker puffer, appropriate because it evolves into traffic light in Life, ",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      2,
+      3,
+      5
+    ]
+  },
+  {
+    "rulestring": "B36/S238",
+    "name": "IronLife",
+    "description": "",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      2,
+      3,
+      8
+    ]
+  },
+  {
+    "rulestring": "B36/S245",
+    "name": "sqrt replicator rule",
+    "description": "Name comes from a dirty orthogonal replicator, formerly known as the logarithmic replicator rule.",
+    "birth": [
+      3,
+      6
+    ],
+    "survive": [
+      2,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B367/S125678",
+    "name": "Slow Blob",
+    "description": "",
+    "birth": [
+      3,
+      6,
+      7
+    ],
+    "survive": [
+      1,
+      2,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B367/S23",
+    "name": "DrighLife",
+    "description": "A mix between DryLife and HighLife",
+    "birth": [
+      3,
+      6,
+      7
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B3678/S1258",
+    "name": "2\u00d72 2",
+    "description": "",
+    "birth": [
+      3,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      1,
+      2,
+      5,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3678/S135678",
+    "name": "Castles",
+    "description": "A rule where patterns almost explode into castle-like stable patterns.",
+    "birth": [
+      3,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      1,
+      3,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3678/S23",
+    "name": "B3678/S23",
+    "description": "Black/white reversal of InverseLife.",
+    "birth": [
+      3,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B3678/S235678",
+    "name": "Stains",
+    "description": "A stable rule in which most patterns tend to \"fill in\" bounded regions. Most nearby rules (such as coagulations) tend to",
+    "birth": [
+      3,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B3678/S34678",
+    "name": "Day & Night",
+    "description": "A stable rule that is symmetric under on-off reversal. Many patterns exhibiting highly complex behavior have been found ",
+    "birth": [
+      3,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      3,
+      4,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B368/S012345678",
+    "name": "LowDeath without Death",
+    "description": "",
+    "birth": [
+      3,
+      6,
+      8
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B368/S12578",
+    "name": "B368/S12578",
+    "description": "An exploding 2x2-like rule with a small 4c/13o replicator, of which guns and W110 unit cells had been constructed [10]",
+    "birth": [
+      3,
+      6,
+      8
+    ],
+    "survive": [
+      1,
+      2,
+      5,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B368/S128",
+    "name": "LowFlockDeath",
+    "description": "",
+    "birth": [
+      3,
+      6,
+      8
+    ],
+    "survive": [
+      1,
+      2,
+      8
+    ]
+  },
+  {
+    "rulestring": "B368/S236",
+    "name": "Life SkyHigh",
+    "description": "A rule that is similar to HighLife but adds a B8 and S6 to the rulestring, hence, the name \"SkyHigh\".",
+    "birth": [
+      3,
+      6,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      6
+    ]
+  },
+  {
+    "rulestring": "B368/S238",
+    "name": "LowDeath",
+    "description": "HighLife's replicator works in this rule, albeit with a different evolution sequence due to the result of B38/S23's \"ped",
+    "birth": [
+      3,
+      6,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      8
+    ]
+  },
+  {
+    "rulestring": "B368/S245",
+    "name": "Morley",
+    "description": "A rule in which random patterns tend to stabilize extremely quickly. Has a very common slow-moving spaceship and slow-mo",
+    "birth": [
+      3,
+      6,
+      8
+    ],
+    "survive": [
+      2,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B37/S012345678",
+    "name": "DryLife without Death",
+    "description": "Similar to Life without death, but patterns tend to grow quadratically instead of forming 'ladders'.",
+    "birth": [
+      3,
+      7
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B37/S12",
+    "name": "DryFlock",
+    "description": "",
+    "birth": [
+      3,
+      7
+    ],
+    "survive": [
+      1,
+      2
+    ]
+  },
+  {
+    "rulestring": "B37/S1234",
+    "name": "Mazectric with Mice",
+    "description": "Some \"mice\" run back and forth in the halls of the maze.",
+    "birth": [
+      3,
+      7
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "rulestring": "B37/S12345",
+    "name": "Maze with Mice",
+    "description": "Similar to B37/S1234, some \"mice\" run back and forth in the continually-stretching halls of the maze.",
+    "birth": [
+      3,
+      7
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B37/S23",
+    "name": "DryLife",
+    "description": "An exploding rule closely related to Conway's Life, named after the fact that standard spaceships bigger than the glider",
+    "birth": [
+      3,
+      7
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B378/S012345678",
+    "name": "Plow World",
+    "description": "An explosive rule, some of the patterns can turn into wickstretchers.",
+    "birth": [
+      3,
+      7,
+      8
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B378/S235678",
+    "name": "Coagulations",
+    "description": "An exploding rule in which patterns tend to expand forever, producing a thick \"goo\" as it does so. Surprisingly, Coagula",
+    "birth": [
+      3,
+      7,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B38/S012345678",
+    "name": "Pedestrian Life without Death",
+    "description": "",
+    "birth": [
+      3,
+      8
+    ],
+    "survive": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B38/S12",
+    "name": "Pedestrian Flock",
+    "description": "A mix between Pedestrian Life and Flock.",
+    "birth": [
+      3,
+      8
+    ],
+    "survive": [
+      1,
+      2
+    ]
+  },
+  {
+    "rulestring": "B38/S128",
+    "name": "HoneyFlock",
+    "description": "",
+    "birth": [
+      3,
+      8
+    ],
+    "survive": [
+      1,
+      2,
+      8
+    ]
+  },
+  {
+    "rulestring": "B38/S23",
+    "name": "Pedestrian Life",
+    "description": "A close Life variant with a number of distinctive natural growth patterns and (5,2)c/190 oblique spaceships.",
+    "birth": [
+      3,
+      8
+    ],
+    "survive": [
+      2,
+      3
+    ]
+  },
+  {
+    "rulestring": "B38/S238",
+    "name": "HoneyLife",
+    "description": "A mix between Pedestrian Life and EightLife.",
+    "birth": [
+      3,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      8
+    ]
+  },
+  {
+    "rulestring": "B45/S12345",
+    "name": "Electrified Maze",
+    "description": "",
+    "birth": [
+      4,
+      5
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B45/S1235",
+    "name": "Oscillators Rule[11]",
+    "description": "Random patterns shrink to tiny oscillators, with periods anywhere between 1 (\"still lifes\") and 16. Larger periods are r",
+    "birth": [
+      4,
+      5
+    ],
+    "survive": [
+      1,
+      2,
+      3,
+      5
+    ]
+  },
+  {
+    "rulestring": "B45678/S2345",
+    "name": "Walled cities",
+    "description": "A stable rule by David Macfarlane that forms centers of pseudo-random activity separated by walls.",
+    "birth": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "rulestring": "B45678/S5678",
+    "name": "Majority[6]",
+    "description": "",
+    "birth": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B4678/S35678",
+    "name": "Vote 4/5[12]",
+    "description": "A modification of the standard G\u00e9rard Vichniac voting rule, also known as \"Anneal\", used as a model for majority voting.",
+    "birth": [
+      4,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      3,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  {
+    "rulestring": "B48/S234",
+    "name": "Lifeguard 1",
+    "description": "",
+    "birth": [
+      4,
+      8
+    ],
+    "survive": [
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "rulestring": "B56/S14568",
+    "name": "Rings 'n' Slugs",
+    "description": "A rule in which patterns stabilize into \"Rings\" and \"Slugs\".",
+    "birth": [
+      5,
+      6
+    ],
+    "survive": [
+      1,
+      4,
+      5,
+      6,
+      8
+    ]
+  },
+  {
+    "rulestring": "B5678/S45678",
+    "name": "Vote[12]",
+    "description": "Standard G\u00e9rard Vichniac voting rule, also known as \"Majority\", used as a model for majority voting.",
+    "birth": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "survive": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  }
+]
