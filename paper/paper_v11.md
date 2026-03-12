@@ -25,9 +25,9 @@ We develop a *global model-selection* framework that complements these tradition
 This is a method and framework paper with theorem-level analysis and broad empirical validation. The contributions are:
 
 1. **Orbit-class reduction** (Theorem 1): fitting a relative-periodic background reduces to independent majority voting on orbit classes, yielding a Hamming-optimal projection in $O(|U|)$ time per candidate model.
-2. **Exact characterization of refinement** (Theorem 2): velocity-matched divisibility is proved equivalent to partition refinement, model nesting, and universal monotonicity of both Hamming residuals and Bernoulli NLL — explaining why both naive defect minimization and NLL-only selection overfit along constant-velocity chains.
-3. **Model selection stabilization** (Theorem 3): under convergent orbit-class frequencies, every suboptimal candidate is eventually excluded; when the rate-minimizer is unique, selection locks to a single winner. Proved for any spatial dimension, with no assumption on residual geometry.
-4. **Nonidentifiability and identifiability** (Theorems 4–5): background period recovery is impossible in general (Theorem 4, by explicit construction); recovery is guaranteed when the background is eventually exactly periodic after a finite transient (Theorem 5).
+2. **Exact characterization of refinement** (Theorem 2): a six-way equivalence showing that velocity-matched divisibility, translation powers, orbit partition refinement, model nesting, universal Hamming monotonicity, and universal NLL monotonicity are all equivalent. The forward implications follow from standard principles (cyclic group theory, Jensen's inequality); the novel content is the *necessity* direction, showing by adversarial construction that divisibility is the exact condition — not merely sufficient — for universal monotonicity. This explains why both naive defect minimization and NLL-only selection overfit along constant-velocity chains.
+3. **Model selection stabilization** (Theorem 3): under convergent orbit-class frequencies, every suboptimal candidate is eventually excluded; when the rate-minimizer is unique, selection locks to a single winner. The proof strategy instantiates the standard BIC/MDL consistency argument [15, 16, 9] for the orbit-class Bernoulli model class on CA spacetimes, where assumption (A1) holds automatically by eventual periodicity. Proved for any spatial dimension, with no assumption on residual geometry.
+4. **Nonidentifiability and identifiability boundary** (Theorems 4–5): background period recovery is impossible in general (Theorem 4, by explicit construction); recovery is guaranteed when the background is eventually exactly periodic after a finite transient (Theorem 5). While the general principle that nested models can absorb structured residuals is known [9, 15], the explicit construction and the sharp Theorem 4/5 dichotomy are new.
 5. **Cross-dimensional experiments**: empirical stabilization observed for 1D (ECA 30/54/110), 2D rules (from surveys of 773 range-threshold rules and all 106 named Life-like rules), and a 3D rule — broad by the standards of systematic CA surveys, though limited to single-seed analysis for most rules.
 6. **Baseline comparison**: residual minimization and NLL selection both degenerate to overfitting without a complexity penalty; NML is the only selector that produces parsimonious period assignments (Section 3.5).
 7. **Application**: identification of persistent structured projection residuals in 2D rules, including one (S37/B11) exhibiting extensive residual scaling.
@@ -50,7 +50,9 @@ Rupe and Crutchfield [4] generalized local causal states to arbitrary spatial di
 
 The compression-based CA analysis tradition is also related but distinct. Zenil [8] used algorithmic complexity measures to *classify* CA dynamics; our use of compression diagnostics (RL, LZ4) operates on projection residuals after template selection, not on raw spacetimes. Packard and Wolfram [5] and Wolfram [11] surveyed 2D rules qualitatively; Li and Packard [12] systematically surveyed the ECA rule space. Boccara and Roger [6] identified period-2 families in totalistic 2D rules. Our surveys extend this tradition with a formal selection criterion (Bernoulli NML) and broader scope (773 range-threshold rules, 106 Life-like rules, 3D rules).
 
-Our primary contribution relative to all of these is a *rate-based elimination and stabilization theorem* (Theorem 3) for model selection over relative-periodic candidates, which applies across spatial dimensions. The theorem provides a formal guarantee that prior survey-based and heuristic-classification approaches lack.
+The model-selection theory builds on the MDL/NML consistency literature. Schwarz [15] established that BIC consistently selects the true model when the data-fit gap grows linearly while the penalty grows logarithmically. Barron, Rissanen, and Yu [16] proved NML's asymptotic optimality and derived the $(k/2)\log n$ parametric complexity expansion for exponential families. Grünwald [9, Ch. 16] proved general MDL consistency results subsuming both BIC and NML. The Bernoulli NML normalizer (Shtarkov constant) was introduced by Shtarkov [10]; exact computation methods for Bernoulli strings were developed by Kontkanen and Myllymäki [17] and Watanabe and Roos [18]. Our Theorem 3 instantiates this established consistency framework for the specific model class of orbit-class Bernoulli models on CA spacetimes, where the orbit-class structure gives concrete form to the abstract model family and the convergent-frequency assumption holds automatically for finite deterministic CA.
+
+Our primary contribution relative to all of these traditions is the *framework itself*: applying Bernoulli NML model selection to orbit-class periodic decomposition of CA spacetimes, with formal guarantees that prior survey-based and heuristic-classification approaches lack. The individual theorems draw on well-established principles and instantiate them in a new domain; the strongest novelty claims are the necessity direction in Theorem 2, the Theorem 4/5 identifiability boundary, and the overall application to CA analysis across spatial dimensions.
 
 ---
 
@@ -77,6 +79,8 @@ The minimum residual count is $\sum_j \min(n_j^{(0)}, n_j^{(1)})$. The minimizer
 *Proof.* The Hamming distance decomposes additively over orbit classes: $d(U,B) = \sum_j d_j$ where $d_j$ counts disagreements within $O_j$. Since $B$ is constant on each $O_j$, choosing $b_j$ independently minimizes each $d_j = \min(n_j^{(0)}, n_j^{(1)})$. $\square$
 
 This is the *orbit-class reduction*: the spatiotemporal fitting problem decomposes into $k$ independent binary estimation problems. The reduction is exact and holds in any dimension. A Hamming-optimal projection is computable in $O(|U|)$ time per candidate model via a single pass over the data. (When some orbit class has $n_j^{(0)} = n_j^{(1)}$, the minimum Hamming distance is unique but may be achieved by more than one projection; in the implementation, ties are broken toward 1.)
+
+**Remark (Prior art).** The optimization principle underlying Theorem 1 — choosing the most frequent symbol per equivalence class to minimize Hamming distance to a periodic target — is well known in the property-testing and string-algorithms literature, where it appears as the "distance to $p$-periodicity" computed by reshaping a string into residue classes and taking per-class majorities [14]. The same principle underlies nearest-neighbor decoding for the binary repetition code. Our contribution is not the majority-vote lemma itself but its use as the foundation for the NML model-selection pipeline and the stabilization analysis (Theorem 3).
 
 **Definition 2.** The *projection residual mask* (or *defect mask*) is $M = U \oplus B^*$ where $B^*$ is the Hamming-optimal projection (with ties broken deterministically). The *defect rate* is $r = \|M\|_1 / N(T)$.
 
@@ -118,6 +122,8 @@ To prove necessity of refinement for the universal inequalities, suppose $\Pi_2$
 
 Combining the implications yields the equivalence of (i)–(vi). $\square$
 
+**Remark (Prior art and novelty).** The forward implications (i)→(ii)→(iii)→(iv)→(v) and (iii)→(vi) each follow from standard principles: subgroup lattice structure of cyclic groups, orbit containment under group action powers, partition-based model class inclusion, monotonicity of optimization over nested feasible sets, and concavity of binary entropy (a consequence of Jensen's inequality and the data-processing inequality). The novel content of Theorem 2 is the *necessity* direction: (v)→(iii) and (vi)→(iii), which show by adversarial construction that velocity-matched divisibility is not merely sufficient but *necessary* for universal monotonicity. The full six-way equivalence — connecting combinatorial (i), algebraic (ii), partition-theoretic (iii), model-theoretic (iv), and two analytic conditions (v)–(vi) — has not appeared in this form before, though the individual legs are routine.
+
 **Remark.** If condition (i) fails, there exists a binary spacetime $U$ for which $d_U^*(c_2) > d_U^*(c_1)$ and $\mathrm{NLL}_U(c_2) > \mathrm{NLL}_U(c_1)$. Thus velocity-matched divisibility is not merely sufficient; it is the exact condition for universal refinement and universal monotonicity.
 
 **Corollary (Overcapacity at both the Hamming and likelihood levels).** Along any constant-velocity divisibility chain $(p_1, \mathbf{s}_1), (2p_1, 2\mathbf{s}_1), (3p_1, 3\mathbf{s}_1), \ldots$ with shifts understood modulo $\mathbf{D}$, both $d_U^*(p, \mathbf{s})$ and $\mathrm{NLL}_U(p, \mathbf{s})$ are monotone non-increasing in $p$ for every binary spacetime $U$. Consequently, naive defect minimization and naive Bernoulli likelihood minimization both weakly favor the largest available period along such chains. This is the overcapacity phenomenon corrected by the NML complexity term.
@@ -152,7 +158,7 @@ This two-stage optimization — minimize over shifts for each period, then compa
 
 ### 2.5 Stabilization Theorem
 
-This is the main theoretical result.
+This is the main theoretical result. Its proof strategy — showing that $\Theta(N)$ data-fit gaps eventually dominate $O(\log N)$ complexity penalties — is the standard argument underlying BIC consistency [15] and MDL consistency more broadly [9, Ch. 16]; see also Barron, Rissanen, and Yu [16] for the NML-specific asymptotic expansion. The contribution here is not the proof technique but the *instantiation* for orbit-class Bernoulli models on CA spacetimes: the orbit-class structure gives a concrete form to the abstract model class, and assumption (A1) is automatically satisfied for finite deterministic CA by eventual periodicity of the state sequence (Corollary D.3).
 
 **Theorem 3 (Rate-Based Elimination and Stabilization of Bernoulli NML Selection).** Let $\mathcal{C} = \{(p_1, \mathbf{s}_1), \ldots, (p_m, \mathbf{s}_m)\}$ be a fixed finite candidate set. For each candidate $c \in \mathcal{C}$, let $k_c = p_c \prod_i D_i$ be the number of orbit classes and let $n_j(T)$ denote the size of the $j$-th orbit class at observation length $T$. Assume:
 
@@ -233,6 +239,8 @@ Under candidate $c_1 = (q \cdot p_0, q \cdot \mathbf{s} \bmod \mathbf{D})$: the 
 By Theorem 3(ii), $c_1$ eventually beats $c_0$, proving (iii). $\square$
 
 The observed spacetime does not intrinsically separate into "background" plus "residual" without additional assumptions. The selected period is the one that best compresses the *entire* spacetime, not necessarily the one matching an external notion of "true background period."
+
+**Remark (Prior art).** The general principle that nested model selection criteria can be fooled by structured residuals is well known in the MDL/BIC literature [9, 15], and harmonic/subharmonic ambiguity is a classical issue in spectral period estimation. The contribution of Theorem 4 is the explicit construction for the orbit-class Bernoulli setting, and its complementarity with Theorem 5: together they characterize the exact boundary of identifiability — recovery succeeds if and only if the background is eventually exactly periodic after a finite transient.
 
 ### 2.7 Identifiability for Eventually Exactly Periodic Backgrounds
 
@@ -680,6 +688,16 @@ Cross-dimensional experiments on 1D elementary CA, 2D totalistic and Life-like r
 [12] W. Li and N. Packard, "The structure of the elementary cellular automata rule space," *Complex Systems*, vol. 4, no. 3, pp. 281–297, 1990.
 
 [13] LifeWiki, "List of Life-like cellular automata," https://conwaylife.com/wiki/ — accessed 2026.
+
+[14] O. Lachish and I. Newman, "Testing periodicity," *Algorithmica*, vol. 60, no. 2, pp. 401–420, 2011.
+
+[15] G. Schwarz, "Estimating the dimension of a model," *Annals of Statistics*, vol. 6, no. 2, pp. 461–464, 1978.
+
+[16] A.R. Barron, J. Rissanen, and B. Yu, "The minimum description length principle in coding and modeling," *IEEE Trans. Information Theory*, vol. 44, no. 6, pp. 2743–2760, 1998.
+
+[17] P. Kontkanen and P. Myllymäki, "A linear-time algorithm for computing the multinomial stochastic complexity," *Information Processing Letters*, vol. 103, no. 6, pp. 227–233, 2007.
+
+[18] K. Watanabe and T. Roos, "Achievability of asymptotic minimax regret by horizon-dependent and horizon-independent strategies," *J. Machine Learning Research*, vol. 19, no. 67, pp. 1–28, 2018.
 
 ---
 
