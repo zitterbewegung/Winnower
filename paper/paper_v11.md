@@ -2,7 +2,7 @@
 
 ## Abstract
 
-We prove that Bernoulli NML model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes stabilizes as the observation window grows: every candidate whose asymptotic per-site NLL rate exceeds the minimum is eventually excluded (Theorem 3). When the rate-minimizing candidate is unique — which holds in all cases we test — the selected model locks to a single winner. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem 1), partition refinement along constant-velocity chains makes higher periods monotonically more expressive (Theorem 2), and the Bernoulli NML criterion's $O(\log T)$ complexity penalty is eventually dominated by $\Theta(T)$ data-fit gaps between candidates with distinct rates. We also show by explicit construction that background period recovery is impossible in general without additional assumptions (Theorem 4). The theory applies identically to 1D, 2D, and 3D automata.
+We prove that Bernoulli NML model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes stabilizes as the observation window grows: every candidate whose asymptotic per-site NLL rate exceeds the minimum is eventually excluded (Theorem 3). When the rate-minimizing candidate is unique — which holds in all cases we test — the selected model locks to a single winner. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem 1), velocity-matched divisibility is exactly characterized as the condition under which partition refinement, model nesting, and universal monotonicity of both Hamming residuals and Bernoulli NLL all hold (Theorem 2), and the Bernoulli NML criterion's $O(\log T)$ complexity penalty is eventually dominated by $\Theta(T)$ data-fit gaps between candidates with distinct rates. We also show by explicit construction that background period recovery is impossible in general without additional assumptions (Theorem 4). The theory applies identically to 1D, 2D, and 3D automata.
 
 Cross-dimensional experiments are consistent with the stabilization prediction: selected periods lock for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (from a survey of 773 range-threshold candidates and all 106 named Life-like rules from the LifeWiki), and a 3D totalistic rule — with margins growing after the selected period locks. A baseline comparison of three selectors (residual minimization, NLL, and NML) isolates the effect of the complexity penalty: without it, NLL selects the maximum available period for every nontrivial rule. A finite-horizon stabilization sweep across 9 rules in 1D/2D/3D shows that all tested rules make at most 2 period transitions before locking, with post-stabilization margins growing monotonically. An entropy-rate comparison shows that the periodic background captures the same regular structure identified by computational mechanics (the "Ether" domain), while the projection residual concentrates the genuinely unpredictable component — with significant internal structure remaining, consistent with particle dynamics. As an application, the framework identifies 2D rules with persistent structured projection residuals, including one (S37/B11) exhibiting extensive residual scaling verified at 400 steps, across multiple seeds, and at grid sizes up to 192×192.
 
@@ -25,7 +25,7 @@ We develop a *global model-selection* framework that complements these tradition
 This is a method and framework paper with theorem-level analysis and broad empirical validation. The contributions are:
 
 1. **Orbit-class reduction** (Theorem 1): fitting a relative-periodic background reduces to independent majority voting on orbit classes, yielding a Hamming-optimal projection in $O(|U|)$ time per candidate model.
-2. **Monotonicity under velocity matching** (Theorem 2): higher periods achieve lower residual counts along constant-velocity divisibility chains, necessitating complexity control.
+2. **Exact characterization of refinement** (Theorem 2): velocity-matched divisibility is proved equivalent to partition refinement, model nesting, and universal monotonicity of both Hamming residuals and Bernoulli NLL — explaining why both naive defect minimization and NLL-only selection overfit along constant-velocity chains.
 3. **Model selection stabilization** (Theorem 3): under convergent orbit-class frequencies, every suboptimal candidate is eventually excluded; when the rate-minimizer is unique, selection locks to a single winner. Proved for any spatial dimension, with no assumption on residual geometry.
 4. **Nonidentifiability and identifiability** (Theorems 4–5): background period recovery is impossible in general (Theorem 4, by explicit construction); recovery is guaranteed when the background is eventually exactly periodic after a finite transient (Theorem 5).
 5. **Cross-dimensional experiments**: empirical stabilization observed for 1D (ECA 30/54/110), 2D rules (from surveys of 773 range-threshold rules and all 106 named Life-like rules), and a 3D rule — broad by the standards of systematic CA surveys, though limited to single-seed analysis for most rules.
@@ -82,17 +82,45 @@ This is the *orbit-class reduction*: the spatiotemporal fitting problem decompos
 
 ### 2.3 Monotonicity and Overcapacity
 
-**Theorem 2 (Monotonicity under Velocity-Matched Refinement).** Let $(p_1, \mathbf{s}_1)$ and $(p_2, \mathbf{s}_2)$ be two relative-periodic models. If there exists an integer $m \geq 1$ such that $p_2 = m \cdot p_1$ and $s_2^{(i)} \equiv m \cdot s_1^{(i)} \pmod{D_i}$ for each spatial dimension $i$, then the orbit partition under $(p_2, \mathbf{s}_2)$ refines the partition under $(p_1, \mathbf{s}_1)$, and:
+**Theorem 2 (Exact Characterization of Universal Refinement and Monotonicity).** Let $c_1 = (p_1, \mathbf{s}_1)$ and $c_2 = (p_2, \mathbf{s}_2)$ be two relative-periodic candidates on a spacetime with spatial torus dimensions $\mathbf{D} = (D_1, \dots, D_n)$. Define the spacetime translation maps
 
-$$d^*(p_2, \mathbf{s}_2) \leq d^*(p_1, \mathbf{s}_1)$$
+$$\tau_i(t, \mathbf{x}) := (t + p_i,\ \mathbf{x} + \mathbf{s}_i \bmod \mathbf{D}), \qquad i \in \{1, 2\},$$
 
-The condition $s_2 = m \cdot s_1 \pmod{D}$ means the two models share the same *characteristic velocity* $\mathbf{s}/p$. In particular, for shift $\mathbf{s} = \mathbf{0}$, monotonicity holds along all divisibility chains $p, 2p, 3p, \ldots$
+where the spatial congruence is componentwise modulo $D_i$. Let $\Pi_i$ denote the orbit partition induced by $\tau_i$, and let $\mathcal{B}_i := \mathcal{B}(p_i, \mathbf{s}_i)$ be the corresponding relative-periodic model class. For a binary spacetime $U$, let $d_U^*(c_i)$ denote the optimal Hamming residual count from Theorem 1, and let $\mathrm{NLL}_U(c_i)$ denote the Bernoulli negative log-likelihood from Definition 3.
 
-*Proof.* Under the stated condition, the periodicity map $\tau_2: (t, \mathbf{x}) \mapsto (t + p_2, \mathbf{x} + \mathbf{s}_2 \bmod \mathbf{D})$ equals $\tau_1^m$, the $m$-fold composition of the $(p_1, \mathbf{s}_1)$ map. Therefore, the $\tau_2$-orbit of any point is a subset of its $\tau_1$-orbit, so the $\tau_2$-partition refines the $\tau_1$-partition. By Theorem 1, optimizing over a finer partition can only reduce total disagreement. $\square$
+Then the following are equivalent:
 
-**Remark.** The velocity-matching condition is necessary in general. For example, on a ring of width 4, the models $(p=1, s=1)$ and $(p=2, s=1)$ share the same shift but *not* the same velocity ($1/1 \neq 1/2$). The checkerboard spacetime $U[t,x] = (t+x) \bmod 2$ has $d^*(1,1) = 0$ but $d^*(2,1) = 4$, violating monotonicity.
+(i) There exists an integer $m \geq 1$ such that $p_2 = m \, p_1$ and $\mathbf{s}_2 \equiv m \, \mathbf{s}_1 \pmod{\mathbf{D}}$ componentwise.
 
-**Corollary (Overcapacity).** Along any constant-velocity divisibility chain, the residual count is monotonically non-increasing. This creates an *overcapacity problem*: naive residual-count minimization always prefers the highest available period. This motivates the complexity-penalized criterion below.
+(ii) The translations satisfy $\tau_2 = \tau_1^m$ for some integer $m \geq 1$.
+
+(iii) The orbit partition $\Pi_2$ refines $\Pi_1$.
+
+(iv) The model classes are nested: $\mathcal{B}_1 \subseteq \mathcal{B}_2$.
+
+(v) For every binary spacetime $U$, $d_U^*(c_2) \leq d_U^*(c_1)$.
+
+(vi) For every binary spacetime $U$, $\mathrm{NLL}_U(c_2) \leq \mathrm{NLL}_U(c_1)$.
+
+In particular, along constant-velocity divisibility chains, both the optimal Hamming residual count and the Bernoulli NLL are monotone non-increasing.
+
+*Proof.* $(i) \Leftrightarrow (ii)$: This is immediate from the definitions. The map $\tau_1^m$ advances time by $m p_1$ and space by $m \mathbf{s}_1$ modulo $\mathbf{D}$, so $\tau_2 = \tau_1^m$ holds exactly when $p_2 = m p_1$ and $\mathbf{s}_2 \equiv m \mathbf{s}_1 \pmod{\mathbf{D}}$.
+
+$(ii) \Rightarrow (iii)$: If $\tau_2 = \tau_1^m$, then every $\tau_2$-orbit is contained in a $\tau_1$-orbit. Hence $\Pi_2$ refines $\Pi_1$.
+
+$(iii) \Rightarrow (iv)$: A field belongs to $\mathcal{B}_i$ if and only if it is constant on each orbit class of $\Pi_i$. If $\Pi_2$ refines $\Pi_1$, then any field constant on $\Pi_1$-classes is automatically constant on the finer $\Pi_2$-classes. Therefore $\mathcal{B}_1 \subseteq \mathcal{B}_2$.
+
+$(iv) \Rightarrow (v)$: Since $\mathcal{B}_1 \subseteq \mathcal{B}_2$, minimizing Hamming distance over the larger class $\mathcal{B}_2$ cannot give a worse optimum: $d_U^*(c_2) \leq d_U^*(c_1)$ for all $U$.
+
+$(iii) \Rightarrow (vi)$: Let a coarse orbit class $O \in \Pi_1$ be partitioned into finer classes $O = \bigsqcup_{\alpha=1}^r O_\alpha$ with $O_\alpha \in \Pi_2$. Write $n_\alpha := |O_\alpha|$, $\theta_\alpha := \#\{1\text{s in } O_\alpha\} / n_\alpha$, $n := \sum_\alpha n_\alpha$, and $\theta := \frac{1}{n} \sum_\alpha n_\alpha \theta_\alpha$. The coarse-class NLL contribution is $n \, H_b(\theta)$, while the refined contribution is $\sum_\alpha n_\alpha H_b(\theta_\alpha)$. Since binary entropy $H_b$ is concave, $n \, H_b(\theta) \geq \sum_\alpha n_\alpha H_b(\theta_\alpha)$. Summing over all coarse orbit classes shows $\mathrm{NLL}_U(c_2) \leq \mathrm{NLL}_U(c_1)$ for all $U$.
+
+To prove necessity of refinement for the universal inequalities, suppose $\Pi_2$ does **not** refine $\Pi_1$. Then some orbit class of $\Pi_2$ intersects at least two distinct orbit classes of $\Pi_1$. Choose two such $\Pi_1$-classes and define a binary spacetime $U$ that is constant on every $\Pi_1$-class, taking value $0$ on one chosen class and value $1$ on the other. Then $U \in \mathcal{B}_1$, so $d_U^*(c_1) = 0$ and $\mathrm{NLL}_U(c_1) = 0$. But the chosen $\Pi_2$-class now contains both symbols $0$ and $1$, so $U \notin \mathcal{B}_2$, implying $d_U^*(c_2) > 0$ and $\mathrm{NLL}_U(c_2) > 0$. Hence neither universal inequality can hold unless $\Pi_2$ refines $\Pi_1$. This proves $(v) \Rightarrow (iii)$ and $(vi) \Rightarrow (iii)$.
+
+Combining the implications yields the equivalence of (i)–(vi). $\square$
+
+**Remark.** If condition (i) fails, there exists a binary spacetime $U$ for which $d_U^*(c_2) > d_U^*(c_1)$ and $\mathrm{NLL}_U(c_2) > \mathrm{NLL}_U(c_1)$. Thus velocity-matched divisibility is not merely sufficient; it is the exact condition for universal refinement and universal monotonicity.
+
+**Corollary (Overcapacity at both the Hamming and likelihood levels).** Along any constant-velocity divisibility chain $(p_1, \mathbf{s}_1), (2p_1, 2\mathbf{s}_1), (3p_1, 3\mathbf{s}_1), \ldots$ with shifts understood modulo $\mathbf{D}$, both $d_U^*(p, \mathbf{s})$ and $\mathrm{NLL}_U(p, \mathbf{s})$ are monotone non-increasing in $p$ for every binary spacetime $U$. Consequently, naive defect minimization and naive Bernoulli likelihood minimization both weakly favor the largest available period along such chains. This is the overcapacity phenomenon corrected by the NML complexity term.
 
 ### 2.4 Bernoulli NML Criterion
 
@@ -438,9 +466,9 @@ We run all three selectors on 105 nontrivial LifeWiki rules (T=100, 64×64, seed
 | NLL | 6 |
 | NML | 1 |
 
-Without the complexity penalty, both residual minimization and NLL systematically select the highest available period, since higher periods can only reduce defect rate by fitting noise in orbit classes. NLL selects period 8 for *every* nontrivial LifeWiki rule (105/105). Residual minimization also favors high periods (81/105 select p≥4), though it occasionally selects lower periods when defect rates happen to be minimized there. Only NML, which penalizes model complexity via the Shtarkov normalizer, produces parsimonious period selections: 97/105 rules select p=1, consistent with the expectation that most Life-like rules on random initial conditions are aperiodic at moderate horizons.
+Without the complexity penalty, both residual minimization and NLL systematically select the highest available period. This is a direct consequence of Theorem 2: along the constant-velocity divisibility chains that dominate the shift-zero candidate set, both the Hamming residual count and the Bernoulli NLL are monotone non-increasing in period, so both selectors weakly favor the largest available period. NLL selects period 8 for *every* nontrivial LifeWiki rule (105/105). Residual minimization also favors high periods (81/105 select p≥4), though it occasionally selects lower periods when defect rates happen to be minimized there. Only NML, which penalizes model complexity via the Shtarkov normalizer, produces parsimonious period selections: 97/105 rules select p=1, consistent with the expectation that most Life-like rules on random initial conditions are aperiodic at moderate horizons.
 
-This demonstrates the role of the complexity penalty in Theorem 3: without it, model selection degenerates to overfitting.
+This demonstrates the role of the complexity penalty in Theorem 3: without it, the overcapacity guaranteed by Theorem 2 causes model selection to degenerate to overfitting at both the Hamming and likelihood levels.
 
 ### 3.6 Finite-Horizon Stabilization Sweep
 
@@ -552,11 +580,11 @@ Defect density drops from 64×64 to 96×96 then stabilizes around 0.002, consist
 The orbit-class reduction (Theorem 1) transforms a seemingly complex spatiotemporal fitting problem into standard Bernoulli estimation. This enables:
 
 1. **Hamming-optimal decomposition** in $O(|U|)$ time per candidate model, for any dimension.
-2. **A formal explanation** of overcapacity (Theorem 2), showing why naive defect-rate ranking is inadequate.
+2. **An exact characterization** of overcapacity (Theorem 2), showing that velocity-matched divisibility is the precise condition for universal monotonicity of both Hamming residuals and Bernoulli NLL — explaining why both naive defect minimization and NLL-only selection overfit along constant-velocity chains.
 3. **A stabilization theorem** (Theorem 3) proving that every suboptimal candidate is eventually excluded, and that when the rate-minimizer is unique, NML selection locks to a single winner. The proof requires only convergent orbit-class frequencies and no assumption on residual geometry.
 4. **A nonidentifiability result** (Theorem 4) showing by explicit construction that background period recovery is impossible in general, with recovery guaranteed when the background is eventually exactly periodic after a finite transient (Theorem 5).
 
-The key insight is that the *same* theoretical framework — orbit classes → Bernoulli estimation → NML stabilization — applies without modification across spatial dimensions. The baseline selector comparison (Section 3.5) provides direct empirical evidence that the complexity penalty is essential: without it, both residual minimization and Bernoulli NLL degenerate to systematic overfitting, selecting the highest available period for every nontrivial rule.
+The key insight is that the *same* theoretical framework — orbit classes → Bernoulli estimation → NML stabilization — applies without modification across spatial dimensions. Theorem 2's exact characterization explains *why* the complexity penalty is essential: velocity-matched divisibility guarantees monotone non-increasing Hamming residuals *and* Bernoulli NLL along constant-velocity chains, so both naive defect minimization and NLL-only selection systematically overfit. The baseline selector comparison (Section 3.5) confirms this empirically: without the complexity penalty, NLL selects the highest available period for every nontrivial rule.
 
 ### 5.2 NML vs Legacy MDL
 
@@ -597,7 +625,7 @@ The finite-horizon stabilization sweep (Section 3.6) extends this picture over t
 
 ### 5.6 Limitations
 
-0. **Monotonicity requires velocity matching.** Theorem 2 holds along constant-velocity chains ($s_2 = m \cdot s_1 \bmod D$), not arbitrary period multiples with the same shift. For shift-zero scanning (the empirically dominant case), all divisibility chains satisfy the condition. For nonzero shifts, this restriction matters.
+0. **Monotonicity is exactly velocity matching.** Theorem 2 proves that velocity-matched divisibility ($\mathbf{s}_2 \equiv m \cdot \mathbf{s}_1 \pmod{\mathbf{D}}$) is not merely sufficient but *necessary* for universal monotonicity of both Hamming residuals and Bernoulli NLL. For shift-zero scanning (the empirically dominant case), all divisibility chains satisfy the condition. For nonzero shifts, this restriction matters: if the velocity-matching condition fails, there exists a spacetime for which monotonicity is violated.
 1. **Shift scanning matters for some rules but not the case studies.** The three rules examined in detail (S24/B11, S11/B37, S37/B11) all have best-fit shift $(0,0)$. In the broader 2D survey, however, 172 of 773 non-trivial rules have nonzero best-fit shift. The theoretical framework supports arbitrary shifts, but the detailed stabilization analysis covers only shift-zero cases.
 2. **NML selects the best-compressing period, not necessarily the "true" period.** When residuals have their own periodicity, NML absorbs them into higher-period templates (Theorem 4). This is principled but may not match a physicist's intuition about "background" vs "defect" periodicity.
 3. **Asymptotic NML complexity.** The $\frac{1}{2}\log_2 n_j$ complexity term is an asymptotic approximation to the Bernoulli NML normalizer. For very small orbit classes ($n_j < 10$), the approximation is less tight — relevant only at the smallest $T$ values.
