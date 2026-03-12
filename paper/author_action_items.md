@@ -14,10 +14,8 @@ Only items requiring manual verification or decision.
 ### ~~2. [RESOLVED] Fredkin Period-8 Interpretation~~
 Explanatory note added to Section 3.2.1b: Fredkin is NOT exact negation on the 64×64 torus (match rate ~50%). Period-8 wins because 32,768 fine-grained orbit classes capture temporal structure that coarser periods miss (NML drops from 415,361 to 396,557). Noted as possible finite-size effect.
 
-### 3. Appendix D — RL No-Ties Assumption
-**Location**: Appendix D
-**Finding**: Exact θ_j = 0.5 ties occur in ALL tested rules: ECA-30 (4 classes), ECA-54 (9), ECA-110 (9), S24/B11 (11), S11/B37 (22), S37/B11 (3), Diamoeba (3), Maze w/ Mice (7), Fredkin (12,388). The no-ties assumption in Theorem D.2 is violated.
-**Action**: Add a remark to Appendix D noting that exact ties occur in practice but affect only a small fraction of orbit classes (except Fredkin). For these classes, majority vote does not stabilize, but the NML score is unaffected (the NLL contribution is symmetric). The RL convergence statement should be qualified accordingly.
+### ~~3. [RESOLVED] Appendix D — RL No-Ties Assumption~~
+Theorem D.2 condition reworded from "assume no exact frequency ties" to a conditional statement. New Remark added documenting empirical tie frequencies (ECA-30: 4, ECA-54: 9, ECA-110: 9, Fredkin: 12,388) and explaining that NML is unaffected because H_b(1/2) = 1 regardless of tie-breaking. Concluding remark notes θ≈1/2 classes have minimal explanatory power.
 
 ---
 
