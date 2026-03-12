@@ -26,6 +26,21 @@ from relative_symmetry_repair.ca2d import (
     parse_rulestring,
 )
 from relative_symmetry_repair.selection import select_period_nd, selection_summary
+from relative_symmetry_repair.selector_tools import (
+    SelectorVariant,
+    shift_handling_from_nd,
+    write_metadata_sidecar,
+)
+
+NML_MODE = "hybrid"
+PERIOD_FIRST_SELECTOR = SelectorVariant(
+    name="period_first_nml_joint_hybrid",
+    selector_type="period_first",
+    score_type="bernoulli_nml",
+    score_column="nml_bits",
+    shift_handling="joint_shift_optimization",
+    nml_mode=NML_MODE,
+)
 
 
 def is_trivial(spacetime: np.ndarray) -> str:
@@ -88,6 +103,7 @@ def survey_rule(
         spacetime,
         shift_ranges=[shift_range, shift_range],
         periods=range(1, max_period + 1),
+        nml_mode=NML_MODE,
     )
     summary = selection_summary(result)
 
@@ -178,6 +194,25 @@ def main():
     suffix = args.output_suffix or f"_T{args.steps}"
     csv_path = output_dir / f"lifewiki_survey{suffix}.csv"
     df.to_csv(csv_path, index=False)
+    write_metadata_sidecar(
+        csv_path,
+        {
+            "script": "survey_lifewiki_rules",
+            "boundary_condition": "periodic",
+            "selector_variant": PERIOD_FIRST_SELECTOR.to_metadata(),
+            "grid_size": [args.width, args.height],
+            "steps": args.steps,
+            "density": 0.5,
+            "seed": args.seed,
+            "period_range": list(range(1, args.max_period + 1)),
+            "shift_range": list(range(-args.shift_radius, args.shift_radius + 1)),
+            "shift_handling": shift_handling_from_nd(
+                [range(-args.shift_radius, args.shift_radius + 1)] * 2
+            ),
+            "n_rules": len(rules),
+            "output_csv": str(csv_path),
+        },
+    )
 
     print(f"\nDone in {elapsed:.1f}s")
     print(f"Saved to {csv_path}")

@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from relative_symmetry_repair.ca2d import random_initial_grid, simulate_2d, rule_consistency_rate_2d
 from relative_symmetry_repair.repair_nd import fit_relative_periodic_background_nd, scan_relative_periodicity_nd
+from relative_symmetry_repair.selector_tools import write_metadata_sidecar
 
 
 def density_at_end(spacetime: np.ndarray, last_n: int = 5) -> float:
@@ -48,7 +49,10 @@ def survey_rule(args: tuple) -> dict | None:
         rule_error_fn=rule_error_fn,
     )
 
-    best = frame.sort_values(["nml_bits", "defect_rate"]).iloc[0]
+    best = frame.sort_values(
+        ["nml_bits", "defect_rate", "period", "shift_0", "shift_1"],
+        kind="mergesort",
+    ).iloc[0]
     best_shift = (int(best["shift_0"]), int(best["shift_1"]))
     best_period = int(best["period"])
     best_fit = fits[(best_shift, best_period)]
@@ -111,6 +115,28 @@ def main():
     out_path = Path("outputs/survey_2d_rules_large.csv")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
+    write_metadata_sidecar(
+        out_path,
+        {
+            "script": "survey_2d_rules_large",
+            "selector_type": "candidate_scan",
+            "score_type": "bernoulli_nml",
+            "nml_mode": "hybrid",
+            "tie_break_rule": "nml_bits asc, defect_rate asc, period asc, shift lex asc",
+            "boundary_condition": "periodic",
+            "grid_size": [48, 48],
+            "steps": 40,
+            "density": 0.5,
+            "seed": 11,
+            "period_range": list(range(1, 7)),
+            "shift_range": list(range(-2, 3)),
+            "range_width_limit": 4,
+            "candidate_count": len(candidates),
+            "nontrivial_count": len(results),
+            "trivial_count": trivial_count,
+            "output_csv": str(out_path),
+        },
+    )
     print(f"Saved to {out_path}")
 
     print(f"\n=== SUMMARY ===")

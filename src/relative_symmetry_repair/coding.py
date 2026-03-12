@@ -15,6 +15,35 @@ from scipy.special import gammaln
 # At n=200 the asymptotic approximation error is <0.01 bits per class,
 # negligible compared to the O(1) constant in the asymptotic expansion.
 EXACT_NML_CUTOFF = 200
+NML_MODE_EXACT = "exact"
+NML_MODE_HYBRID = "hybrid"
+NML_MODE_ASYMPTOTIC = "asymptotic"
+VALID_NML_MODES = frozenset(
+    {
+        NML_MODE_EXACT,
+        NML_MODE_HYBRID,
+        NML_MODE_ASYMPTOTIC,
+    }
+)
+
+
+def resolve_nml_mode(
+    *,
+    mode: str | None = None,
+    exact: bool | None = None,
+) -> str:
+    """Resolve legacy ``exact=...`` calls to an explicit NML scoring mode."""
+    if mode is not None and exact is not None:
+        raise ValueError("Pass either mode=... or exact=..., not both")
+    if mode is None:
+        if exact is None:
+            return NML_MODE_HYBRID
+        return NML_MODE_HYBRID if exact else NML_MODE_ASYMPTOTIC
+    if mode not in VALID_NML_MODES:
+        raise ValueError(
+            f"Unknown NML mode {mode!r}. Expected one of {sorted(VALID_NML_MODES)}."
+        )
+    return mode
 
 
 @functools.lru_cache(maxsize=4096)
@@ -50,18 +79,29 @@ def _exact_bernoulli_regret(n: int) -> float:
     return max_val + math.log2(total)
 
 
-def bernoulli_nml_complexity_single(n: int) -> float:
+def bernoulli_nml_complexity_single(
+    n: int,
+    *,
+    mode: str = NML_MODE_HYBRID,
+) -> float:
     """NML parametric complexity for a single Bernoulli class with n observations.
 
-    Uses exact computation for n <= EXACT_NML_CUTOFF, asymptotic (½ log₂ n)
-    for larger n. The asymptotic approximation omits the O(1) constant
-    (½ log(π/2) ≈ 0.326 bits), which does not affect model selection.
+    ``mode="exact"`` uses the exact Shtarkov normalizer for all ``n``.
+    ``mode="hybrid"`` uses the exact normalizer up to ``EXACT_NML_CUTOFF``
+    and the asymptotic ``½ log₂ n`` approximation above that cutoff.
+    ``mode="asymptotic"`` uses ``½ log₂ n`` throughout.
     """
     if n <= 1:
         return 0.0
-    if n <= EXACT_NML_CUTOFF:
+    if mode == NML_MODE_EXACT:
         return _exact_bernoulli_regret(n)
-    return 0.5 * math.log2(n)
+    if mode == NML_MODE_HYBRID and n <= EXACT_NML_CUTOFF:
+        return _exact_bernoulli_regret(n)
+    if mode == NML_MODE_ASYMPTOTIC or mode == NML_MODE_HYBRID:
+        return 0.5 * math.log2(n)
+    raise ValueError(
+        f"Unknown NML mode {mode!r}. Expected one of {sorted(VALID_NML_MODES)}."
+    )
 
 
 def log2_binomial(n: int, k: int) -> float:
@@ -176,27 +216,30 @@ def nml_complexity_bits(
     labels: np.ndarray,
     n_labels: int,
     *,
-    exact: bool = True,
+    mode: str | None = None,
+    exact: bool | None = None,
 ) -> float:
     """NML parametric complexity: Σ_j complexity(n_j).
 
-    When ``exact=True`` (default), uses exact Bernoulli NML for small
-    orbit classes (n_j ≤ EXACT_NML_CUTOFF) and asymptotic (½ log₂ n_j)
-    for larger ones. When ``exact=False``, uses asymptotic throughout.
+    ``mode="exact"`` uses exact Bernoulli NML for every orbit class.
+    ``mode="hybrid"`` uses exact Bernoulli NML for small orbit classes
+    (``n_j ≤ EXACT_NML_CUTOFF``) and asymptotic ``½ log₂ n_j`` for larger
+    ones. ``mode="asymptotic"`` uses asymptotic complexity throughout.
 
     For each orbit class j with n_j observations, the Bernoulli NML
     normalizing constant contributes (1/2) log2(n_j) + O(1) bits
     asymptotically. The exact computation sums binomial coefficients
     weighted by MLE likelihoods (Shtarkov normalizer).
     """
+    nml_mode = resolve_nml_mode(mode=mode, exact=exact)
     flat_labels = labels.ravel()
     totals = np.bincount(flat_labels, minlength=n_labels).astype(np.int64)
-    if exact:
-        return float(sum(bernoulli_nml_complexity_single(int(n)) for n in totals))
-    valid = totals[totals > 1].astype(np.float64)
-    if valid.size == 0:
-        return 0.0
-    return float(0.5 * np.sum(np.log2(valid)))
+    return float(
+        sum(
+            bernoulli_nml_complexity_single(int(n), mode=nml_mode)
+            for n in totals
+        )
+    )
 
 
 def nml_score_bits(
@@ -204,19 +247,24 @@ def nml_score_bits(
     labels: np.ndarray,
     n_labels: int,
     *,
-    exact: bool = True,
+    mode: str | None = None,
+    exact: bool | None = None,
 ) -> tuple[float, float, float]:
     """Bernoulli NML score = NLL + parametric complexity.
 
     Returns (nll_bits, complexity_bits, total_nml_bits).
 
-    When ``exact=True`` (default), uses finite-sample-corrected NML
-    complexity for small orbit classes (n_j ≤ EXACT_NML_CUTOFF) and
-    asymptotic for larger ones. When ``exact=False``, uses asymptotic
-    throughout (legacy behavior).
+    ``mode="exact"`` uses full exact Bernoulli NML.
+    ``mode="hybrid"`` uses finite-sample-corrected exact NML for small
+    orbit classes and asymptotic complexity above ``EXACT_NML_CUTOFF``.
+    ``mode="asymptotic"`` uses asymptotic complexity throughout.
+
+    The legacy ``exact=...`` argument is retained for backward
+    compatibility, where ``exact=True`` maps to ``mode="hybrid"`` and
+    ``exact=False`` maps to ``mode="asymptotic"``.
     """
     nll = orbit_nll_bits(spacetime, labels, n_labels)
-    comp = nml_complexity_bits(labels, n_labels, exact=exact)
+    comp = nml_complexity_bits(labels, n_labels, mode=mode, exact=exact)
     return nll, comp, nll + comp
 
 

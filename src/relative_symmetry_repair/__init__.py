@@ -27,7 +27,9 @@ from .selection import (
     SelectionResult,
     SelectionStatus,
     select_period,
+    select_period_from_scan,
     select_period_nd,
+    select_period_nd_from_scan,
     analyze_residual,
     selection_summary,
 )
@@ -67,7 +69,9 @@ __all__ = [
     "SelectionResult",
     "SelectionStatus",
     "select_period",
+    "select_period_from_scan",
     "select_period_nd",
+    "select_period_nd_from_scan",
     "analyze_residual",
     "selection_summary",
 ]

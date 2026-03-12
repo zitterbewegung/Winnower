@@ -27,6 +27,11 @@ from .repair_nd import (
     extract_components_nd,
     summarise_components_nd,
 )
+from .selector_tools import (
+    TIE_BREAK_RULE,
+    shift_handling_from_1d,
+    shift_handling_from_nd,
+)
 
 
 # ── Data structures ───────────────────────────────────────────────────────────
@@ -76,6 +81,13 @@ class SelectionResult:
 
     # The underlying fit object for the selected model
     best_fit: RelativePeriodicFit | RelativePeriodicFitND | None = None
+
+    # Selector metadata for traceability
+    selector_type: str = "period_first"
+    score_type: str = "bernoulli_nml"
+    nml_mode: str = "hybrid"
+    shift_handling: str = "joint_shift_optimization"
+    tie_break_rule: str = TIE_BREAK_RULE
 
 
 # ── Margin thresholds ─────────────────────────────────────────────────────────
@@ -131,6 +143,7 @@ def select_period(
     *,
     rule: int | None = None,
     min_component_size: int = 6,
+    nml_mode: str = "hybrid",
 ) -> SelectionResult:
     """Period-first selection for 1D spacetimes.
 
@@ -140,9 +153,33 @@ def select_period(
     Returns a SelectionResult with the selected period, runner-up,
     margin, and status. Call analyze_residual() to populate Stage B.
     """
+    shift_list = [int(shift) for shift in shifts]
+    period_list = [int(period) for period in periods]
     frame, fits = scan_relative_periodicity(
-        spacetime, shifts=shifts, periods=periods, rule=rule,
+        spacetime,
+        shifts=shift_list,
+        periods=period_list,
+        rule=rule,
+        nml_mode=nml_mode,
     )
+    return select_period_from_scan(
+        frame,
+        fits,
+        min_component_size=min_component_size,
+        nml_mode=nml_mode,
+        shift_handling=shift_handling_from_1d(shift_list),
+    )
+
+
+def select_period_from_scan(
+    frame: pd.DataFrame,
+    fits: dict[tuple[int, int], RelativePeriodicFit],
+    *,
+    min_component_size: int = 6,
+    nml_mode: str = "hybrid",
+    shift_handling: str = "joint_shift_optimization",
+) -> SelectionResult:
+    """Build a period-first selection result from a precomputed 1D scan."""
     period_scores = _group_by_period(frame, fits, nd=False)
     if not period_scores:
         raise ValueError("No candidates scanned")
@@ -162,6 +199,8 @@ def select_period(
         status=_classify_status(margin),
         all_periods=period_scores,
         best_fit=best_fit,
+        nml_mode=nml_mode,
+        shift_handling=shift_handling,
     )
 
     # Auto-populate residual diagnostics
@@ -178,16 +217,40 @@ def select_period_nd(
     *,
     rule_error_fn=None,
     min_component_size: int = 4,
+    nml_mode: str = "hybrid",
 ) -> SelectionResult:
     """Period-first selection for N-dimensional spacetimes.
 
     Stage A: scan all (period, shift_vector) pairs, group by period,
     select the period with lowest NML (min over shifts).
     """
+    shift_lists = [[int(shift) for shift in axis] for axis in shift_ranges]
+    period_list = [int(period) for period in periods]
     frame, fits = scan_relative_periodicity_nd(
-        spacetime, shift_ranges=shift_ranges, periods=periods,
+        spacetime,
+        shift_ranges=shift_lists,
+        periods=period_list,
         rule_error_fn=rule_error_fn,
+        nml_mode=nml_mode,
     )
+    return select_period_nd_from_scan(
+        frame,
+        fits,
+        min_component_size=min_component_size,
+        nml_mode=nml_mode,
+        shift_handling=shift_handling_from_nd(shift_lists),
+    )
+
+
+def select_period_nd_from_scan(
+    frame: pd.DataFrame,
+    fits: dict[tuple[tuple[int, ...], int], RelativePeriodicFitND],
+    *,
+    min_component_size: int = 4,
+    nml_mode: str = "hybrid",
+    shift_handling: str = "joint_shift_optimization",
+) -> SelectionResult:
+    """Build a period-first selection result from a precomputed N-D scan."""
     period_scores = _group_by_period(frame, fits, nd=True)
     if not period_scores:
         raise ValueError("No candidates scanned")
@@ -207,6 +270,8 @@ def select_period_nd(
         status=_classify_status(margin),
         all_periods=period_scores,
         best_fit=best_fit,
+        nml_mode=nml_mode,
+        shift_handling=shift_handling,
     )
 
     if best_fit is not None:
@@ -286,6 +351,11 @@ def selection_summary(result: SelectionResult) -> dict:
         "status": result.status.value,
         "margin_bits": result.margin,
         "n_periods_scanned": len(result.all_periods),
+        "selector_type": result.selector_type,
+        "score_type": result.score_type,
+        "nml_mode": result.nml_mode,
+        "shift_handling": result.shift_handling,
+        "tie_break_rule": result.tie_break_rule,
     }
     if result.runner_up:
         d["runner_up_period"] = result.runner_up.period

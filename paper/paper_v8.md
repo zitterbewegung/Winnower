@@ -366,6 +366,98 @@ In all tested cases, the NML-selected period makes finitely many transitions the
 
 These results cover a small number of detailed case studies (3 rules per dimension). The broader 2D survey (Section 3.2.1) characterizes period *distribution* at a single short horizon, not stabilization.
 
+### 3.5 Baseline Selector Comparison
+
+To motivate the NML criterion, we compare three model-selection strategies on the same data:
+
+1. **Residual minimization**: argmin_c defect_rate(c)
+2. **Bernoulli NLL**: argmin_c NLL(c)
+3. **Bernoulli NML**: argmin_c NML(c)
+
+We run all three selectors on 105 nontrivial LifeWiki rules (T=100, 64×64, seed 42), 3 ECA rules (T=144, width 192), and 1 3D rule (diamoeba, T=80, 16³).
+
+**LifeWiki 2D (105 nontrivial rules):**
+
+| Selector | p=1 | p=2 | p≥4 | max p |
+|----------|-----|-----|-----|-------|
+| Residual | 16 | 8 | 81 | 8 |
+| NLL | 0 | 0 | 105 | 8 |
+| NML | 97 | 7 | 1 | 8 |
+
+**1D ECA (3 rules):**
+
+| Selector | p=1 | p≥4 | max p |
+|----------|-----|-----|-------|
+| Residual | 0 | 3 | 10 |
+| NLL | 0 | 3 | 10 |
+| NML | 1 | 2 | 4 |
+
+**3D diamoeba (1 rule):**
+
+| Selector | Selected p |
+|----------|-----------|
+| Residual | 6 |
+| NLL | 6 |
+| NML | 1 |
+
+Without the complexity penalty, both residual minimization and NLL systematically select the highest available period, since higher periods can only reduce defect rate by fitting noise in orbit classes. NLL selects period 8 for *every* nontrivial LifeWiki rule (105/105). Residual minimization also favors high periods (81/105 select p≥4), though it occasionally selects lower periods when defect rates happen to be minimized there. Only NML, which penalizes model complexity via the Shtarkov normalizer, produces parsimonious period selections: 97/105 rules select p=1, consistent with the expectation that most Life-like rules on random initial conditions are aperiodic at moderate horizons.
+
+This demonstrates the role of the complexity penalty in Theorem 3: without it, model selection degenerates to overfitting.
+
+### 3.6 Finite-Horizon Stabilization Sweep
+
+We sweep horizons T ∈ {50, 100, 200, 400, 600, 800} for representative rules across all three dimensions, recording the NML-selected period and margin (bits) at each horizon.
+
+**1D ECA stabilization:**
+
+| Rule | T=50 | T=100 | T=200 | T=400 | T=600 | T=800 |
+|------|------|-------|-------|-------|-------|-------|
+| ECA-30 | p=2 | p=1 | p=1 | p=1 | p=1 | p=1 |
+| ECA-54 | p=4 | p=4 | p=4 | p=4 | p=4 | p=4 |
+| ECA-110 | p=1 | p=7 | p=4 | p=4 | p=4 | p=4 |
+
+ECA-54 locks immediately at p=4 (margin grows from 681 to 2319 bits). ECA-30 has one early transition (p=2 → p=1) then locks. ECA-110 shows a transient (p=1 → p=7 → p=4) before stabilizing at T=200 with growing margins.
+
+**2D stabilization:**
+
+| Rule | T=50 | T=100 | T=200 | T=400 | T=600 | T=800 |
+|------|------|-------|-------|-------|-------|-------|
+| Diamoeba | p=1 | p=1 | p=1 | p=1 | p=1 | p=1 |
+| Maze w/ Mice | p=1 | p=1 | p=1 | p=2 | p=2 | p=2 |
+| S24/B11 | p=1 | p=1 | p=1 | p=1 | p=2 | p=2 |
+| S11/B37 | p=2 | p=2 | p=2 | p=2 | p=4 | p=4 |
+| S37/B11 | p=1 | p=1 | p=2 | p=2 | p=2 | p=2 |
+
+2D rules show later stabilization than 1D, with transitions occurring at T=200–600. The persistent-residual rules (S24/B11, S11/B37, S37/B11) take longer because the NLL gap between adjacent periods grows more slowly. After the final transition, margins grow monotonically in all cases.
+
+**3D stabilization (diamoeba, T ∈ {10, 20, 40, 60, 80}):**
+
+| T | Period | Margin (bits) |
+|---|--------|---------------|
+| 10 | 1 | 2852 |
+| 20 | 1 | 3559 |
+| 40 | 1 | 5322 |
+| 60 | 1 | 6447 |
+| 80 | 1 | 7286 |
+
+3D diamoeba locks to p=1 from the first measurement, with margins growing monotonically.
+
+**Summary statistics:**
+
+| Rule | Transitions | Stabilization T | Final p |
+|------|------------|-----------------|---------|
+| ECA-30 | 1 | 100 | 1 |
+| ECA-54 | 0 | 50 | 4 |
+| ECA-110 | 2 | 200 | 4 |
+| Diamoeba | 0 | 50 | 1 |
+| Maze w/ Mice | 1 | 400 | 2 |
+| S24/B11 | 1 | 600 | 2 |
+| S11/B37 | 1 | 600 | 4 |
+| S37/B11 | 1 | 200 | 2 |
+| diamoeba3d | 0 | 10 | 1 |
+
+All 9 tested rules make at most 2 transitions before the selected period locks over the observed range. Post-stabilization margins grow monotonically, consistent with the predicted $\Theta(T)$ data-fit gap dominating the $O(\log T)$ complexity penalty. The monotonically growing margins provide evidence that these rules have entered the asymptotic regime described by Theorem 3, though finite data cannot prove this definitively.
+
 ---
 
 ## 4. Application: Persistent Structured Defects in 2D

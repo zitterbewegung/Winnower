@@ -1,0 +1,34 @@
+{
+  "boundary_condition": "periodic",
+  "candidate_count": 1050,
+  "density": 0.5,
+  "grid_size": [
+    48,
+    48
+  ],
+  "nml_mode": "hybrid",
+  "nontrivial_count": 773,
+  "output_csv": "outputs/survey_2d_rules_large.csv",
+  "period_range": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "range_width_limit": 4,
+  "score_type": "bernoulli_nml",
+  "script": "survey_2d_rules_large",
+  "seed": 11,
+  "selector_type": "candidate_scan",
+  "shift_range": [
+    -2,
+    -1,
+    0,
+    1,
+    2
+  ],
+  "steps": 40,
+  "tie_break_rule": "nml_bits asc, defect_rate asc, period asc, shift lex asc"
+}

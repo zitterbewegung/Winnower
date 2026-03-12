@@ -1,0 +1,178 @@
+{
+  "boundary_condition": "periodic",
+  "datasets": {
+    "1D": {
+      "density": 0.5,
+      "horizons": [
+        50,
+        100,
+        200,
+        400,
+        600,
+        800
+      ],
+      "period_range": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "rules": [
+        "ECA-30",
+        "ECA-54",
+        "ECA-110"
+      ],
+      "seed": 11,
+      "shift_handling": "joint_shift_optimization",
+      "shift_range": [
+        -6,
+        -5,
+        -4,
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "width": 192
+    },
+    "2D_contiguous": {
+      "density": 0.5,
+      "grid_size": [
+        64,
+        64
+      ],
+      "horizons": [
+        50,
+        100,
+        200,
+        400,
+        600,
+        800
+      ],
+      "period_range": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "rules": [
+        "S24/B11",
+        "S11/B37",
+        "S37/B11"
+      ],
+      "seed": 11,
+      "shift_handling": "joint_shift_optimization",
+      "shift_range": [
+        -2,
+        -1,
+        0,
+        1,
+        2
+      ]
+    },
+    "2D_lifewiki": {
+      "density": 0.5,
+      "grid_size": [
+        64,
+        64
+      ],
+      "horizons": [
+        50,
+        100,
+        200,
+        400,
+        600,
+        800
+      ],
+      "period_range": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "rules": [
+        "Diamoeba",
+        "Maze_w_Mice"
+      ],
+      "seed": 11,
+      "shift_handling": "joint_shift_optimization",
+      "shift_range": [
+        -2,
+        -1,
+        0,
+        1,
+        2
+      ]
+    },
+    "3D": {
+      "density": 0.5,
+      "grid_size": [
+        16,
+        16,
+        16
+      ],
+      "horizons": [
+        10,
+        20,
+        40,
+        60,
+        80
+      ],
+      "period_range": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "rules": [
+        "diamoeba3d"
+      ],
+      "seed": 11,
+      "shift_handling": "joint_shift_optimization",
+      "shift_range": [
+        -1,
+        0,
+        1
+      ]
+    }
+  },
+  "experiment": "stabilization_analysis",
+  "outputs": {
+    "candidates": "results/stabilization_candidates.csv",
+    "period_scores": "results/stabilization_period_scores.csv",
+    "results": "results/stabilization_results.csv",
+    "shift_zero_period_scores": "results/stabilization_shift_zero_period_scores.csv",
+    "shift_zero_results": "results/stabilization_shift_zero_results.csv"
+  },
+  "selector_variant": {
+    "name": "period_first_nml_joint_hybrid",
+    "nml_mode": "hybrid",
+    "score_column": "nml_bits",
+    "score_type": "bernoulli_nml",
+    "selector_type": "period_first",
+    "shift_handling": "joint_shift_optimization",
+    "tie_break_rule": "score asc, period asc, shift lex asc"
+  }
+}

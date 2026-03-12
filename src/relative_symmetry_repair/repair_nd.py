@@ -30,8 +30,9 @@ class RelativePeriodicFitND:
     template_bits: int = 0
     mdl_bits: float = 0.0       # legacy: template_bits_nml + run_length_bits
     nll_bits: float = 0.0       # Bernoulli NLL over orbit classes
-    nml_complexity: float = 0.0 # asymptotic NML complexity: Σ (1/2) log2(n_j)
-    nml_bits: float = 0.0       # asymptotic Bernoulli NML: nll_bits + nml_complexity
+    nml_complexity: float = 0.0 # Bernoulli NML complexity under the configured mode
+    nml_bits: float = 0.0       # Bernoulli NML score under the configured mode
+    nml_mode: str = "hybrid"
     rule_error: float | None = None
 
     def to_record(self) -> dict[str, float | int | None]:
@@ -52,6 +53,7 @@ class RelativePeriodicFitND:
             "nll_bits": self.nll_bits,
             "nml_complexity": self.nml_complexity,
             "nml_bits": self.nml_bits,
+            "nml_mode": self.nml_mode,
             "rule_error": self.rule_error,
         })
         return rec
@@ -124,6 +126,7 @@ def fit_relative_periodic_background_nd(
     period: int,
     *,
     rule_error_fn=None,
+    nml_mode: str = "hybrid",
 ) -> RelativePeriodicFitND:
     """Project an N-dimensional binary spacetime onto the nearest relative-periodic background.
 
@@ -160,8 +163,13 @@ def fit_relative_periodic_background_nd(
     t_bits_nml = template_bits_nml(period, spatial_dims, steps)
     mdl = t_bits_nml + rl_bits
 
-    # Asymptotic Bernoulli NML score on orbit classes
-    nll, nml_comp, nml_total = nml_score_bits(spacetime.astype(np.uint8), labels, n_labels)
+    # Bernoulli NML score on orbit classes, with explicit scoring mode.
+    nll, nml_comp, nml_total = nml_score_bits(
+        spacetime.astype(np.uint8),
+        labels,
+        n_labels,
+        mode=nml_mode,
+    )
 
     return RelativePeriodicFitND(
         shift=tuple(int(s) for s in shift),
@@ -179,6 +187,7 @@ def fit_relative_periodic_background_nd(
         nll_bits=nll,
         nml_complexity=nml_comp,
         nml_bits=nml_total,
+        nml_mode=nml_mode,
         rule_error=rule_error,
     )
 
@@ -189,6 +198,7 @@ def scan_relative_periodicity_nd(
     periods: Iterable[int],
     *,
     rule_error_fn=None,
+    nml_mode: str = "hybrid",
 ) -> tuple[pd.DataFrame, dict[tuple, RelativePeriodicFitND]]:
     """Scan an N-D spacetime across a grid of (shift_vector, period) pairs.
 
@@ -214,6 +224,7 @@ def scan_relative_periodicity_nd(
                 shift=shift_combo,
                 period=period,
                 rule_error_fn=rule_error_fn,
+                nml_mode=nml_mode,
             )
             key = (shift_combo, period)
             fits[key] = fit
