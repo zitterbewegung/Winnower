@@ -57,6 +57,45 @@ Open the notebook:
 jupyter notebook notebooks/relative_symmetry_repair_demo.ipynb
 ```
 
+## ALIFE experiment suite
+
+The repository now includes a manuscript-facing ALIFE experiment suite under `scripts/` and `src/relative_symmetry_repair/experiment_suite.py`. The suite reuses the existing simulation and period-first selection code, adds deterministic multi-seed orchestration, null controls, candidate-range robustness checks, large rule surveys, summary plots, manifests, and paper-ready markdown snippets.
+
+Representative entry points:
+
+```bash
+python scripts/alife_null_controls.py
+python scripts/alife_seed_stability.py --n-seeds 10
+python scripts/alife_run_all.py
+```
+
+The package CLI also exposes lightweight wrappers for the main blocks:
+
+```bash
+relative-symmetry-repair alife-null-controls --output-root outputs/alife_2026
+relative-symmetry-repair alife-seed-stability --n-seeds 10
+relative-symmetry-repair alife-run-all --resume
+```
+
+Common suite outputs live under `outputs/alife_2026/`:
+
+```text
+outputs/alife_2026/
+  null_controls/
+  seed_stability/
+  candidate_range_robustness/
+  lifewiki_horizon_sweep/
+  eca_atlas/
+  survey_3d/
+  counterexample_stress/
+  results_manifest.json
+paper/
+  alife_experiment_summary.md
+  alife_table_snippets.md
+```
+
+Each experiment block writes per-run CSVs, summary CSVs, at least one PNG figure, and a small `manifest.json`. The top-level orchestrator aggregates these into `outputs/alife_2026/results_manifest.json` and regenerates the paper-facing markdown summaries.
+
 ## Output guide
 
 Each rule directory under `outputs/` contains four PNG files plus CSV summaries.

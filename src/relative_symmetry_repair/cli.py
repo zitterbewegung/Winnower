@@ -8,6 +8,11 @@ from .eca import random_initial_state, simulate_eca
 from .plotting import plot_decomposition, plot_spacetime, plot_spectrum, save_figure
 from .repair import extract_components, scan_relative_periodicity, summarise_components
 from .selection import select_period, select_period_nd, selection_summary
+from .experiment_suite import (
+    run_all_suite,
+    run_null_controls_suite,
+    run_seed_stability_suite,
+)
 
 from .ca2d import LIFE_RULES, random_initial_grid, simulate_2d, rule_consistency_rate_2d
 from .ca3d import RULES_3D, random_initial_volume, simulate_3d, rule_consistency_rate_3d
@@ -262,6 +267,76 @@ def analyze3d(
         typer.echo(f"Runner-up period: {result.runner_up.period} "
                    f"(+{result.margin:.1f} bits)")
     typer.echo(f"Wrote outputs to {output_dir.resolve()}")
+
+
+@app.command("alife-null-controls")
+def alife_null_controls(
+    output_root: Path = typer.Option(Path("outputs/alife_2026"), help="Root directory for ALIFE outputs."),
+    base_seed: int = typer.Option(11, help="Base seed for deterministic seed iteration."),
+    n_seeds: int = typer.Option(1, help="Number of original spacetimes per rule."),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reuse existing per-run CSV rows."),
+    save_decompositions: bool = typer.Option(False, "--save-decompositions/--no-save-decompositions", help="Save a small decomposition subset."),
+) -> None:
+    manifest = run_null_controls_suite(
+        output_root=output_root,
+        base_seed=base_seed,
+        n_seeds=n_seeds,
+        resume=resume,
+        save_decompositions=save_decompositions,
+    )
+    typer.echo(f"Wrote ALIFE null-controls outputs to {Path(manifest['output_dir']).resolve()}")
+
+
+@app.command("alife-seed-stability")
+def alife_seed_stability(
+    output_root: Path = typer.Option(Path("outputs/alife_2026"), help="Root directory for ALIFE outputs."),
+    base_seed: int = typer.Option(11, help="Base seed for deterministic seed iteration."),
+    n_seeds: int = typer.Option(10, help="Number of seeds for the representative panel."),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reuse existing per-run CSV rows."),
+) -> None:
+    manifest = run_seed_stability_suite(
+        output_root=output_root,
+        base_seed=base_seed,
+        n_seeds=n_seeds,
+        resume=resume,
+    )
+    typer.echo(f"Wrote ALIFE seed-stability outputs to {Path(manifest['output_dir']).resolve()}")
+
+
+@app.command("alife-run-all")
+def alife_run_all(
+    output_root: Path = typer.Option(Path("outputs/alife_2026"), help="Root directory for ALIFE outputs."),
+    paper_dir: Path = typer.Option(Path("paper"), help="Directory for manuscript-facing markdown summaries."),
+    base_seed: int = typer.Option(11, help="Base seed for deterministic seed iteration."),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reuse existing per-run CSV rows."),
+    null_controls: bool = typer.Option(True, "--null-controls/--no-null-controls", help="Enable the null-controls block."),
+    seed_stability: bool = typer.Option(True, "--seed-stability/--no-seed-stability", help="Enable the seed-stability block."),
+    candidate_range_robustness: bool = typer.Option(True, "--candidate-range-robustness/--no-candidate-range-robustness", help="Enable the search-range robustness block."),
+    lifewiki_horizon_sweep: bool = typer.Option(True, "--lifewiki-horizon-sweep/--no-lifewiki-horizon-sweep", help="Enable the LifeWiki horizon sweep."),
+    eca_atlas: bool = typer.Option(True, "--eca-atlas/--no-eca-atlas", help="Enable the ECA atlas block."),
+    survey_3d: bool = typer.Option(True, "--survey-3d/--no-survey-3d", help="Enable the 3D survey block."),
+    counterexample_stress: bool = typer.Option(True, "--counterexample-stress/--no-counterexample-stress", help="Enable the counterexample-stress block."),
+    paper_reports: bool = typer.Option(True, "--paper-reports/--no-paper-reports", help="Write manuscript-facing markdown reports."),
+    lifewiki_limit: int | None = typer.Option(None, help="Optional cap for the number of LifeWiki rules."),
+    eca_limit: int | None = typer.Option(None, help="Optional cap for the number of ECA rules."),
+) -> None:
+    manifest = run_all_suite(
+        output_root=output_root,
+        paper_dir=paper_dir,
+        base_seed=base_seed,
+        resume=resume,
+        run_null_controls=null_controls,
+        run_seed_stability=seed_stability,
+        run_candidate_range_robustness=candidate_range_robustness,
+        run_lifewiki_horizon_sweep=lifewiki_horizon_sweep,
+        run_eca_atlas=eca_atlas,
+        run_3d_survey=survey_3d,
+        run_counterexample_stress=counterexample_stress,
+        generate_paper_markdown=paper_reports,
+        lifewiki_limit=lifewiki_limit,
+        eca_limit=eca_limit,
+    )
+    typer.echo(f"Wrote ALIFE suite outputs to {Path(manifest['output_root']).resolve()}")
 
 
 def main() -> None:
