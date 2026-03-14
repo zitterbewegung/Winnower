@@ -2,6 +2,25 @@
 
 This note is for discussing the paper in plain language. It summarizes the core method, what the theorems do, what is and is not "machine learning," and a few compact examples.
 
+## Visual aids
+
+If you want figure-based discussion aids, see:
+
+- `outputs/alife_2026/rule_diagrams/representative_rules_1d.png`
+- `outputs/alife_2026/rule_diagrams/representative_rules_2d.png`
+- `outputs/alife_2026/rule_diagrams/representative_rules_3d.png`
+- `outputs/alife_2026/rule_diagrams/rule_mechanisms_1d.png`
+- `outputs/alife_2026/rule_diagrams/rule_mechanisms_2d.png`
+- `outputs/alife_2026/rule_diagrams/rule_mechanisms_3d.png`
+- `outputs/alife_2026/rule_diagrams/guide.md`
+- `outputs/alife_2026/rule_diagrams/presentation_rules_1d.png`
+- `outputs/alife_2026/rule_diagrams/presentation_rules_2d.png`
+- `outputs/alife_2026/rule_diagrams/presentation_rules_3d.png`
+- `outputs/alife_2026/rule_diagrams/presentation_guide.md`
+- `paper/figures/alife_representative_rules.png`
+- `paper/figures/alife_rule_mechanisms.png`
+- `paper/alife_figure_snippets.md`
+
 ## One-sentence pitch
 
 The paper treats a cellular automaton spacetime as data, fits competing relative-periodic background templates, scores them with a Bernoulli NML criterion, and proves when the selected template stabilizes and when "true background period" is or is not recoverable.
