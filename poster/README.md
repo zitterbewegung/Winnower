@@ -6,6 +6,7 @@ This directory contains a first-pass poster assembled from the stronger poster-o
 
 - `alife_2026_poster.tex` — standalone landscape poster source
 - `alife_2026_poster.pdf` — compiled poster output after a successful local build
+- `EDITABLE_FIGURES.md` — notes on which figure families are best edited as PDF, SVG, or by direct redraw
 
 ## Build
 

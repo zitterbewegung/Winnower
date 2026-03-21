@@ -92,6 +92,7 @@ RULE_NOTES = {
 PRESENTATION_FOCUS_RULES_1D = ("ECA-54", "ECA-110")
 PRESENTATION_FOCUS_RULES_2D = ("Diamoeba", "Maze with Mice", "S37/B11")
 PRESENTATION_FOCUS_RULES_3D = ("3d-life", "clouds", "diamoeba3d")
+EXPORT_FORMATS: tuple[str, ...] = ()
 
 
 @dataclass(slots=True)
@@ -257,6 +258,10 @@ def _decorate_binary_axis(ax: plt.Axes, title: str | None = None) -> None:
         spine.set_visible(False)
 
 
+def _save_diagram(fig, path: Path) -> None:
+    save_figure(fig, path, extra_formats=EXPORT_FORMATS)
+
+
 def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
     with plt.rc_context({**PLOT_RC, "axes.titlepad": 8}):
         fig, axes = plt.subplots(
@@ -314,7 +319,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
             fontsize=9,
         )
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -401,7 +406,7 @@ def _plot_nd_overview(payloads: list[DiagramPayload], *, title: str, caption: st
         fig.suptitle(title, fontsize=13, y=0.995)
         fig.text(0.5, 0.012, caption, ha="center", va="bottom", fontsize=9)
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -479,7 +484,7 @@ def _plot_presentation_1d(payloads: list[DiagramPayload], path: Path) -> None:
             fontsize=9.5,
         )
         fig.tight_layout(rect=(0.0, 0.045, 1.0, 0.975))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -553,7 +558,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
             fontsize=9.5,
         )
         fig.tight_layout(rect=(0.0, 0.045, 1.0, 0.975))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -627,7 +632,7 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
             fontsize=9.5,
         )
         fig.tight_layout(rect=(0.0, 0.045, 1.0, 0.975))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -793,7 +798,7 @@ def _plot_1d_mechanisms(cases: tuple[ALifeCase, ...], path: Path) -> None:
             fontsize=9,
         )
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -852,7 +857,7 @@ def _plot_totalistic_mechanisms(
         fig.suptitle(title, fontsize=13, y=0.995)
         fig.text(0.5, 0.012, caption, ha="center", va="bottom", fontsize=9)
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -1045,7 +1050,7 @@ def _compose_paper_figure(
                 ax.plot([0.0, 1.0], [0.0, 0.0], transform=ax.transAxes, color="#d7d1c8", linewidth=1.0)
 
         fig.tight_layout(rect=(0.0, 0.0, 1.0, 1.0))
-        save_figure(fig, path)
+        _save_diagram(fig, path)
         plt.close(fig)
 
 
@@ -1203,6 +1208,7 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
         "output_dir": str(output_dir.resolve()),
         "paper_dir": str(paper_dir.resolve()),
         "base_seed": int(base_seed),
+        "export_formats": ["png", *EXPORT_FORMATS],
         "horizons": {str(key): int(value) for key, value in DIAGRAM_HORIZONS.items()},
         "files": {
             "overview_1d": str(overview_1d_path.resolve()),
@@ -1233,11 +1239,25 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
 
 
 def main() -> None:
+    global EXPORT_FORMATS
     parser = argparse.ArgumentParser(description="Render manuscript-friendly overview and mechanism diagrams for the representative ALIFE rules.")
     parser.add_argument("--output-root", type=Path, default=ROOT / "outputs" / "alife_2026")
     parser.add_argument("--base-seed", type=int, default=11)
     parser.add_argument("--paper-dir", type=Path, default=ROOT / "paper")
+    parser.add_argument(
+        "--export-formats",
+        type=str,
+        default="png",
+        help="Comma-separated formats to write for generated figures, e.g. png,pdf,svg",
+    )
     args = parser.parse_args()
+
+    requested_formats = tuple(
+        fmt.strip().lower().lstrip(".")
+        for fmt in args.export_formats.split(",")
+        if fmt.strip()
+    )
+    EXPORT_FORMATS = tuple(fmt for fmt in requested_formats if fmt != "png")
 
     manifest = build_rule_diagrams(args.output_root, base_seed=args.base_seed, paper_dir=args.paper_dir)
     print(f"Wrote rule diagrams to {manifest['output_dir']}")

@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
+\usepackage{qrcode}
 \usepackage{amsmath}
 \usepackage{microtype}
 
@@ -61,7 +62,7 @@
 \vspace{0.2em}
 {\fontsize{20}{24}\selectfont Joshua Herman\hfill ALIFE 2026 poster draft\hfill Affiliation to be added\par}
 \vspace{0.35em}
-\Callout{\textbf{Main message.} Fit a global periodic scaffold, score candidate periods and shifts with Bernoulli NML, and analyze the residual defect mask. Across 1D, 2D, and 3D case studies, the selected period either stabilizes immediately or changes only a small number of times before locking.}
+\Callout{\textbf{Main message.} Fit a global periodic scaffold, score candidate periods and shifts with Bernoulli NML, and analyze the residual defect mask. The poster emphasis is 2D: broad periodic domains can coexist with persistent structured residuals that survive the fit. 1D and 3D examples act as cross-dimensional checks.}
 
 \vspace{0.45em}
 \noindent
@@ -112,7 +113,7 @@ This is the cleanest poster-side argument for using NML: without complexity cont
 \end{minipage}\hfill
 \begin{minipage}[t]{0.39\textwidth}
 
-\SectionHeader{What The Decomposition Looks Like}
+\SectionHeader{2D Focus: Domains And Residuals}
 Each panel shows \textbf{Observed}, \textbf{Background}, and \textbf{Defect}. The defect view isolates the structure that the scaffold does not explain.
 
 \includegraphics[width=\linewidth]{presentation_rules_2d.png}
@@ -187,11 +188,14 @@ S11/B37 & 4 & 0.0275 & 7 / 10 \\
 \vspace{0.35em}
 For \textbf{S37/B11}, the late defect density stays close to $0.011$ across $32^2$ to $192^2$ grids, with mean late defects growing from $11.4$ to $428.5$. That is the strongest poster-side application case for persistent structured residuals.
 
+\vspace{0.35em}
+\Callout{\textbf{Poster takeaway.} The most compelling 2D story is not just ``low defect rate.'' It is that the selected scaffold captures the broad regular background while leaving behind residuals that remain structured, persistent, and scalable.}
+
 \SectionHeader{Takeaways}
 \begin{itemize}
   \item A single global selector gives usable periodic scaffolds in 1D, 2D, and 3D CA.
   \item The complexity penalty is not cosmetic. It changes the selected period qualitatively.
-  \item Residual masks expose structured defects and make broad surveys feasible.
+  \item In 2D, residual masks expose structured defects and make broad surveys feasible.
   \item The method is a front end: it does not replace computational mechanics, but it produces compact domain hypotheses worth following up with richer local analyses.
 \end{itemize}
 
@@ -200,9 +204,23 @@ For \textbf{S37/B11}, the late defect density stays close to $0.011$ across $32^
 \vfill
 \hrule
 \vspace{0.35em}
+\begin{minipage}[t]{0.78\textwidth}
 {\fontsize{13}{16}\selectfont
 \textbf{Selected sources inside this repo.}
 Algorithm and stabilization figures from \texttt{alife\_lba\_bundle/figures}. Presentation panels from \texttt{outputs/alife\_2026/rule\_diagrams}. Control summaries from \texttt{outputs/alife\_2026/null\_controls}. Multi-seed and scaling summaries from \texttt{outputs/strengthening\_v2}. Background context: Crutchfield \& Hanson (1997), Gr\"unwald (2007), Rupe \& Crutchfield (2018), Shalizi et al. (2006).
+
+\vspace{0.35em}
+\textbf{Project link.} \url{https://github.com/zitterbewegung/relative_symmetry_repair}
 }
+\end{minipage}\hfill
+\begin{minipage}[t]{0.18\textwidth}
+\raggedleft
+\qrcode[height=1.35in]{https://github.com/zitterbewegung/relative_symmetry_repair}
+
+{\fontsize{12}{15}\selectfont
+Scan for repo, paper assets, and scripts.\\
+Replace with paper/preprint URL if needed.
+}
+\end{minipage}
 
 \end{document}

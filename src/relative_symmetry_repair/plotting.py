@@ -138,7 +138,24 @@ def plot_decomposition(fit: RelativePeriodicFit, *, source: np.ndarray, title_pr
     return fig, axes
 
 
-def save_figure(fig, path: str | Path) -> None:
+def save_figure(fig, path: str | Path, *, extra_formats: tuple[str, ...] = ()) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=180, bbox_inches="tight")
+    raster_formats = {"png", "jpg", "jpeg", "tif", "tiff", "webp"}
+
+    def _save(target: Path) -> None:
+        fmt = target.suffix.lower().lstrip(".")
+        kwargs = {"bbox_inches": "tight"}
+        if fmt in raster_formats:
+            kwargs["dpi"] = 180
+        fig.savefig(target, **kwargs)
+
+    _save(path)
+
+    seen_formats = {path.suffix.lower().lstrip(".")}
+    for fmt in extra_formats:
+        normalized = fmt.lower().lstrip(".")
+        if not normalized or normalized in seen_formats:
+            continue
+        seen_formats.add(normalized)
+        _save(path.with_suffix(f".{normalized}"))
