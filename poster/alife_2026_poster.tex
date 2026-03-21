@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage[paperwidth=48in,paperheight=36in,margin=0.75in]{geometry}
+\usepackage[paperwidth=48in,paperheight=36in,margin=0.55in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[scaled=0.96]{helvet}
 \renewcommand{\familydefault}{\sfdefault}
@@ -8,6 +8,7 @@
 \usepackage{tabularx}
 \usepackage{array}
 \usepackage{enumitem}
+\usepackage{colortbl}
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
 \usepackage{qrcode}
@@ -24,64 +25,82 @@
 
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.28em}
-\setlist[itemize]{leftmargin=1.2em, itemsep=0.2em, topsep=0.2em}
-\setlength{\tabcolsep}{10pt}
-\renewcommand{\arraystretch}{1.22}
+\setlength{\parskip}{0.34em}
+\setlist[itemize]{leftmargin=1.05em, itemsep=0.18em, topsep=0.18em}
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.20}
 
-\definecolor{PosterBg}{HTML}{F5F1E8}
-\definecolor{PosterInk}{HTML}{1B1F23}
-\definecolor{PosterAccent}{HTML}{8A3B2E}
-\definecolor{PosterAccentDark}{HTML}{5D281F}
-\definecolor{PosterTeal}{HTML}{2F6874}
-\definecolor{PosterGold}{HTML}{B86125}
-\definecolor{PosterMuted}{HTML}{ECE6DA}
+\definecolor{PosterBg}{HTML}{EFE2D0}
+\definecolor{PosterPaper}{HTML}{FFFFFF}
+\definecolor{PosterInk}{HTML}{3B3B3B}
+\definecolor{PosterAccent}{HTML}{B00300}
+\definecolor{PosterAccentSoft}{HTML}{FCDEB9}
+\definecolor{PosterGray}{HTML}{5F5F5F}
+\definecolor{PosterBorder}{HTML}{DBDBDB}
+\definecolor{PosterMuted}{HTML}{E2E2E2}
+
+\arrayrulecolor{PosterBorder}
 
 \newcommand{\SectionHeader}[1]{%
-  \vspace{0.35em}%
-  \noindent\colorbox{PosterAccent}{%
+  \vspace{0.32em}%
+  \noindent\colorbox{PosterAccentSoft}{%
     \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
-      \vspace{0.15em}\color{white}\fontsize{22}{26}\selectfont\bfseries #1\vspace{0.15em}%
+      \vspace{0.18em}\color{PosterAccent}\fontsize{26}{30}\selectfont\bfseries #1\vspace{0.16em}%
     }%
   }%
-  \vspace{0.35em}%
+  \vspace{0.28em}%
 }
 
-\newcommand{\Callout}[1]{%
-  \noindent\colorbox{PosterMuted}{%
-    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
-      \vspace{0.25em}\fontsize{18}{22}\selectfont #1\vspace{0.25em}%
+\newcommand{\LeadBox}[1]{%
+  \noindent\fcolorbox{PosterBorder}{PosterAccentSoft}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      \vspace{0.22em}\fontsize{20}{24}\selectfont #1\vspace{0.20em}%
     }%
+  }%
+}
+
+\newcommand{\PosterCard}[1]{%
+  \noindent\fcolorbox{PosterBorder}{PosterPaper}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{#1}%
   }%
 }
 
 \begin{document}
 \pagecolor{PosterBg}
 \color{PosterInk}
-\fontsize{18}{23}\selectfont
+\fontsize{21}{27}\selectfont
 
-{\fontsize{40}{44}\selectfont\bfseries Selecting Relative-Periodic Domains in Cellular Automaton Spacetime with Bernoulli NML\par}
-\vspace{0.2em}
-{\fontsize{20}{24}\selectfont Joshua Herman\hfill ALIFE 2026 poster draft\hfill Affiliation to be added\par}
-\vspace{0.35em}
-\Callout{\textbf{Main message.} Fit a global periodic scaffold, score candidate periods and shifts with Bernoulli NML, and analyze the residual defect mask. The poster emphasis is 2D: broad periodic domains can coexist with persistent structured residuals that survive the fit. 1D and 3D examples act as cross-dimensional checks.}
+\noindent
+\colorbox{PosterAccent}{%
+  \parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+    \vspace{0.24in}
+    {\color{white}\fontsize{68}{72}\selectfont\bfseries Bernoulli NML Selects Relative-Periodic Domains\par}
+    \vspace{0.08in}
+    {\color{PosterAccentSoft}\fontsize{30}{34}\selectfont Residual defect masks expose persistent structure in cellular automaton spacetime\par}
+    \vspace{0.10in}
+    {\color{white}\fontsize{22}{26}\selectfont Joshua Herman\hfill ALIFE 2026\hfill Affiliation to be added\par}
+    \vspace{0.20in}
+  }%
+}
+
+\vspace{0.30em}
+\LeadBox{\textbf{Main result.} A single complexity-penalized selector fits a global periodic scaffold in 1D, 2D, and 3D cellular automata. The strongest 2D cases do not collapse to noise after background subtraction; they leave low-density residual masks that stay visibly structured.}
 
 \vspace{0.45em}
 \noindent
-\begin{minipage}[t]{0.29\textwidth}
+\begin{minipage}[t]{0.285\textwidth}
 
-\SectionHeader{Question}
-Cellular automata often show broad periodic domains together with particles, interfaces, and other persistent defects. The practical problem is to decide \emph{which global period and shift best explain a finite observed spacetime}.
+\SectionHeader{Problem}
+Broad CA domains coexist with particles, interfaces, and other persistent defects. The practical task is to choose \emph{which global period and shift best explain a finite observed spacetime}.
 
-\Callout{This is a front end rather than a full causal-state reconstruction: find a good scaffold first, then study what remains.}
+\LeadBox{\textbf{Poster lens.} Fit the scaffold first, then study what survives in the residual.}
 
 \SectionHeader{Selector}
-For each candidate period $p$ and shift $\mathbf{s}$:
 \begin{itemize}
-  \item the translation $(t,\mathbf{x}) \mapsto (t+p,\mathbf{x}+\mathbf{s})$ partitions spacetime into orbit classes;
-  \item majority vote on each orbit gives the nearest relative-periodic background $B^*(p,\mathbf{s})$;
-  \item the residual mask is $M = U \oplus B^*(p,\mathbf{s})$;
-  \item candidates are scored by Bernoulli NML rather than raw residual or raw likelihood.
+  \item Translation by $(t,\mathbf{x}) \mapsto (t+p,\mathbf{x}+\mathbf{s})$ induces orbit classes.
+  \item Majority vote on each orbit gives the nearest background $B^*(p,\mathbf{s})$.
+  \item The residual mask is $M = U \oplus B^*(p,\mathbf{s})$.
+  \item Bernoulli NML compares candidate periods and shifts without rewarding unnecessary template size.
 \end{itemize}
 
 \[
@@ -91,138 +110,164 @@ For each candidate period $p$ and shift $\mathbf{s}$:
 \frac{1}{2}\sum_j \log_2 n_j
 \]
 
-The first term rewards pure orbit classes. The second term keeps larger templates from winning only because they have more parameters.
+The fit term favors pure orbit classes. The penalty prevents larger templates from winning by sheer flexibility.
 
-\vspace{0.35em}
-\includegraphics[width=\linewidth]{algorithm_detailed_tikz.pdf}
-
-\SectionHeader{Why The Penalty Matters}
-{\fontsize{15}{19}\selectfont
-\begin{tabularx}{\linewidth}{@{}lX@{}}
-\toprule
-Selector & What happens on 105 nontrivial LifeWiki rules at $T=100$ \\
-\midrule
-Residual minimization & 16 pick $p=1$, 8 pick $p=2$, and 81 pick period $\ge 4$ \\
-Bernoulli NLL & All 105 pick the maximum tested period \\
-Bernoulli NML & 97 pick $p=1$, 7 pick $p=2$, and 1 picks $p=8$ \\
-\bottomrule
-\end{tabularx}
+\vspace{0.18em}
+\PosterCard{
+  \vspace{0.10em}
+  \includegraphics[width=\linewidth]{algorithm_detailed_tikz.pdf}
+  \vspace{0.06em}
 }
 
-\vspace{0.35em}
-This is the cleanest poster-side argument for using NML: without complexity control, the selector systematically overfits.
+\SectionHeader{Why Not Raw Likelihood?}
+\PosterCard{
+  {\fontsize{18}{22}\selectfont
+  \begin{tabularx}{\linewidth}{@{}lX@{}}
+  \toprule
+  Selector & Outcome on 105 nontrivial LifeWiki rules at $T=100$ \\
+  \midrule
+  Residual minimization & 16 pick $p=1$, 8 pick $p=2$, and 81 pick period $\ge 4$ \\
+  Bernoulli NLL & All 105 pick the maximum tested period \\
+  Bernoulli NML & 97 pick $p=1$, 7 pick $p=2$, and 1 picks $p=8$ \\
+  \bottomrule
+  \end{tabularx}
+  }
+}
+
+\vspace{0.18em}
+Bernoulli NML is the useful poster-side argument: without the complexity term, the selector overfits almost immediately.
 
 \end{minipage}\hfill
-\begin{minipage}[t]{0.39\textwidth}
+\begin{minipage}[t]{0.415\textwidth}
 
-\SectionHeader{2D Focus: Domains And Residuals}
-Each panel shows \textbf{Observed}, \textbf{Background}, and \textbf{Defect}. The defect view isolates the structure that the scaffold does not explain.
+\SectionHeader{2D Main Result}
+Observed, background, and defect panels separate what the scaffold explains from what remains structured after subtraction.
 
-\includegraphics[width=\linewidth]{presentation_rules_2d.png}
+\PosterCard{
+  \vspace{0.12em}
+  \includegraphics[width=\linewidth]{presentation_rules_2d.png}
+  \vspace{0.05em}
+}
 
-{\fontsize{16}{20}\selectfont
-\textbf{2D focal cases.}
+\vspace{0.24em}
+\LeadBox{\textbf{Most important visual claim.} In 2D, the selected scaffold captures broad regular domains while residual masks preserve coherent, low-density structure. The method is therefore useful both for selection and for downstream defect analysis.}
+
+\SectionHeader{Focal 2D Cases}
 \begin{itemize}
   \item \textbf{Diamoeba}: large breathing domains, selected winner $(p,\mathbf{s})=(1,(0,0))$, defect rate $0.077$.
   \item \textbf{Maze with Mice}: highly coherent maze background, selected winner $(2,(0,0))$, defect rate $0.008$.
   \item \textbf{S37/B11}: low-defect background plus persistent residual structure, selected winner $(2,(0,0))$, defect rate $0.015$ in the presentation run.
 \end{itemize}
+
+\SectionHeader{Cross-Dimensional Checks}
+\PosterCard{
+  \begin{minipage}[t]{0.49\linewidth}
+  \includegraphics[width=\linewidth]{presentation_rules_1d.png}
+  \vspace{0.15em}
+
+  {\fontsize{17}{21}\selectfont \textbf{1D.} ECA-54 locks to period $4$. ECA-110 stabilizes to $(p,s)=(4,-2)$ under the period-first selector.}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.49\linewidth}
+  \includegraphics[width=\linewidth]{presentation_rules_3d.png}
+  \vspace{0.15em}
+
+  {\fontsize{17}{21}\selectfont \textbf{3D.} The same decomposition still works on volumetric rules; the tested diamoeba3d case settles to period $1$.}
+  \end{minipage}
 }
 
-\vspace{0.35em}
-\begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=\linewidth]{presentation_rules_1d.png}
-\vspace{0.2em}
-{\fontsize{14}{17}\selectfont \textbf{1D.} ECA-54 locks to period $4$. ECA-110 stabilizes to $(p,s)=(4,-2)$ under the period-first selector.}
 \end{minipage}\hfill
-\begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=\linewidth]{presentation_rules_3d.png}
-\vspace{0.2em}
-{\fontsize{14}{17}\selectfont \textbf{3D.} The same decomposition still works on volumetric rules; the tested diamoeba3d case settles to period $1$.}
-\end{minipage}
+\begin{minipage}[t]{0.285\textwidth}
 
-\end{minipage}\hfill
-\begin{minipage}[t]{0.29\textwidth}
+\SectionHeader{Stability Across Horizon}
+The selected period usually locks quickly as the observation horizon grows.
 
-\SectionHeader{Stabilization Across Horizon}
-\includegraphics[width=0.98\linewidth]{stabilization_summary.png}
+\PosterCard{
+  \vspace{0.10em}
+  \includegraphics[width=\linewidth]{stabilization_summary.pdf}
+  \vspace{0.04em}
+}
 
-{\fontsize{16}{20}\selectfont
 \begin{itemize}
   \item \textbf{ECA-54} locks immediately to period $4$.
   \item \textbf{ECA-110} passes through a short transient and then locks to period $4$ with shift $-2$.
-  \item \textbf{S24/B11} changes later, as longer horizons reveal additional periodic structure in the residual.
+  \item \textbf{S24/B11} changes later, as longer horizons reveal additional periodic structure.
   \item \textbf{Diamoeba3d} corrects a small-sample transient and then locks to period $1$.
 \end{itemize}
-}
 
 \SectionHeader{Controls And Robustness}
-{\fontsize{15}{19}\selectfont
-\begin{tabularx}{\linewidth}{@{}l>{\raggedleft\arraybackslash}p{1.35in}>{\raggedleft\arraybackslash}p{1.35in}@{}}
-\toprule
-2D summary & Mean period & Mean defect rate \\
-\midrule
-Original runs & 2.2 & 0.014 \\
-Bernoulli i.i.d. & 1.0 & 0.384 \\
-Space shuffled & 1.0 & 0.384 \\
-Time shuffled & 1.0 & 0.114 \\
-\bottomrule
-\end{tabularx}
+\PosterCard{
+  {\fontsize{18}{22}\selectfont
+  \begin{tabularx}{\linewidth}{@{}l>{\raggedleft\arraybackslash}p{1.10in}>{\raggedleft\arraybackslash}p{1.10in}@{}}
+  \toprule
+  2D summary & Mean period & Mean defect rate \\
+  \midrule
+  Original runs & 2.2 & 0.014 \\
+  Bernoulli i.i.d. & 1.0 & 0.384 \\
+  Space shuffled & 1.0 & 0.384 \\
+  Time shuffled & 1.0 & 0.114 \\
+  \bottomrule
+  \end{tabularx}
+  }
 }
 
-\vspace{0.35em}
-The controls collapse toward period $1$ and much worse residual quality, which is consistent with the selector responding to real spacetime structure rather than generic occupancy statistics.
+\vspace{0.16em}
+Shuffled and i.i.d. controls collapse back toward period $1$ and much worse defect rates, which is consistent with the selector responding to real spacetime structure rather than generic occupancy statistics.
 
-\vspace{0.4em}
-{\fontsize{15}{19}\selectfont
-\begin{tabularx}{\linewidth}{@{}l>{\raggedleft\arraybackslash}p{1.0in}>{\raggedleft\arraybackslash}p{1.2in}>{\raggedleft\arraybackslash}X@{}}
-\toprule
-Rule & Modal $p$ & Mean defect rate & Seed consistency \\
-\midrule
-S14/B11 & 1 & 0.0059 & 10 / 10 \\
-S24/B11 & 2 & 0.0278 & 10 / 10 \\
-S37/B11 & 2 & 0.0441 & 10 / 10 \\
-S11/B37 & 4 & 0.0275 & 7 / 10 \\
-\bottomrule
-\end{tabularx}
+\vspace{0.18em}
+\PosterCard{
+  {\fontsize{18}{22}\selectfont
+  \begin{tabularx}{\linewidth}{@{}l>{\raggedleft\arraybackslash}p{0.85in}>{\raggedleft\arraybackslash}p{0.95in}>{\raggedleft\arraybackslash}X@{}}
+  \toprule
+  Rule & Modal $p$ & Defect rate & Seed consistency \\
+  \midrule
+  S14/B11 & 1 & 0.0059 & 10 / 10 \\
+  S24/B11 & 2 & 0.0278 & 10 / 10 \\
+  S37/B11 & 2 & 0.0441 & 10 / 10 \\
+  S11/B37 & 4 & 0.0275 & 7 / 10 \\
+  \bottomrule
+  \end{tabularx}
+  }
 }
 
-\vspace{0.35em}
-For \textbf{S37/B11}, the late defect density stays close to $0.011$ across $32^2$ to $192^2$ grids, with mean late defects growing from $11.4$ to $428.5$. That is the strongest poster-side application case for persistent structured residuals.
-
-\vspace{0.35em}
-\Callout{\textbf{Poster takeaway.} The most compelling 2D story is not just ``low defect rate.'' It is that the selected scaffold captures the broad regular background while leaving behind residuals that remain structured, persistent, and scalable.}
+\vspace{0.16em}
+For \textbf{S37/B11}, the late defect density stays close to $0.011$ across $32^2$ to $192^2$ grids, with mean late defects growing from $11.4$ to $428.5$.
 
 \SectionHeader{Takeaways}
+\LeadBox{
 \begin{itemize}
   \item A single global selector gives usable periodic scaffolds in 1D, 2D, and 3D CA.
-  \item The complexity penalty is not cosmetic. It changes the selected period qualitatively.
+  \item The complexity penalty changes the selected period qualitatively; it is not cosmetic.
   \item In 2D, residual masks expose structured defects and make broad surveys feasible.
-  \item The method is a front end: it does not replace computational mechanics, but it produces compact domain hypotheses worth following up with richer local analyses.
+  \item The method is a front end for richer local analysis, not a replacement for computational mechanics.
 \end{itemize}
+}
 
 \end{minipage}
 
-\vfill
-\hrule
-\vspace{0.35em}
-\begin{minipage}[t]{0.78\textwidth}
-{\fontsize{13}{16}\selectfont
-\textbf{Selected sources inside this repo.}
-Algorithm and stabilization figures from \texttt{alife\_lba\_bundle/figures}. Presentation panels from \texttt{outputs/alife\_2026/rule\_diagrams}. Control summaries from \texttt{outputs/alife\_2026/null\_controls}. Multi-seed and scaling summaries from \texttt{outputs/strengthening\_v2}. Background context: Crutchfield \& Hanson (1997), Gr\"unwald (2007), Rupe \& Crutchfield (2018), Shalizi et al. (2006).
+\vspace{0.45em}
+\noindent\fcolorbox{PosterBorder}{PosterPaper}{%
+  \parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{%
+    \begin{minipage}[t]{0.78\textwidth}
+    {\fontsize{15}{19}\selectfont
+    \textbf{Design notes for this version.} The poster uses the ALIFE 2026 site palette: accent-1 beige background, accent-2 deep red, pale apricot highlight, and charcoal neutrals. Text was enlarged and sections were simplified to support fast scanning at distance.
 
-\vspace{0.35em}
-\textbf{Project link.} \url{https://github.com/zitterbewegung/relative_symmetry_repair}
-}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.18\textwidth}
-\raggedleft
-\qrcode[height=1.35in]{https://github.com/zitterbewegung/relative_symmetry_repair}
+    \vspace{0.20em}
+    \textbf{Selected sources inside this repo.} Algorithm figure: \texttt{poster/figures/algorithm\_detailed\_tikz.tex}. Stabilization figure: \texttt{scripts/alife\_stabilization\_summary.py}. Presentation panels: \texttt{outputs/alife\_2026/rule\_diagrams}. Control summaries: \texttt{outputs/alife\_2026/null\_controls}. Multi-seed and scaling summaries: \texttt{outputs/strengthening\_v2}.
 
-{\fontsize{12}{15}\selectfont
-Scan for repo, paper assets, and scripts.\\
-Replace with paper/preprint URL if needed.
+    \vspace{0.20em}
+    \textbf{Project link.} \url{https://github.com/zitterbewegung/relative_symmetry_repair}
+    }
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.18\textwidth}
+    \raggedleft
+    \qrcode[height=1.45in]{https://github.com/zitterbewegung/relative_symmetry_repair}
+
+    {\fontsize{13}{16}\selectfont
+    Scan for repo, paper assets, and scripts.\\
+    Replace with a preprint URL if needed.
+    }
+    \end{minipage}
+  }%
 }
-\end{minipage}
 
 \end{document}

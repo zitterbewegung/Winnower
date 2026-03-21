@@ -31,9 +31,11 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
 
     fig, axes = plt.subplots(2, len(FOCUS_RULES), figsize=(15.8, 7.0), sharex="col")
     colors = {
-        "period": "#3b82c4",
-        "margin": "#d0842f",
+        "period": "#b00300",
+        "margin": "#5f5f5f",
     }
+    face = "#ffffff"
+    grid = "#dbdbdb"
 
     for col, rule in enumerate(FOCUS_RULES):
         group = df[df["rule"] == rule].sort_values("T")
@@ -44,18 +46,27 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
         ax_margin = axes[1, col]
 
         ax_period.plot(group["T"], group["selected_period"], "o-", linewidth=2.2, markersize=5, color=colors["period"])
-        ax_period.set_title(rule, fontsize=11)
-        ax_period.set_ylabel("Selected period" if col == 0 else "", fontsize=10)
-        ax_period.grid(alpha=0.25, linewidth=0.6)
+        ax_period.set_title(rule, fontsize=11, color="#3b3b3b")
+        ax_period.set_ylabel("Selected period" if col == 0 else "", fontsize=10, color="#3b3b3b")
+        ax_period.set_facecolor(face)
+        ax_period.grid(color=grid, alpha=0.8, linewidth=0.6)
+        ax_period.tick_params(colors="#5f5f5f", labelsize=9)
+        for spine in ax_period.spines.values():
+            spine.set_color("#cfc3b3")
         ax_period.set_ylim(0, max(1, int(group["selected_period"].max())) + 1)
 
         margins = group["margin"].replace([np.inf], np.nan)
         ax_margin.plot(group["T"], margins, "s-", linewidth=2.2, markersize=5, color=colors["margin"])
-        ax_margin.set_xlabel("Horizon T", fontsize=10)
-        ax_margin.set_ylabel("Margin (bits)" if col == 0 else "", fontsize=10)
-        ax_margin.grid(alpha=0.25, linewidth=0.6)
+        ax_margin.set_xlabel("Horizon T", fontsize=10, color="#3b3b3b")
+        ax_margin.set_ylabel("Margin (bits)" if col == 0 else "", fontsize=10, color="#3b3b3b")
+        ax_margin.set_facecolor(face)
+        ax_margin.grid(color=grid, alpha=0.8, linewidth=0.6)
+        ax_margin.tick_params(colors="#5f5f5f", labelsize=9)
+        for spine in ax_margin.spines.values():
+            spine.set_color("#cfc3b3")
 
-    fig.suptitle("Representative stabilization patterns across 1D, 2D, and 3D rules", fontsize=14, y=0.98)
+    fig.patch.set_facecolor("#ffffff")
+    fig.suptitle("Representative stabilization patterns across 1D, 2D, and 3D rules", fontsize=14, y=0.98, color="#b00300")
     fig.text(
         0.5,
         0.02,
@@ -64,6 +75,7 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
         ha="center",
         va="bottom",
         fontsize=10,
+        color="#3b3b3b",
     )
     fig.tight_layout(rect=(0.02, 0.05, 0.98, 0.95))
     save_figure(fig, output_path, extra_formats=extra_formats)

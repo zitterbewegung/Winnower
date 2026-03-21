@@ -6,18 +6,18 @@
 \usepackage{xcolor}
 \usetikzlibrary{arrows.meta,calc}
 
-\definecolor{Ink}{HTML}{1B1F23}
-\definecolor{Accent}{HTML}{2B6CB0}
-\definecolor{Arrow}{HTML}{4F9D69}
-\definecolor{Border}{HTML}{C9C9C9}
-\definecolor{PanelBg}{HTML}{F7F7F7}
-\definecolor{Zero}{HTML}{F4F3EE}
+\definecolor{Ink}{HTML}{3B3B3B}
+\definecolor{Accent}{HTML}{B00300}
+\definecolor{Arrow}{HTML}{5F5F5F}
+\definecolor{Border}{HTML}{DBDBDB}
+\definecolor{PanelBg}{HTML}{FFFFFF}
+\definecolor{Zero}{HTML}{F7F2EA}
 \definecolor{One}{HTML}{222222}
-\definecolor{OrbitA}{HTML}{D7E8FB}
-\definecolor{OrbitB}{HTML}{F8D1D1}
-\definecolor{OrbitC}{HTML}{D4F0E0}
-\definecolor{OrbitD}{HTML}{FFE88B}
-\definecolor{WinnerBg}{HTML}{E6F3EB}
+\definecolor{OrbitA}{HTML}{FCDEB9}
+\definecolor{OrbitB}{HTML}{EFE2D0}
+\definecolor{OrbitC}{HTML}{E2E2E2}
+\definecolor{OrbitD}{HTML}{F3D5D0}
+\definecolor{WinnerBg}{HTML}{FCDEB9}
 
 \tikzset{
   panel title/.style={anchor=west,text=Ink,font=\bfseries\fontsize{11.5}{11.5}\selectfont},
@@ -102,7 +102,7 @@
   % Panel 2
   \begin{scope}[shift={(5.15,0)}]
     \node[panel sub] at (2.40,4.40) {Translate by $(t,x)\mapsto$\\$(t+p,x+s)$.\\One orbit = one template bit.};
-    \draw[soft frame] (1.12,1.46) rectangle (3.68,4.02);
+    \draw[soft frame] (1.12,1.36) rectangle (3.68,3.92);
     \foreach \c/\r/\lab/\col in {0/0/1/OrbitA,1/0/2/OrbitB,2/0/3/OrbitC,3/0/4/OrbitD,4/0/1/OrbitA,5/0/2/OrbitB,0/1/4/OrbitD,1/1/1/OrbitA,2/1/2/OrbitB,3/1/3/OrbitC,4/1/4/OrbitD,5/1/1/OrbitA,0/2/3/OrbitC,1/2/4/OrbitD,2/2/1/OrbitA,3/2/2/OrbitB,4/2/3/OrbitC,5/2/4/OrbitD,0/3/2/OrbitB,1/3/3/OrbitC,2/3/4/OrbitD,3/3/1/OrbitA,4/3/2/OrbitB,5/3/3/OrbitC,0/4/1/OrbitA,1/4/2/OrbitB,2/4/3/OrbitC,3/4/4/OrbitD,4/4/1/OrbitA,5/4/2/OrbitB} {
       \fill[\col] ({1.42 + 0.30*\c},{1.76 + 1.50 - 0.30*(\r+1)}) rectangle ++(0.30,0.30);
       \draw[draw=black!28, line width=0.45pt] ({1.42 + 0.30*\c},{1.76 + 1.50 - 0.30*(\r+1)}) rectangle ++(0.30,0.30);
@@ -130,13 +130,13 @@
     \node[text=Ink, font=\bfseries\fontsize{9.0}{9.0}\selectfont] at (2.40,3.76) {NML$(p,s)$ = fit + penalty};
     \draw[score box] (0.88,2.48) rectangle (4.02,3.16);
     \node[anchor=west, text=Accent, font=\bfseries\fontsize{8.6}{8.6}\selectfont] at (1.04,2.83) {Fit};
-    \node[text=Ink, font=\fontsize{7.9}{8.9}\selectfont] at (2.78,2.83) {pure orbits $\rightarrow$ low entropy};
+    \node[anchor=west, text=Ink, font=\fontsize{7.6}{8.6}\selectfont] at (2.04,2.83) {pure orbits $\rightarrow$ low entropy};
     \draw[score box] (0.88,1.62) rectangle (4.02,2.30);
     \node[anchor=west, text=Accent, font=\bfseries\fontsize{8.6}{8.6}\selectfont] at (1.04,1.97) {Penalty};
-    \node[text=Ink, font=\fontsize{7.9}{8.9}\selectfont] at (2.86,1.97) {more template bits $\rightarrow$ higher cost};
-    \draw[winner box] (0.88,0.84) rectangle (4.02,1.34);
-    \node[text=Arrow!75!black, font=\bfseries\fontsize{8.0}{8.0}\selectfont] at (2.45,1.09) {Keep the candidate with the smallest total NML.};
-    \node[panel foot] at (2.40,0.30) {Output: the selected background scaffold and its residual defect mask.};
+    \node[anchor=west, text=Ink, font=\fontsize{7.6}{8.6}\selectfont] at (2.04,1.97) {more template bits $\rightarrow$ higher cost};
+    \draw[winner box] (0.88,0.78) rectangle (4.02,1.36);
+    \node[text=Arrow!75!black, align=center, font=\bfseries\fontsize{7.7}{8.3}\selectfont] at (2.45,1.07) {Keep the candidate\\with the smallest total NML.};
+    \node[panel foot] at (2.40,0.28) {Output: selected scaffold + residual mask.};
   \end{scope}
 \end{tikzpicture}
 \end{document}
