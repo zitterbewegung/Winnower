@@ -60,18 +60,28 @@ def _draw_binary_grid(ax: plt.Axes, data: np.ndarray, *, left: float, bottom: fl
     ax.add_patch(Rectangle((left, bottom), width, height, fill=False, edgecolor="#777777", linewidth=1.0))
 
 
+def _square_frame(ax: plt.Axes, *, left: float, bottom: float, size: float) -> None:
+    ax.add_patch(Rectangle((left, bottom), size, size, facecolor="white", edgecolor="#b7b7b7", linewidth=1.0))
+
+
+def _fit_rect_in_square(*, rows: int, cols: int, left: float, bottom: float, size: float, pad: float = 0.08) -> tuple[float, float, float, float]:
+    usable = size * (1.0 - 2.0 * pad)
+    cell = min(usable / cols, usable / rows)
+    width = cols * cell
+    height = rows * cell
+    inner_left = left + (size - width) / 2.0
+    inner_bottom = bottom + (size - height) / 2.0
+    return inner_left, inner_bottom, width, height
+
+
+def _panel_subtitle(ax: plt.Axes, line1: str, line2: str) -> None:
+    ax.text(0.50, 0.79, line1, ha="center", va="center", fontsize=11.5, color=TEXT)
+    ax.text(0.50, 0.73, line2, ha="center", va="center", fontsize=11.5, color=TEXT)
+
+
 def _observed_panel(ax: plt.Axes) -> None:
     _panel(ax, 1, "Observed spacetime")
-    ax.text(
-        0.50,
-        0.78,
-        "Choose candidate $(p,s)$.",
-        ha="center",
-        va="bottom",
-        fontsize=12,
-        color=TEXT,
-    )
-    ax.text(0.50, 0.72, "Example below: $p=2$, $s=1$.", ha="center", va="bottom", fontsize=12, color=TEXT)
+    _panel_subtitle(ax, "Choose candidate $(p,s)$.", "Example: $p=2$, $s=1$.")
 
     data = np.array(
         [
@@ -84,10 +94,19 @@ def _observed_panel(ax: plt.Axes) -> None:
         ],
         dtype=np.uint8,
     )
-    left, right, bottom, top = 0.25, 0.84, 0.19, 0.63
-    _draw_binary_grid(ax, data, left=left, bottom=bottom, width=right - left, height=top - bottom)
-    ax.text((left + right) / 2, top + 0.03, "space $x$", ha="center", va="bottom", fontsize=12, color=TEXT)
-    ax.text(left - 0.06, (bottom + top) / 2, "time $t$", ha="center", va="center", rotation=90, fontsize=12, color=TEXT)
+    frame_left, frame_bottom, frame_size = 0.26, 0.21, 0.48
+    _square_frame(ax, left=frame_left, bottom=frame_bottom, size=frame_size)
+    left, bottom, width, height = _fit_rect_in_square(
+        rows=data.shape[0],
+        cols=data.shape[1],
+        left=frame_left,
+        bottom=frame_bottom,
+        size=frame_size,
+        pad=0.10,
+    )
+    _draw_binary_grid(ax, data, left=left, bottom=bottom, width=width, height=height)
+    ax.text(frame_left + frame_size / 2, frame_bottom + frame_size - 0.035, "space $x$", ha="center", va="bottom", fontsize=11.5, color=TEXT)
+    ax.text(frame_left - 0.055, frame_bottom + frame_size / 2, "time $t$", ha="center", va="center", rotation=90, fontsize=11.5, color=TEXT)
 
     ax.text(
         0.50,
@@ -102,19 +121,9 @@ def _observed_panel(ax: plt.Axes) -> None:
 
 def _orbit_panel(ax: plt.Axes) -> None:
     _panel(ax, 2, "Orbit classes")
-    ax.text(
-        0.50,
-        0.78,
-        "Apply $(t,x)\\mapsto(t+p,x+s)$.",
-        ha="center",
-        va="bottom",
-        fontsize=12,
-        color=TEXT,
-    )
-    ax.text(0.50, 0.72, "Same color = same orbit.", ha="center", va="bottom", fontsize=12, color=TEXT)
+    _panel_subtitle(ax, "Apply $(t,x)\\mapsto(t+p,x+s)$.", "Same color = same orbit.")
 
     colors = ["#d7e8fb", "#f8d1d1", "#d4f0e0", "#ffe88b", "#d9c8f0", "#f7d6b8"]
-    x0, y0, w, h = 0.25, 0.18, 0.11, 0.11
     labels = np.array(
         [
             [1, 2, 3, 4, 1, 2],
@@ -124,6 +133,18 @@ def _orbit_panel(ax: plt.Axes) -> None:
             [1, 2, 3, 4, 1, 2],
         ]
     )
+    frame_left, frame_bottom, frame_size = 0.24, 0.20, 0.50
+    _square_frame(ax, left=frame_left, bottom=frame_bottom, size=frame_size)
+    x0, y0, grid_w, grid_h = _fit_rect_in_square(
+        rows=labels.shape[0],
+        cols=labels.shape[1],
+        left=frame_left,
+        bottom=frame_bottom,
+        size=frame_size,
+        pad=0.10,
+    )
+    w = grid_w / labels.shape[1]
+    h = grid_h / labels.shape[0]
     for r in range(labels.shape[0]):
         for c in range(labels.shape[1]):
             lab = int(labels[r, c])
@@ -149,15 +170,15 @@ def _orbit_panel(ax: plt.Axes) -> None:
 
     ax.add_patch(
         FancyArrowPatch(
-            (0.50, 0.57),
-            (0.41, 0.49),
+            (frame_left + 0.29, frame_bottom + 0.34),
+            (frame_left + 0.18, frame_bottom + 0.22),
             arrowstyle="->",
             mutation_scale=14,
             linewidth=1.6,
             color=ACCENT,
         )
     )
-    ax.text(0.54, 0.53, "$(p,s)$", ha="left", va="center", fontsize=14, color=ACCENT)
+    ax.text(frame_left + 0.31, frame_bottom + 0.25, "$(p,s)$", ha="left", va="center", fontsize=14, color=ACCENT)
     ax.text(
         0.50,
         0.12,
@@ -171,51 +192,37 @@ def _orbit_panel(ax: plt.Axes) -> None:
 
 def _majority_panel(ax: plt.Axes) -> None:
     _panel(ax, 3, "Majority-vote fit")
-    ax.text(
-        0.50,
-        0.78,
-        "Count ones and zeros in each orbit.",
-        ha="center",
-        va="bottom",
-        fontsize=12,
-        color=TEXT,
-    )
-    ax.text(0.50, 0.72, "Choose the majority bit.", ha="center", va="bottom", fontsize=12, color=TEXT)
+    _panel_subtitle(ax, "Count ones and zeros in each orbit.", "Choose the majority bit.")
 
-    table_x, table_y, table_w, table_h = 0.23, 0.22, 0.38, 0.46
+    frame_left, frame_bottom, frame_size = 0.20, 0.20, 0.50
+    _square_frame(ax, left=frame_left, bottom=frame_bottom, size=frame_size)
+    table_x, table_y, table_w, table_h = frame_left + 0.05, frame_bottom + 0.09, 0.25, 0.40
     ax.add_patch(Rectangle((table_x, table_y), table_w, table_h, facecolor="white", edgecolor="#9a9a9a", linewidth=1.0))
     row_h = table_h / 4
-    col_split = table_x + 0.45 * table_w
+    col_split = table_x + 0.40 * table_w
     for i in range(1, 4):
         ax.plot([table_x, table_x + table_w], [table_y + i * row_h, table_y + i * row_h], color="#c0c0c0", linewidth=0.8)
     ax.plot([col_split, col_split], [table_y, table_y + table_h], color="#c0c0c0", linewidth=0.8)
-    ax.text(table_x + 0.225 * table_w, table_y + table_h - row_h / 2, "orbit", ha="center", va="center", fontsize=13, fontweight="bold")
-    ax.text(col_split + 0.275 * table_w, table_y + table_h - row_h / 2, "ones / zeros", ha="center", va="center", fontsize=13, fontweight="bold")
+    ax.text(table_x + 0.20 * table_w, table_y + table_h - row_h / 2, "orbit", ha="center", va="center", fontsize=11.5, fontweight="bold")
+    ax.text(col_split + 0.30 * table_w, table_y + table_h - row_h / 2, "ones /\nzeros", ha="center", va="center", fontsize=11.0, fontweight="bold", linespacing=0.95)
     rows = [("1", "5 / 1"), ("2", "1 / 5"), ("3", "4 / 2")]
     for idx, (orbit, counts) in enumerate(rows, start=1):
         yc = table_y + table_h - (idx + 0.5) * row_h
-        ax.text(table_x + 0.225 * table_w, yc, orbit, ha="center", va="center", fontsize=13)
-        ax.text(col_split + 0.275 * table_w, yc, counts, ha="center", va="center", fontsize=13)
+        ax.text(table_x + 0.20 * table_w, yc, orbit, ha="center", va="center", fontsize=12.5)
+        ax.text(col_split + 0.30 * table_w, yc, counts, ha="center", va="center", fontsize=12.5)
 
-    ax.text(0.72, 0.54, "$B^*(p,s)$", ha="center", va="center", fontsize=16, color=TEXT)
-    ax.add_patch(FancyArrowPatch((0.68, 0.48), (0.84, 0.48), arrowstyle="->", mutation_scale=14, linewidth=1.8, color=ARROW))
+    ax.text(frame_left + 0.42, frame_bottom + 0.33, "$B^*(p,s)$", ha="center", va="center", fontsize=13.8, color=TEXT)
+    ax.add_patch(FancyArrowPatch((frame_left + 0.28, frame_bottom + 0.25), (frame_left + 0.44, frame_bottom + 0.25), arrowstyle="->", mutation_scale=14, linewidth=1.8, color=ARROW))
     ax.text(0.50, 0.13, "Residual mask: $M = U \\oplus B^*$.", ha="center", va="center", fontsize=14, color=TEXT)
 
 
 def _score_panel(ax: plt.Axes) -> None:
     _panel(ax, 4, "Score and select")
-    ax.text(
-        0.50,
-        0.78,
-        "NML = fit + complexity.",
-        ha="center",
-        va="bottom",
-        fontsize=12,
-        color=TEXT,
-    )
-    ax.text(0.50, 0.72, "Keep the best period.", ha="center", va="bottom", fontsize=12, color=TEXT)
+    _panel_subtitle(ax, "Score fit and complexity.", "Keep the best period.")
 
-    left, right, bottom, top = 0.07, 0.32, 0.23, 0.62
+    frame_left, frame_bottom, frame_size = 0.14, 0.18, 0.54
+    _square_frame(ax, left=frame_left, bottom=frame_bottom, size=frame_size)
+    grid_left, grid_bottom, grid_size = frame_left + 0.04, frame_bottom + 0.16, 0.22
     data = np.array(
         [
             [0, 1, 1, 0],
@@ -225,19 +232,28 @@ def _score_panel(ax: plt.Axes) -> None:
         ],
         dtype=np.uint8,
     )
-    _draw_binary_grid(ax, data, left=left, bottom=bottom, width=right - left, height=top - bottom)
-    ax.text((left + right) / 2, top + 0.03, "$B^*(p,s)$", ha="center", va="bottom", fontsize=15)
+    _square_frame(ax, left=grid_left, bottom=grid_bottom, size=grid_size)
+    left, bottom, width, height = _fit_rect_in_square(
+        rows=data.shape[0],
+        cols=data.shape[1],
+        left=grid_left,
+        bottom=grid_bottom,
+        size=grid_size,
+        pad=0.08,
+    )
+    _draw_binary_grid(ax, data, left=left, bottom=bottom, width=width, height=height)
+    ax.text(grid_left + grid_size / 2, grid_bottom + grid_size + 0.035, "$B^*(p,s)$", ha="center", va="bottom", fontsize=14.5)
 
     box_specs = [
-        (0.42, 0.56, 0.47, 0.13, r"$\mathrm{NLL}(p,s)=\sum_j n_j H_b(\hat{\theta}_j)$"),
-        (0.42, 0.39, 0.50, 0.13, r"$\mathrm{NML}=\mathrm{NLL}+\frac{1}{2}\sum_j \log_2 n_j$"),
-        (0.42, 0.12, 0.50, 0.15, r"$p^*=\arg\min_p\ \min_s\,\mathrm{NML}(p,s)$"),
+        (0.44, 0.56, 0.43, 0.14, r"fit score $=\sum_j n_j H_b(\hat{\theta}_j)$", 12.2),
+        (0.44, 0.39, 0.43, 0.14, r"NML $=$ fit $+\frac{1}{2}\sum_j \log_2 n_j$", 12.2),
+        (0.44, 0.20, 0.43, 0.15, "Lowest NML wins.", 13.0),
     ]
-    for x, y, w, h, text in box_specs:
+    for x, y, w, h, text, fontsize in box_specs:
         ax.add_patch(Rectangle((x, y), w, h, facecolor="white", edgecolor="#c8c8c8", linewidth=1.0))
-        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=14, color=TEXT)
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fontsize, color=TEXT)
 
-    ax.add_patch(FancyArrowPatch((0.67, 0.37), (0.67, 0.28), arrowstyle="->", mutation_scale=14, linewidth=1.6, color=ACCENT))
+    ax.add_patch(FancyArrowPatch((0.655, 0.37), (0.655, 0.30), arrowstyle="->", mutation_scale=14, linewidth=1.6, color=ACCENT))
     ax.text(
         0.50,
         0.10,
