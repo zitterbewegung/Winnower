@@ -6,12 +6,14 @@ This repo now has a practical split between figures that can be regenerated nati
 
 These are script-generated with Matplotlib and can now be exported directly as `pdf` and `svg`:
 
+- `scripts/alife_algorithm_figure.py`
 - `scripts/alife_rule_diagrams.py`
 - `scripts/alife_stabilization_summary.py`
 
 Recommended commands:
 
 ```bash
+./venv/bin/python scripts/alife_algorithm_figure.py --export-formats png,pdf,svg
 ./venv/bin/python scripts/alife_rule_diagrams.py --export-formats png,pdf
 ./venv/bin/python scripts/alife_stabilization_summary.py --export-formats png,pdf,svg
 ```
@@ -24,17 +26,7 @@ This is the preferred route for:
 
 For the large array-based rule panels, `pdf` is the more practical editable format. Bulk `svg` export is technically possible but slow and often produces unwieldy files.
 
-## Existing vector source: convert as needed
-
-`algorithm_detailed.pdf` already exists as a native Matplotlib PDF. That means it is already much more editable than the checked-in PNG.
-
-Useful workflow:
-
-```bash
-inkscape algorithm_detailed.pdf --export-type=svg --export-filename=outputs/alife_2026/editable_figures/algorithm_detailed.svg
-```
-
-For manual editing, importing the PDF directly into Inkscape or Illustrator is often better than editing the PNG.
+`algorithm_detailed.{png,pdf,svg}` now comes from the native regeneration script, so it no longer depends on PDF conversion.
 
 ## What not to do unless necessary
 
