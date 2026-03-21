@@ -1,0 +1,208 @@
+\documentclass[12pt]{article}
+\usepackage[paperwidth=48in,paperheight=36in,margin=0.75in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.96]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsmath}
+\usepackage{microtype}
+
+\graphicspath{
+  {../alife_lba_bundle/figures/}
+  {../outputs/alife_2026/rule_diagrams/}
+  {../figures/}
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.28em}
+\setlist[itemize]{leftmargin=1.2em, itemsep=0.2em, topsep=0.2em}
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.22}
+
+\definecolor{PosterBg}{HTML}{F5F1E8}
+\definecolor{PosterInk}{HTML}{1B1F23}
+\definecolor{PosterAccent}{HTML}{8A3B2E}
+\definecolor{PosterAccentDark}{HTML}{5D281F}
+\definecolor{PosterTeal}{HTML}{2F6874}
+\definecolor{PosterGold}{HTML}{B86125}
+\definecolor{PosterMuted}{HTML}{ECE6DA}
+
+\newcommand{\SectionHeader}[1]{%
+  \vspace{0.35em}%
+  \noindent\colorbox{PosterAccent}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \vspace{0.15em}\color{white}\fontsize{22}{26}\selectfont\bfseries #1\vspace{0.15em}%
+    }%
+  }%
+  \vspace{0.35em}%
+}
+
+\newcommand{\Callout}[1]{%
+  \noindent\colorbox{PosterMuted}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+      \vspace{0.25em}\fontsize{18}{22}\selectfont #1\vspace{0.25em}%
+    }%
+  }%
+}
+
+\begin{document}
+\pagecolor{PosterBg}
+\color{PosterInk}
+\fontsize{18}{23}\selectfont
+
+{\fontsize{40}{44}\selectfont\bfseries Selecting Relative-Periodic Domains in Cellular Automaton Spacetime with Bernoulli NML\par}
+\vspace{0.2em}
+{\fontsize{20}{24}\selectfont Joshua Herman\hfill ALIFE 2026 poster draft\hfill Affiliation to be added\par}
+\vspace{0.35em}
+\Callout{\textbf{Main message.} Fit a global periodic scaffold, score candidate periods and shifts with Bernoulli NML, and analyze the residual defect mask. Across 1D, 2D, and 3D case studies, the selected period either stabilizes immediately or changes only a small number of times before locking.}
+
+\vspace{0.45em}
+\noindent
+\begin{minipage}[t]{0.29\textwidth}
+
+\SectionHeader{Question}
+Cellular automata often show broad periodic domains together with particles, interfaces, and other persistent defects. The practical problem is to decide \emph{which global period and shift best explain a finite observed spacetime}.
+
+\Callout{This is a front end rather than a full causal-state reconstruction: find a good scaffold first, then study what remains.}
+
+\SectionHeader{Selector}
+For each candidate period $p$ and shift $\mathbf{s}$:
+\begin{itemize}
+  \item the translation $(t,\mathbf{x}) \mapsto (t+p,\mathbf{x}+\mathbf{s})$ partitions spacetime into orbit classes;
+  \item majority vote on each orbit gives the nearest relative-periodic background $B^*(p,\mathbf{s})$;
+  \item the residual mask is $M = U \oplus B^*(p,\mathbf{s})$;
+  \item candidates are scored by Bernoulli NML rather than raw residual or raw likelihood.
+\end{itemize}
+
+\[
+\mathrm{NML}(p,\mathbf{s}) =
+\sum_j n_j H_b(\hat{\theta}_j)
+\;+\;
+\frac{1}{2}\sum_j \log_2 n_j
+\]
+
+The first term rewards pure orbit classes. The second term keeps larger templates from winning only because they have more parameters.
+
+\vspace{0.35em}
+\includegraphics[width=\linewidth]{algorithm_detailed.png}
+
+\SectionHeader{Why The Penalty Matters}
+{\fontsize{15}{19}\selectfont
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Selector & What happens on 105 nontrivial LifeWiki rules at $T=100$ \\
+\midrule
+Residual minimization & 16 pick $p=1$, 8 pick $p=2$, and 81 pick period $\ge 4$ \\
+Bernoulli NLL & All 105 pick the maximum tested period \\
+Bernoulli NML & 97 pick $p=1$, 7 pick $p=2$, and 1 picks $p=8$ \\
+\bottomrule
+\end{tabularx}
+}
+
+\vspace{0.35em}
+This is the cleanest poster-side argument for using NML: without complexity control, the selector systematically overfits.
+
+\end{minipage}\hfill
+\begin{minipage}[t]{0.39\textwidth}
+
+\SectionHeader{What The Decomposition Looks Like}
+Each panel shows \textbf{Observed}, \textbf{Background}, and \textbf{Defect}. The defect view isolates the structure that the scaffold does not explain.
+
+\includegraphics[width=\linewidth]{presentation_rules_2d.png}
+
+{\fontsize{16}{20}\selectfont
+\textbf{2D focal cases.}
+\begin{itemize}
+  \item \textbf{Diamoeba}: large breathing domains, selected winner $(p,\mathbf{s})=(1,(0,0))$, defect rate $0.077$.
+  \item \textbf{Maze with Mice}: highly coherent maze background, selected winner $(2,(0,0))$, defect rate $0.008$.
+  \item \textbf{S37/B11}: low-defect background plus persistent residual structure, selected winner $(2,(0,0))$, defect rate $0.015$ in the presentation run.
+\end{itemize}
+}
+
+\vspace{0.35em}
+\begin{minipage}[t]{0.49\linewidth}
+\includegraphics[width=\linewidth]{presentation_rules_1d.png}
+\vspace{0.2em}
+{\fontsize{14}{17}\selectfont \textbf{1D.} ECA-54 locks to period $4$. ECA-110 stabilizes to $(p,s)=(4,-2)$ under the period-first selector.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\includegraphics[width=\linewidth]{presentation_rules_3d.png}
+\vspace{0.2em}
+{\fontsize{14}{17}\selectfont \textbf{3D.} The same decomposition still works on volumetric rules; the tested diamoeba3d case settles to period $1$.}
+\end{minipage}
+
+\end{minipage}\hfill
+\begin{minipage}[t]{0.29\textwidth}
+
+\SectionHeader{Stabilization Across Horizon}
+\includegraphics[width=0.98\linewidth]{stabilization_summary.png}
+
+{\fontsize{16}{20}\selectfont
+\begin{itemize}
+  \item \textbf{ECA-54} locks immediately to period $4$.
+  \item \textbf{ECA-110} passes through a short transient and then locks to period $4$ with shift $-2$.
+  \item \textbf{S24/B11} changes later, as longer horizons reveal additional periodic structure in the residual.
+  \item \textbf{Diamoeba3d} corrects a small-sample transient and then locks to period $1$.
+\end{itemize}
+}
+
+\SectionHeader{Controls And Robustness}
+{\fontsize{15}{19}\selectfont
+\begin{tabularx}{\linewidth}{@{}l>{\raggedleft\arraybackslash}p{1.35in}>{\raggedleft\arraybackslash}p{1.35in}@{}}
+\toprule
+2D summary & Mean period & Mean defect rate \\
+\midrule
+Original runs & 2.2 & 0.014 \\
+Bernoulli i.i.d. & 1.0 & 0.384 \\
+Space shuffled & 1.0 & 0.384 \\
+Time shuffled & 1.0 & 0.114 \\
+\bottomrule
+\end{tabularx}
+}
+
+\vspace{0.35em}
+The controls collapse toward period $1$ and much worse residual quality, which is consistent with the selector responding to real spacetime structure rather than generic occupancy statistics.
+
+\vspace{0.4em}
+{\fontsize{15}{19}\selectfont
+\begin{tabularx}{\linewidth}{@{}l>{\raggedleft\arraybackslash}p{1.0in}>{\raggedleft\arraybackslash}p{1.2in}>{\raggedleft\arraybackslash}X@{}}
+\toprule
+Rule & Modal $p$ & Mean defect rate & Seed consistency \\
+\midrule
+S14/B11 & 1 & 0.0059 & 10 / 10 \\
+S24/B11 & 2 & 0.0278 & 10 / 10 \\
+S37/B11 & 2 & 0.0441 & 10 / 10 \\
+S11/B37 & 4 & 0.0275 & 7 / 10 \\
+\bottomrule
+\end{tabularx}
+}
+
+\vspace{0.35em}
+For \textbf{S37/B11}, the late defect density stays close to $0.011$ across $32^2$ to $192^2$ grids, with mean late defects growing from $11.4$ to $428.5$. That is the strongest poster-side application case for persistent structured residuals.
+
+\SectionHeader{Takeaways}
+\begin{itemize}
+  \item A single global selector gives usable periodic scaffolds in 1D, 2D, and 3D CA.
+  \item The complexity penalty is not cosmetic. It changes the selected period qualitatively.
+  \item Residual masks expose structured defects and make broad surveys feasible.
+  \item The method is a front end: it does not replace computational mechanics, but it produces compact domain hypotheses worth following up with richer local analyses.
+\end{itemize}
+
+\end{minipage}
+
+\vfill
+\hrule
+\vspace{0.35em}
+{\fontsize{13}{16}\selectfont
+\textbf{Selected sources inside this repo.}
+Algorithm and stabilization figures from \texttt{alife\_lba\_bundle/figures}. Presentation panels from \texttt{outputs/alife\_2026/rule\_diagrams}. Control summaries from \texttt{outputs/alife\_2026/null\_controls}. Multi-seed and scaling summaries from \texttt{outputs/strengthening\_v2}. Background context: Crutchfield \& Hanson (1997), Gr\"unwald (2007), Rupe \& Crutchfield (2018), Shalizi et al. (2006).
+}
+
+\end{document}
