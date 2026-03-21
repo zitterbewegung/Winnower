@@ -10,6 +10,10 @@ These are script-generated with Matplotlib and can now be exported directly as `
 - `scripts/alife_rule_diagrams.py`
 - `scripts/alife_stabilization_summary.py`
 
+For the poster algorithm figure there is now also a native TikZ source:
+
+- `poster/figures/algorithm_detailed_tikz.tex`
+
 Recommended commands:
 
 ```bash
@@ -26,7 +30,7 @@ This is the preferred route for:
 
 For the large array-based rule panels, `pdf` is the more practical editable format. Bulk `svg` export is technically possible but slow and often produces unwieldy files.
 
-`algorithm_detailed.{png,pdf,svg}` now comes from the native regeneration script, so it no longer depends on PDF conversion.
+`algorithm_detailed_tikz.tex` is the most layout-stable editable source for the poster version of the algorithm figure. The script-generated `algorithm_detailed.{png,pdf,svg}` remains useful for quick export and iteration.
 
 ## What not to do unless necessary
 
