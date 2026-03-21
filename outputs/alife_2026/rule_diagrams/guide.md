@@ -26,10 +26,10 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 
 ## How to read the colors
 
-- Light cells use `#f4f3ee` and mean value `0`.
-- Dark cells use `#111111` and mean value `1`.
-- Red cells use `#c83f49` and mark disagreement with the selected relative-periodic background.
-- In mechanism figures, `#b86125` marks birth counts and `#2f6874` marks survival counts.
+- Light cells use `#fcdeb9` and mean value `0`.
+- Dark cells use `#3b3b3b` and mean value `1`.
+- Red cells use `#b00300` and mark disagreement with the selected relative-periodic background.
+- In mechanism figures, `#b00300` marks birth counts and `#5f5f5f` marks survival counts.
 
 ## Representative 1D rules
 

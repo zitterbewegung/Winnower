@@ -11,9 +11,9 @@ from matplotlib.patches import Patch
 
 from .repair import RelativePeriodicFit
 
-ZERO_COLOR = "#f4f3ee"
-ONE_COLOR = "#111111"
-DEFECT_COLOR = "#c83f49"
+ZERO_COLOR = "#fcdeb9"
+ONE_COLOR = "#3b3b3b"
+DEFECT_COLOR = "#b00300"
 
 BINARY_CMAP = ListedColormap([ZERO_COLOR, ONE_COLOR])
 DEFECT_CMAP = ListedColormap([ZERO_COLOR, DEFECT_COLOR])
@@ -21,8 +21,8 @@ DEFECT_CMAP = ListedColormap([ZERO_COLOR, DEFECT_COLOR])
 
 def _binary_legend_handles() -> list[Patch]:
     return [
-        Patch(facecolor=ZERO_COLOR, edgecolor="#444444", label="0 = white"),
-        Patch(facecolor=ONE_COLOR, edgecolor="#444444", label="1 = black"),
+        Patch(facecolor=ZERO_COLOR, edgecolor="#444444", label="0 = light"),
+        Patch(facecolor=ONE_COLOR, edgecolor="#444444", label="1 = dark"),
     ]
 
 

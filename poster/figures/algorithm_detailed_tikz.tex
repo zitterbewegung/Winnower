@@ -9,10 +9,11 @@
 \definecolor{Ink}{HTML}{3B3B3B}
 \definecolor{Accent}{HTML}{B00300}
 \definecolor{Arrow}{HTML}{5F5F5F}
-\definecolor{Border}{HTML}{DBDBDB}
-\definecolor{PanelBg}{HTML}{FFFFFF}
-\definecolor{Zero}{HTML}{F7F2EA}
-\definecolor{One}{HTML}{222222}
+\definecolor{Border}{HTML}{CFC3B3}
+\definecolor{PanelBg}{HTML}{EFE2D0}
+\definecolor{CardBg}{HTML}{FCDEB9}
+\definecolor{Zero}{HTML}{FCDEB9}
+\definecolor{One}{HTML}{3B3B3B}
 \definecolor{OrbitA}{HTML}{FCDEB9}
 \definecolor{OrbitB}{HTML}{EFE2D0}
 \definecolor{OrbitC}{HTML}{E2E2E2}
@@ -24,8 +25,8 @@
   panel sub/.style={text=Ink,align=center,text width=3.75cm,font=\fontsize{8.4}{9.7}\selectfont},
   panel foot/.style={text=Ink,align=center,text width=4.05cm,font=\fontsize{8.0}{9.1}\selectfont},
   soft frame/.style={draw=black!20,line width=0.7pt},
-  row box/.style={draw=black!18,fill=white,line width=0.6pt,rounded corners=2.0pt},
-  score box/.style={draw=black!18,fill=white,line width=0.6pt,rounded corners=2.0pt},
+  row box/.style={draw=black!18,fill=CardBg,line width=0.6pt,rounded corners=2.0pt},
+  score box/.style={draw=black!18,fill=CardBg,line width=0.6pt,rounded corners=2.0pt},
   winner box/.style={draw=Arrow!55!black,fill=WinnerBg,line width=0.8pt,rounded corners=2.0pt}
 }
 
@@ -60,7 +61,7 @@
     \fill[PanelBg] (0,0) rectangle (4.8,5.95);
     \draw[draw=Border, line width=0.8pt] (0,0) rectangle (4.8,5.95);
     \fill[Accent] (0.38,5.69) circle[radius=0.20];
-    \node[text=white, font=\bfseries\small] at (0.38,5.69) {#2};
+    \node[text=PanelBg, font=\bfseries\small] at (0.38,5.69) {#2};
     \node[panel title] at (0.96,5.67) {#3};
   \end{scope}
 }
@@ -78,6 +79,7 @@
 
 \begin{document}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Latex,line cap=round,line join=round]
+  \fill[PanelBg] (-0.18,-0.16) rectangle (20.43,7.16);
   \node[anchor=west, text=Ink, font=\bfseries\fontsize{17}{19}\selectfont] at (0,6.85) {Relative-periodic domain selection by Bernoulli NML};
 
   \Panel{0.0}{1}{Observed spacetime}

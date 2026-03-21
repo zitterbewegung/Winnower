@@ -68,11 +68,14 @@ PAPER_MECHANISMS_CAPTION = (
     "These mechanism diagrams clarify the local rule families whose global spatiotemporal organization is analyzed by the NML selector."
 )
 
-BIRTH_COLOR = "#b86125"
-SURVIVE_COLOR = "#2f6874"
-CENTER_COLOR = "#e4d9c7"
-GRID_COLOR = "#8b867d"
-TEXT_COLOR = "#1f1b16"
+ALIFE_BG = "#efe2d0"
+ALIFE_CARD = "#fcdeb9"
+TITLE_COLOR = "#b00300"
+BIRTH_COLOR = "#b00300"
+SURVIVE_COLOR = "#5f5f5f"
+CENTER_COLOR = "#fcdeb9"
+GRID_COLOR = "#cfc3b3"
+TEXT_COLOR = "#3b3b3b"
 
 RULE_NOTES = {
     "ECA-30": "Chaotic texture with little large-scale repetition; the selector still prefers a simple background.",
@@ -250,8 +253,9 @@ def _build_payload(case: ALifeCase, *, seed: int) -> DiagramPayload:
 
 
 def _decorate_binary_axis(ax: plt.Axes, title: str | None = None) -> None:
+    ax.set_facecolor(ALIFE_BG)
     if title:
-        ax.set_title(title, fontsize=10)
+        ax.set_title(title, fontsize=10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -259,6 +263,9 @@ def _decorate_binary_axis(ax: plt.Axes, title: str | None = None) -> None:
 
 
 def _save_diagram(fig, path: Path) -> None:
+    fig.patch.set_facecolor(ALIFE_BG)
+    for ax in fig.axes:
+        ax.set_facecolor(ALIFE_BG)
     save_figure(fig, path, extra_formats=EXPORT_FORMATS)
 
 
@@ -309,6 +316,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
             "Representative 1D rules: raw evolution, selected background, and what the fit leaves behind",
             fontsize=13,
             y=0.995,
+            color=TITLE_COLOR,
         )
         fig.text(
             0.5,
@@ -317,6 +325,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
             ha="center",
             va="bottom",
             fontsize=9,
+            color=TEXT_COLOR,
         )
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
         _save_diagram(fig, path)
@@ -403,8 +412,8 @@ def _plot_nd_overview(payloads: list[DiagramPayload], *, title: str, caption: st
                 ax.imshow(image, interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
                 _decorate_binary_axis(ax)
 
-        fig.suptitle(title, fontsize=13, y=0.995)
-        fig.text(0.5, 0.012, caption, ha="center", va="bottom", fontsize=9)
+        fig.suptitle(title, fontsize=13, y=0.995, color=TITLE_COLOR)
+        fig.text(0.5, 0.012, caption, ha="center", va="bottom", fontsize=9, color=TEXT_COLOR)
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
         _save_diagram(fig, path)
         plt.close(fig)
@@ -474,6 +483,7 @@ def _plot_presentation_1d(payloads: list[DiagramPayload], path: Path) -> None:
             "Presentation set: 1D rules with the clearest periodic structure or drift",
             fontsize=14,
             y=0.995,
+            color=TITLE_COLOR,
         )
         fig.text(
             0.5,
@@ -482,6 +492,7 @@ def _plot_presentation_1d(payloads: list[DiagramPayload], path: Path) -> None:
             ha="center",
             va="bottom",
             fontsize=9.5,
+            color=TEXT_COLOR,
         )
         fig.tight_layout(rect=(0.0, 0.045, 1.0, 0.975))
         _save_diagram(fig, path)
@@ -548,6 +559,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
             "Presentation set: larger 2D views cropped around the active region",
             fontsize=14,
             y=0.995,
+            color=TITLE_COLOR,
         )
         fig.text(
             0.5,
@@ -556,6 +568,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
             ha="center",
             va="bottom",
             fontsize=9.5,
+            color=TEXT_COLOR,
         )
         fig.tight_layout(rect=(0.0, 0.045, 1.0, 0.975))
         _save_diagram(fig, path)
@@ -622,6 +635,7 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
             "Presentation set: 3D rules shown as max projections instead of single midplane slices",
             fontsize=14,
             y=0.995,
+            color=TITLE_COLOR,
         )
         fig.text(
             0.5,
@@ -630,6 +644,7 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
             ha="center",
             va="bottom",
             fontsize=9.5,
+            color=TEXT_COLOR,
         )
         fig.tight_layout(rect=(0.0, 0.045, 1.0, 0.975))
         _save_diagram(fig, path)
@@ -674,10 +689,11 @@ def _draw_count_rule(ax: plt.Axes, *, birth: list[int], survive: list[int], max_
         ax.set_xticklabels(labels, fontsize=8)
     ax.set_yticks([])
     ax.set_xlabel("live-neighbor count", fontsize=9)
-    ax.set_title("Local threshold rule", fontsize=10)
+    ax.xaxis.label.set_color(TEXT_COLOR)
+    ax.set_title("Local threshold rule", fontsize=10, color=TEXT_COLOR)
     for spine in ax.spines.values():
         spine.set_visible(False)
-    ax.tick_params(axis="x", length=0)
+    ax.tick_params(axis="x", length=0, colors=TEXT_COLOR)
 
 
 def _draw_2d_neighborhood(ax: plt.Axes) -> None:
@@ -690,7 +706,7 @@ def _draw_2d_neighborhood(ax: plt.Axes) -> None:
             ax.add_patch(rect)
     ax.text(1.0, 1.0, "cell", ha="center", va="center", fontsize=8, color=TEXT_COLOR)
     ax.text(1.0, -0.38, "count live neighbors in the 8 surrounding cells", ha="center", va="top", fontsize=8.5, color=TEXT_COLOR)
-    ax.set_title("2D Moore neighborhood", fontsize=10)
+    ax.set_title("2D Moore neighborhood", fontsize=10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -721,7 +737,7 @@ def _draw_3d_neighborhood(ax: plt.Axes) -> None:
     draw_layer(3.2, "z", center=True)
     draw_layer(6.4, "z + 1", center=False)
     ax.text(4.2, -0.28, "count all live voxels except the center cell = 26 neighbors", ha="center", va="top", fontsize=8.3, color=TEXT_COLOR)
-    ax.set_title("3D Moore neighborhood", fontsize=10)
+    ax.set_title("3D Moore neighborhood", fontsize=10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -739,7 +755,7 @@ def _draw_eca_table(ax: plt.Axes, rule: int) -> None:
     ax.set_yticks(range(8))
     ax.set_yticklabels([f"{bits[0]}{bits[1]}{bits[2]}" for bits, _ in rows], fontsize=8)
     ax.axvline(2.5, color=GRID_COLOR, linewidth=1.2)
-    ax.set_title(f"Local update table for rule {rule}", fontsize=10)
+    ax.set_title(f"Local update table for rule {rule}", fontsize=10, color=TEXT_COLOR)
     ax.set_xticks(np.arange(-0.5, 4.0, 1.0), minor=True)
     ax.set_yticks(np.arange(-0.5, 8.0, 1.0), minor=True)
     ax.grid(which="minor", color=GRID_COLOR, linewidth=0.8)
@@ -788,6 +804,7 @@ def _plot_1d_mechanisms(cases: tuple[ALifeCase, ...], path: Path) -> None:
             "1D representative rules: each Wolfram rule is just an 8-row lookup table on three-cell neighborhoods",
             fontsize=13,
             y=0.995,
+            color=TITLE_COLOR,
         )
         fig.text(
             0.5,
@@ -796,6 +813,7 @@ def _plot_1d_mechanisms(cases: tuple[ALifeCase, ...], path: Path) -> None:
             ha="center",
             va="bottom",
             fontsize=9,
+            color=TEXT_COLOR,
         )
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
         _save_diagram(fig, path)
@@ -854,8 +872,8 @@ def _plot_totalistic_mechanisms(
 
             _draw_count_rule(axes[row, 2], birth=birth, survive=survive, max_neighbors=max_neighbors)
 
-        fig.suptitle(title, fontsize=13, y=0.995)
-        fig.text(0.5, 0.012, caption, ha="center", va="bottom", fontsize=9)
+        fig.suptitle(title, fontsize=13, y=0.995, color=TITLE_COLOR)
+        fig.text(0.5, 0.012, caption, ha="center", va="bottom", fontsize=9, color=TEXT_COLOR)
         fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.97))
         _save_diagram(fig, path)
         plt.close(fig)
@@ -1024,7 +1042,7 @@ def _compose_paper_figure(
                 fontweight="bold",
                 color=TEXT_COLOR,
                 bbox={
-                    "facecolor": "white",
+                    "facecolor": ALIFE_CARD,
                     "edgecolor": "none",
                     "boxstyle": "round,pad=0.25",
                     "alpha": 0.92,
@@ -1040,14 +1058,14 @@ def _compose_paper_figure(
                 fontsize=10,
                 color=TEXT_COLOR,
                 bbox={
-                    "facecolor": "white",
+                    "facecolor": ALIFE_CARD,
                     "edgecolor": "none",
                     "boxstyle": "round,pad=0.25",
                     "alpha": 0.92,
                 },
             )
             if index < len(panel_paths) - 1:
-                ax.plot([0.0, 1.0], [0.0, 0.0], transform=ax.transAxes, color="#d7d1c8", linewidth=1.0)
+                ax.plot([0.0, 1.0], [0.0, 0.0], transform=ax.transAxes, color=GRID_COLOR, linewidth=1.0)
 
         fig.tight_layout(rect=(0.0, 0.0, 1.0, 1.0))
         _save_diagram(fig, path)

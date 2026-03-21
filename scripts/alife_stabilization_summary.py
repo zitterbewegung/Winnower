@@ -34,8 +34,8 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
         "period": "#b00300",
         "margin": "#5f5f5f",
     }
-    face = "#ffffff"
-    grid = "#dbdbdb"
+    face = "#efe2d0"
+    grid = "#cfc3b3"
 
     for col, rule in enumerate(FOCUS_RULES):
         group = df[df["rule"] == rule].sort_values("T")
@@ -65,7 +65,7 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
         for spine in ax_margin.spines.values():
             spine.set_color("#cfc3b3")
 
-    fig.patch.set_facecolor("#ffffff")
+    fig.patch.set_facecolor("#efe2d0")
     fig.suptitle("Representative stabilization patterns across 1D, 2D, and 3D rules", fontsize=14, y=0.98, color="#b00300")
     fig.text(
         0.5,
