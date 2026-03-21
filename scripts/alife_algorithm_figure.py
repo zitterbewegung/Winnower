@@ -250,8 +250,13 @@ def _score_panel(ax: plt.Axes) -> None:
 
 
 def build_figure(output_path: Path, *, extra_formats: tuple[str, ...], bundle_png: Path | None) -> None:
-    fig, axes = plt.subplots(1, 4, figsize=(16.2, 4.9))
-    fig.subplots_adjust(left=0.02, right=0.98, top=0.86, bottom=0.08, wspace=0.10)
+    fig, axes = plt.subplots(
+        1,
+        4,
+        figsize=(18.8, 4.5),
+        gridspec_kw={"width_ratios": [1.02, 1.02, 1.00, 1.12]},
+    )
+    fig.subplots_adjust(left=0.018, right=0.982, top=0.87, bottom=0.08, wspace=0.075)
     fig.suptitle("Relative-periodic domain selection by Bernoulli NML", fontsize=22, fontweight="bold", y=0.965)
 
     _observed_panel(axes[0])
