@@ -253,11 +253,11 @@ def build_figure(output_path: Path, *, extra_formats: tuple[str, ...], bundle_pn
     fig, axes = plt.subplots(
         1,
         4,
-        figsize=(18.8, 4.5),
-        gridspec_kw={"width_ratios": [1.02, 1.02, 1.00, 1.12]},
+        figsize=(18.0, 5.5),
+        gridspec_kw={"width_ratios": [1.00, 1.00, 0.98, 1.10]},
     )
-    fig.subplots_adjust(left=0.018, right=0.982, top=0.87, bottom=0.08, wspace=0.075)
-    fig.suptitle("Relative-periodic domain selection by Bernoulli NML", fontsize=22, fontweight="bold", y=0.965)
+    fig.subplots_adjust(left=0.018, right=0.982, top=0.89, bottom=0.075, wspace=0.072)
+    fig.suptitle("Relative-periodic domain selection by Bernoulli NML", fontsize=22, fontweight="bold", y=0.968)
 
     _observed_panel(axes[0])
     _orbit_panel(axes[1])
