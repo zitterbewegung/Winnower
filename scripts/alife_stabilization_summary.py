@@ -66,12 +66,13 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
             spine.set_color("#cfc3b3")
 
     fig.patch.set_facecolor("#efe2d0")
-    fig.suptitle("Representative stabilization patterns across 1D, 2D, and 3D rules", fontsize=14, y=0.98, color="#b00300")
+    fig.suptitle("How the selected period stabilizes in representative 1D, 2D, and 3D rules", fontsize=14, y=0.98, color="#b00300")
     fig.text(
         0.5,
         0.02,
-        "Top row: selected period versus horizon. Bottom row: winning margin in bits. "
-        "The selected period either stabilizes immediately or changes only a small number of times before locking.",
+        "The top row shows the selected period as a function of the horizon T. "
+        "The bottom row shows the winning margin in bits. In these representative rules, "
+        "the selected period either stabilizes immediately or changes only a few times before it locks.",
         ha="center",
         va="bottom",
         fontsize=10,

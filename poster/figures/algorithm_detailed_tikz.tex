@@ -80,7 +80,7 @@
 \begin{document}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Latex,line cap=round,line join=round]
   \fill[PanelBg] (-0.18,-0.16) rectangle (20.43,7.16);
-  \node[anchor=west, text=Ink, font=\bfseries\fontsize{17}{19}\selectfont] at (0,6.85) {Relative-periodic domain selection by Bernoulli NML};
+  \node[anchor=west, text=Ink, font=\bfseries\fontsize{17}{19}\selectfont] at (0,6.85) {Selecting a relative-periodic domain with Bernoulli NML};
 
   \Panel{0.0}{1}{Observed spacetime}
   \Panel{5.15}{2}{Orbit classes}
@@ -93,29 +93,29 @@
 
   % Panel 1
   \begin{scope}[shift={(0,0)}]
-    \node[panel sub] at (2.40,4.40) {Choose candidate\\period and shift.\\Example: $p=2$, $s=1$.};
+    \node[panel sub] at (2.40,4.40) {Choose a candidate\\period and shift.\\Here $p=2$ and $s=1$.};
     \draw[soft frame] (1.28,1.56) rectangle (3.52,3.80);
     \node[text=Ink, font=\fontsize{10.5}{10.5}\selectfont] at (2.40,3.74) {$x$};
     \node[text=Ink, font=\fontsize{10.5}{10.5}\selectfont, rotate=90] at (1.03,2.68) {$t$};
     \DrawBinaryGrid{1.50}{1.98}{1/0,2/0,5/0,6/0,2/1,3/1,6/1,7/1,0/2,3/2,4/2,7/2,1/3,2/3,5/3,6/3,2/4,3/4,6/4,7/4,0/5,3/5,4/5,7/5}
-    \node[panel foot] at (2.40,0.56) {Observed CA spacetime $U$ to be explained by a relative-periodic scaffold.};
+    \node[panel foot] at (2.40,0.56) {The observed CA spacetime $U$ is the pattern to be explained.};
   \end{scope}
 
   % Panel 2
   \begin{scope}[shift={(5.15,0)}]
-    \node[panel sub] at (2.40,4.40) {Translate by $(t,x)\mapsto$\\$(t+p,x+s)$.\\One orbit = one template bit.};
+    \node[panel sub] at (2.40,4.56) {Translate by $(t,x)\mapsto$\\$(t+p,x+s)$.\\Each orbit gives one template bit.};
     \draw[soft frame] (1.12,1.36) rectangle (3.68,3.92);
     \foreach \c/\r/\lab/\col in {0/0/1/OrbitA,1/0/2/OrbitB,2/0/3/OrbitC,3/0/4/OrbitD,4/0/1/OrbitA,5/0/2/OrbitB,0/1/4/OrbitD,1/1/1/OrbitA,2/1/2/OrbitB,3/1/3/OrbitC,4/1/4/OrbitD,5/1/1/OrbitA,0/2/3/OrbitC,1/2/4/OrbitD,2/2/1/OrbitA,3/2/2/OrbitB,4/2/3/OrbitC,5/2/4/OrbitD,0/3/2/OrbitB,1/3/3/OrbitC,2/3/4/OrbitD,3/3/1/OrbitA,4/3/2/OrbitB,5/3/3/OrbitC,0/4/1/OrbitA,1/4/2/OrbitB,2/4/3/OrbitC,3/4/4/OrbitD,4/4/1/OrbitA,5/4/2/OrbitB} {
       \fill[\col] ({1.42 + 0.30*\c},{1.76 + 1.50 - 0.30*(\r+1)}) rectangle ++(0.30,0.30);
       \draw[draw=black!28, line width=0.45pt] ({1.42 + 0.30*\c},{1.76 + 1.50 - 0.30*(\r+1)}) rectangle ++(0.30,0.30);
       \node[text=black!65, font=\fontsize{8.8}{8.8}\selectfont] at ({1.42 + 0.30*\c + 0.15},{1.76 + 1.50 - 0.30*(\r+1) + 0.15}) {\lab};
     }
-    \node[panel foot] at (2.40,0.56) {The orbit partition turns a spacetime block into a smaller background template.};
+    \node[panel foot] at (2.40,0.56) {The orbit partition shrinks the spacetime block to a smaller template.};
   \end{scope}
 
   % Panel 3
   \begin{scope}[shift={(10.30,0)}]
-    \node[panel sub] at (2.40,4.40) {Count ones and zeros\\inside each orbit.\\Majority vote sets the bit.};
+    \node[panel sub] at (2.40,4.40) {Count ones and zeros\\on each orbit.\\Majority vote sets the template bit.};
     \node[text=Ink, font=\bfseries\fontsize{8.3}{8.3}\selectfont] at (1.18,3.60) {orbit};
     \node[text=Ink, font=\bfseries\fontsize{8.3}{8.3}\selectfont] at (2.30,3.60) {count};
     \node[text=Ink, font=\bfseries\fontsize{8.3}{8.3}\selectfont] at (3.90,3.60) {vote};
@@ -123,22 +123,22 @@
     \VoteRow{0.76}{2.20}{2}{OrbitB}{1 / 5}{Zero}
     \VoteRow{0.76}{1.52}{3}{OrbitC}{4 / 2}{One}
     \VoteRow{0.76}{0.84}{4}{OrbitD}{2 / 4}{Zero}
-    \node[panel foot] at (2.40,0.40) {Voted bits form $B^*(p,s)$; the residual mask is $M = U \oplus B^*$.};
+    \node[panel foot] at (2.40,0.40) {The voted bits form $B^*(p,s)$, and $M = U \oplus B^*(p,s)$ is the residual mask.};
   \end{scope}
 
   % Panel 4
   \begin{scope}[shift={(15.45,0)}]
-    \node[panel sub] at (2.40,4.40) {Score each candidate\\with Bernoulli NML.\\Lower total is better.};
+    \node[panel sub] at (2.40,4.40) {Score each candidate\\with Bernoulli NML.\\Smaller totals are better.};
     \node[text=Ink, font=\bfseries\fontsize{9.0}{9.0}\selectfont] at (2.40,3.76) {NML$(p,s)$ = fit + penalty};
     \draw[score box] (0.88,2.48) rectangle (4.02,3.16);
     \node[anchor=west, text=Accent, font=\bfseries\fontsize{8.6}{8.6}\selectfont] at (1.04,2.83) {Fit};
-    \node[anchor=west, text=Ink, font=\fontsize{7.6}{8.6}\selectfont] at (2.04,2.83) {pure orbits $\rightarrow$ low entropy};
+    \node[anchor=west, text=Ink, font=\fontsize{7.4}{8.2}\selectfont] at (2.04,2.83) {pure orbits reduce fit};
     \draw[score box] (0.88,1.62) rectangle (4.02,2.30);
     \node[anchor=west, text=Accent, font=\bfseries\fontsize{8.6}{8.6}\selectfont] at (1.04,1.97) {Penalty};
-    \node[anchor=west, text=Ink, font=\fontsize{7.6}{8.6}\selectfont] at (2.04,1.97) {more template bits $\rightarrow$ higher cost};
+    \node[anchor=west, text=Ink, font=\fontsize{7.4}{8.2}\selectfont] at (2.04,1.97) {extra bits raise cost};
     \draw[winner box] (0.88,0.78) rectangle (4.02,1.36);
-    \node[text=Arrow!75!black, align=center, font=\bfseries\fontsize{7.7}{8.3}\selectfont] at (2.45,1.07) {Keep the candidate\\with the smallest total NML.};
-    \node[panel foot] at (2.40,0.28) {Output: selected scaffold + residual mask.};
+    \node[text=Arrow!75!black, align=center, font=\bfseries\fontsize{7.7}{8.3}\selectfont] at (2.45,1.07) {Choose the candidate\\with the smallest total NML.};
+    \node[panel foot] at (2.40,0.28) {Output: the selected scaffold and its residual mask.};
   \end{scope}
 \end{tikzpicture}
 \end{document}

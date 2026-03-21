@@ -220,9 +220,9 @@ def _crop_image(image: np.ndarray, bbox: tuple[int, int, int, int]) -> np.ndarra
 
 def _presentation_panel_meaning() -> str:
     return (
-        "Observed = raw CA state. "
-        "Background = the selected relative-periodic scaffold. "
-        "Defect = the cells the scaffold cannot explain."
+        "The observed panel shows the raw CA state. "
+        "The background panel shows the selected relative-periodic scaffold. "
+        "The defect panel shows the cells that the scaffold cannot explain."
     )
 
 
@@ -425,16 +425,14 @@ def _presentation_text_block(payload: DiagramPayload) -> str:
         [
             payload.case.name,
             _rule_label(payload.case),
-            f"selected (p, s) = ({payload.selected_period}, {payload.selected_shift})",
-            f"winner margin = {payload.winner_margin_bits:.1f} bits",
-            f"defect rate = {payload.defect_rate:.3f}",
+            f"The selected winner is ({payload.selected_period}, {payload.selected_shift}).",
+            f"The margin is {payload.winner_margin_bits:.1f} bits, and the defect rate is {payload.defect_rate:.3f}.",
             "",
-            "Meaning of the views:",
-            "Observed = raw state",
-            "Background = fitted scaffold",
-            "Defect = unexplained residual",
+            "The observed panel shows the raw state.",
+            "The background panel shows the fitted scaffold.",
+            "The defect panel shows the residual cells.",
             "",
-            "Why this rule is useful:",
+            "Why this rule matters:",
             note,
         ]
     )
@@ -480,7 +478,7 @@ def _plot_presentation_1d(payloads: list[DiagramPayload], path: Path) -> None:
                 _decorate_binary_axis(ax)
 
         fig.suptitle(
-            "Presentation set: 1D rules with the clearest periodic structure or drift",
+            "Presentation set: 1D rules with clear periodic structure or drift",
             fontsize=14,
             y=0.995,
             color=TITLE_COLOR,
@@ -556,7 +554,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
                 _decorate_binary_axis(ax)
 
         fig.suptitle(
-            "Presentation set: larger 2D views cropped around the active region",
+            "Presentation set: 2D rules cropped around the active region",
             fontsize=14,
             y=0.995,
             color=TITLE_COLOR,
@@ -564,7 +562,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
         fig.text(
             0.5,
             0.014,
-            _presentation_panel_meaning() + " These panels are cropped to the active region so the domains and residual structures read more clearly.",
+            _presentation_panel_meaning() + " These panels are cropped to the active region so that the domains and residual structures read more clearly.",
             ha="center",
             va="bottom",
             fontsize=9.5,
@@ -632,7 +630,7 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
                 _decorate_binary_axis(ax)
 
         fig.suptitle(
-            "Presentation set: 3D rules shown as max projections instead of single midplane slices",
+            "Presentation set: 3D rules shown as max projections",
             fontsize=14,
             y=0.995,
             color=TITLE_COLOR,
@@ -640,7 +638,7 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
         fig.text(
             0.5,
             0.014,
-            _presentation_panel_meaning() + " The 3D presentation set uses max projections so volumetric structure is less likely to disappear in a flat midplane slice.",
+            _presentation_panel_meaning() + " Max projections make volumetric structure less likely to disappear in a single flat midplane slice.",
             ha="center",
             va="bottom",
             fontsize=9.5,
