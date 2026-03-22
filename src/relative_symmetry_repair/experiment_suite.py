@@ -12,6 +12,7 @@ from matplotlib.colors import BoundaryNorm
 import numpy as np
 import pandas as pd
 
+from .alife_style import BACKGROUND_COLOR, TEXT_COLOR
 from .ca2d import parse_rulestring, random_initial_grid, simulate_2d, simulate_2d_general
 from .ca3d import RULES_3D, random_initial_volume, simulate_3d
 from .eca import random_initial_state, simulate_eca
@@ -35,8 +36,15 @@ PLOT_RC = {
     "font.family": "DejaVu Serif",
     "axes.spines.top": False,
     "axes.spines.right": False,
-    "axes.facecolor": "#fbfaf7",
-    "figure.facecolor": "white",
+    "axes.facecolor": BACKGROUND_COLOR,
+    "figure.facecolor": BACKGROUND_COLOR,
+    "savefig.facecolor": BACKGROUND_COLOR,
+    "savefig.edgecolor": BACKGROUND_COLOR,
+    "text.color": TEXT_COLOR,
+    "axes.labelcolor": TEXT_COLOR,
+    "axes.titlecolor": TEXT_COLOR,
+    "xtick.color": TEXT_COLOR,
+    "ytick.color": TEXT_COLOR,
     "axes.titlesize": 11,
     "axes.labelsize": 10,
     "xtick.labelsize": 9,
@@ -775,7 +783,7 @@ def _plot_grouped_bars(
         ax.set_title(title)
         ax.legend(frameon=False, ncol=2)
         fig.tight_layout()
-        fig.savefig(path, dpi=180, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
 
 
@@ -930,7 +938,7 @@ def _plot_seed_stability_summary(summary: pd.DataFrame, path: Path) -> None:
 
         fig.suptitle("ALIFE seed stability summary")
         fig.tight_layout()
-        fig.savefig(path, dpi=180, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
 
 
@@ -1066,7 +1074,7 @@ def _plot_candidate_range_summary(summary: pd.DataFrame, path: Path) -> None:
 
         fig.suptitle("Candidate-range robustness")
         fig.tight_layout()
-        fig.savefig(path, dpi=180, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
 
 
@@ -1218,7 +1226,7 @@ def _discrete_period_heatmap(
         colorbar = fig.colorbar(image, ax=ax)
         colorbar.set_label("Modal selected period")
         fig.tight_layout()
-        fig.savefig(path, dpi=180, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
 
 
@@ -1372,7 +1380,7 @@ def _plot_eca_atlas_stability(matrix: np.ndarray, *, x_labels: Sequence[str], pa
         colorbar = fig.colorbar(image, ax=ax)
         colorbar.set_label("Modal frequency across seeds")
         fig.tight_layout()
-        fig.savefig(path, dpi=180, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
 
 
@@ -1523,7 +1531,7 @@ def _plot_3d_survey_summary(summary: pd.DataFrame, path: Path) -> None:
         axes[1].set_title("3D rule survey: margin")
 
         fig.tight_layout()
-        fig.savefig(path, dpi=180, bbox_inches="tight")
+        save_figure(fig, path)
         plt.close(fig)
 
 

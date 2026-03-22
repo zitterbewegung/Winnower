@@ -161,7 +161,12 @@ def save_figure(fig, path: str | Path, *, extra_formats: tuple[str, ...] = ()) -
 
     def _save(target: Path) -> None:
         fmt = target.suffix.lower().lstrip(".")
-        kwargs = {"bbox_inches": "tight"}
+        kwargs = {
+            "bbox_inches": "tight",
+            "pad_inches": 0,
+            "facecolor": fig.get_facecolor(),
+            "edgecolor": fig.get_edgecolor(),
+        }
         if fmt in raster_formats:
             kwargs["dpi"] = 180
         fig.savefig(target, **kwargs)
