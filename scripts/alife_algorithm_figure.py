@@ -19,13 +19,15 @@ if str(SRC) not in sys.path:
 
 from relative_symmetry_repair.plotting import save_figure  # noqa: E402
 
-TEXT = "#1b1f23"
-ACCENT = "#2b6cb0"
-ARROW = "#4f9d69"
-BORDER = "#c7c7c7"
-PANEL_BG = "#f7f7f7"
-ZERO = "#f4f3ee"
-ONE = "#222222"
+TEXT = "#3b3b3b"
+ACCENT = "#b00300"
+ARROW = "#5f5f5f"
+BORDER = "#cfc3b3"
+PANEL_BG = "#efe2d0"
+CARD_BG = "#fcdeb9"
+MUTED = "#e2e2e2"
+ZERO = CARD_BG
+ONE = TEXT
 
 
 def _panel(ax: plt.Axes, number: int, title: str) -> None:
@@ -53,15 +55,15 @@ def _draw_binary_grid(ax: plt.Axes, data: np.ndarray, *, left: float, bottom: fl
                     cell_w,
                     cell_h,
                     facecolor=ONE if value else ZERO,
-                    edgecolor="#8a8a8a",
+                    edgecolor=BORDER,
                     linewidth=0.7,
                 )
             )
-    ax.add_patch(Rectangle((left, bottom), width, height, fill=False, edgecolor="#777777", linewidth=1.0))
+    ax.add_patch(Rectangle((left, bottom), width, height, fill=False, edgecolor=ARROW, linewidth=1.0))
 
 
 def _square_frame(ax: plt.Axes, *, left: float, bottom: float, size: float) -> None:
-    ax.add_patch(Rectangle((left, bottom), size, size, facecolor="white", edgecolor="#b7b7b7", linewidth=1.0))
+    ax.add_patch(Rectangle((left, bottom), size, size, fill=False, edgecolor=BORDER, linewidth=1.0))
 
 
 def _fit_rect_in_square(*, rows: int, cols: int, left: float, bottom: float, size: float, pad: float = 0.08) -> tuple[float, float, float, float]:
@@ -90,7 +92,7 @@ def _info_card(
     body: str,
     body_fontsize: float,
 ) -> None:
-    ax.add_patch(Rectangle((left, bottom), width, height, facecolor="white", edgecolor="#c8c8c8", linewidth=1.0))
+    ax.add_patch(Rectangle((left, bottom), width, height, facecolor=CARD_BG, edgecolor=BORDER, linewidth=1.0))
     ax.text(left + 0.03, bottom + height - 0.03, title, ha="left", va="top", fontsize=10.5, fontweight="bold", color=ACCENT)
     ax.text(left + width / 2, bottom + height * 0.44, body, ha="center", va="center", fontsize=body_fontsize, color=TEXT, linespacing=1.0)
 
@@ -139,7 +141,7 @@ def _orbit_panel(ax: plt.Axes) -> None:
     _panel(ax, 2, "Orbit classes")
     _panel_subtitle(ax, "Apply $(t,x)\\mapsto(t+p,x+s)$.", "Same color = same orbit.")
 
-    colors = ["#d7e8fb", "#f8d1d1", "#d4f0e0", "#ffe88b", "#d9c8f0", "#f7d6b8"]
+    colors = [CARD_BG, PANEL_BG, MUTED, "#f3d5d0"]
     labels = np.array(
         [
             [1, 2, 3, 4, 1, 2],
@@ -170,7 +172,7 @@ def _orbit_panel(ax: plt.Axes) -> None:
                     w,
                     h,
                     facecolor=colors[(lab - 1) % len(colors)],
-                    edgecolor="#8c8c8c",
+                    edgecolor=BORDER,
                     linewidth=0.8,
                 )
             )
@@ -181,7 +183,7 @@ def _orbit_panel(ax: plt.Axes) -> None:
                 ha="center",
                 va="center",
                 fontsize=12,
-                color="#444444",
+                color=TEXT,
             )
 
     ax.text(
@@ -202,12 +204,12 @@ def _majority_panel(ax: plt.Axes) -> None:
     frame_left, frame_bottom, frame_size = 0.20, 0.20, 0.50
     _square_frame(ax, left=frame_left, bottom=frame_bottom, size=frame_size)
     table_x, table_y, table_w, table_h = frame_left + 0.05, frame_bottom + 0.09, 0.25, 0.40
-    ax.add_patch(Rectangle((table_x, table_y), table_w, table_h, facecolor="white", edgecolor="#9a9a9a", linewidth=1.0))
+    ax.add_patch(Rectangle((table_x, table_y), table_w, table_h, facecolor=CARD_BG, edgecolor=ARROW, linewidth=1.0))
     row_h = table_h / 4
     col_split = table_x + 0.40 * table_w
     for i in range(1, 4):
-        ax.plot([table_x, table_x + table_w], [table_y + i * row_h, table_y + i * row_h], color="#c0c0c0", linewidth=0.8)
-    ax.plot([col_split, col_split], [table_y, table_y + table_h], color="#c0c0c0", linewidth=0.8)
+        ax.plot([table_x, table_x + table_w], [table_y + i * row_h, table_y + i * row_h], color=BORDER, linewidth=0.8)
+    ax.plot([col_split, col_split], [table_y, table_y + table_h], color=BORDER, linewidth=0.8)
     ax.text(table_x + 0.20 * table_w, table_y + table_h - row_h / 2, "orbit", ha="center", va="center", fontsize=11.5, fontweight="bold")
     ax.text(col_split + 0.30 * table_w, table_y + table_h - row_h / 2, "ones /\nzeros", ha="center", va="center", fontsize=11.0, fontweight="bold", linespacing=0.95)
     rows = [("1", "5 / 1"), ("2", "1 / 5"), ("3", "4 / 2")]
@@ -310,7 +312,8 @@ def build_figure(output_path: Path, *, extra_formats: tuple[str, ...], bundle_pn
         gridspec_kw={"width_ratios": [1.00, 1.00, 0.98, 1.10]},
     )
     fig.subplots_adjust(left=0.018, right=0.982, top=0.89, bottom=0.075, wspace=0.072)
-    fig.suptitle("Relative-periodic domain selection by Bernoulli NML", fontsize=22, fontweight="bold", y=0.968)
+    fig.patch.set_facecolor(PANEL_BG)
+    fig.suptitle("Relative-periodic domain selection by Bernoulli NML", fontsize=22, fontweight="bold", y=0.968, color=ACCENT)
 
     _observed_panel(axes[0])
     _orbit_panel(axes[1])
@@ -327,7 +330,7 @@ def build_figure(output_path: Path, *, extra_formats: tuple[str, ...], bundle_pn
                 transform=fig.transFigure,
                 arrowstyle="simple",
                 mutation_scale=28,
-                color="#b0b9c6",
+                color=ARROW,
                 alpha=0.85,
             )
         )

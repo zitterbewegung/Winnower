@@ -22,7 +22,13 @@ from relative_symmetry_repair.plotting import save_figure  # noqa: E402
 FOCUS_RULES = ("ECA-54", "ECA-110", "S24/B11", "diamoeba3d")
 
 
-def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats: tuple[str, ...]) -> None:
+def build_summary_figure(
+    results_csv: Path,
+    output_path: Path,
+    *,
+    extra_formats: tuple[str, ...],
+    bundle_png: Path | None,
+) -> None:
     df = pd.read_csv(results_csv)
     df = df[df["rule"].isin(FOCUS_RULES)].copy()
     order = {name: idx for idx, name in enumerate(FOCUS_RULES)}
@@ -80,6 +86,8 @@ def build_summary_figure(results_csv: Path, output_path: Path, *, extra_formats:
     )
     fig.tight_layout(rect=(0.02, 0.05, 0.98, 0.95))
     save_figure(fig, output_path, extra_formats=extra_formats)
+    if bundle_png is not None:
+        save_figure(fig, bundle_png)
     plt.close(fig)
 
 
@@ -90,6 +98,11 @@ def main() -> None:
         "--output",
         type=Path,
         default=ROOT / "outputs" / "alife_2026" / "editable_figures" / "stabilization_summary.png",
+    )
+    parser.add_argument(
+        "--bundle-png",
+        type=Path,
+        default=ROOT / "alife_lba_bundle" / "figures" / "stabilization_summary.png",
     )
     parser.add_argument(
         "--export-formats",
@@ -105,7 +118,7 @@ def main() -> None:
         if fmt.strip()
     )
     extra_formats = tuple(fmt for fmt in requested_formats if fmt != args.output.suffix.lower().lstrip("."))
-    build_summary_figure(args.results_csv, args.output, extra_formats=extra_formats)
+    build_summary_figure(args.results_csv, args.output, extra_formats=extra_formats, bundle_png=args.bundle_png)
     print(f"Wrote stabilization summary to {args.output}")
 
 
