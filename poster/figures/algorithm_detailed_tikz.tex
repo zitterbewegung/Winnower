@@ -21,10 +21,11 @@
 \definecolor{WinnerBg}{HTML}{FCDEB9}
 
 \tikzset{
-  panel title/.style={anchor=west,text=Ink,font=\bfseries\fontsize{11.5}{11.5}\selectfont},
-  panel sub/.style={text=Ink,align=center,text width=3.75cm,font=\fontsize{8.4}{9.7}\selectfont},
-  panel foot/.style={text=Ink,align=center,text width=4.05cm,font=\fontsize{8.0}{9.1}\selectfont},
-  soft frame/.style={draw=black!20,line width=0.7pt},
+  figure title/.style={anchor=west,text=Accent,font=\bfseries\fontsize{16.4}{18.4}\selectfont},
+  panel title/.style={anchor=west,text=Accent,font=\bfseries\fontsize{11.0}{13.0}\selectfont},
+  panel sub/.style={text=Ink,align=center,text width=3.75cm,font=\fontsize{8.3}{10.0}\selectfont},
+  panel foot/.style={text=Ink,align=center,text width=4.05cm,font=\fontsize{7.9}{9.7}\selectfont},
+  soft frame/.style={draw=Border,line width=0.7pt},
   row box/.style={draw=black!18,fill=CardBg,line width=0.6pt,rounded corners=2.0pt},
   score box/.style={draw=black!18,fill=CardBg,line width=0.6pt,rounded corners=2.0pt},
   winner box/.style={draw=Arrow!55!black,fill=WinnerBg,line width=0.8pt,rounded corners=2.0pt}
@@ -80,7 +81,7 @@
 \begin{document}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Latex,line cap=round,line join=round]
   \fill[PanelBg] (-0.18,-0.16) rectangle (20.43,7.16);
-  \node[anchor=west, text=Ink, font=\bfseries\fontsize{17}{19}\selectfont] at (0,6.85) {Selecting a relative-periodic domain with Bernoulli NML};
+  \node[figure title] at (0,6.85) {Selecting a relative-periodic domain with Bernoulli NML};
 
   \Panel{0.0}{1}{Observed spacetime}
   \Panel{5.15}{2}{Orbit classes}
@@ -116,9 +117,9 @@
   % Panel 3
   \begin{scope}[shift={(10.30,0)}]
     \node[panel sub] at (2.40,4.40) {Count ones and zeros\\on each orbit.\\Majority vote sets the template bit.};
-    \node[text=Ink, font=\bfseries\fontsize{8.3}{8.3}\selectfont] at (1.18,3.60) {orbit};
-    \node[text=Ink, font=\bfseries\fontsize{8.3}{8.3}\selectfont] at (2.30,3.60) {count};
-    \node[text=Ink, font=\bfseries\fontsize{8.3}{8.3}\selectfont] at (3.90,3.60) {vote};
+    \node[text=Accent, font=\bfseries\fontsize{8.2}{9.2}\selectfont] at (1.18,3.60) {orbit};
+    \node[text=Accent, font=\bfseries\fontsize{8.2}{9.2}\selectfont] at (2.30,3.60) {count};
+    \node[text=Accent, font=\bfseries\fontsize{8.2}{9.2}\selectfont] at (3.90,3.60) {vote};
     \VoteRow{0.76}{2.88}{1}{OrbitA}{5 / 1}{One}
     \VoteRow{0.76}{2.20}{2}{OrbitB}{1 / 5}{Zero}
     \VoteRow{0.76}{1.52}{3}{OrbitC}{4 / 2}{One}
@@ -129,7 +130,7 @@
   % Panel 4
   \begin{scope}[shift={(15.45,0)}]
     \node[panel sub] at (2.40,4.40) {Score each candidate\\with Bernoulli NML.\\Smaller totals are better.};
-    \node[text=Ink, font=\bfseries\fontsize{9.0}{9.0}\selectfont] at (2.40,3.76) {NML$(p,s)$ = fit + penalty};
+    \node[text=Accent, font=\bfseries\fontsize{8.9}{10.0}\selectfont] at (2.40,3.76) {NML$(p,s)$ = fit + penalty};
     \draw[score box] (0.88,2.48) rectangle (4.02,3.16);
     \node[anchor=west, text=Accent, font=\bfseries\fontsize{8.6}{8.6}\selectfont] at (1.04,2.83) {Fit};
     \node[anchor=west, text=Ink, font=\fontsize{7.4}{8.2}\selectfont] at (2.04,2.83) {pure orbits reduce fit};
