@@ -17,6 +17,15 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from relative_symmetry_repair.alife_style import (  # noqa: E402
+    ACCENT_COLOR,
+    BACKGROUND_COLOR,
+    GRID_COLOR,
+    SECONDARY_COLOR,
+    TEXT_COLOR,
+    apply_axis_theme,
+    apply_figure_theme,
+)
 from relative_symmetry_repair.plotting import save_figure  # noqa: E402
 
 FOCUS_RULES = ("ECA-54", "ECA-110", "S24/B11", "diamoeba3d")
@@ -37,11 +46,9 @@ def build_summary_figure(
 
     fig, axes = plt.subplots(2, len(FOCUS_RULES), figsize=(15.8, 7.0), sharex="col")
     colors = {
-        "period": "#b00300",
-        "margin": "#5f5f5f",
+        "period": ACCENT_COLOR,
+        "margin": SECONDARY_COLOR,
     }
-    face = "#efe2d0"
-    grid = "#cfc3b3"
 
     for col, rule in enumerate(FOCUS_RULES):
         group = df[df["rule"] == rule].sort_values("T")
@@ -52,27 +59,21 @@ def build_summary_figure(
         ax_margin = axes[1, col]
 
         ax_period.plot(group["T"], group["selected_period"], "o-", linewidth=2.2, markersize=5, color=colors["period"])
-        ax_period.set_title(rule, fontsize=11, color="#3b3b3b")
-        ax_period.set_ylabel("Selected period" if col == 0 else "", fontsize=10, color="#3b3b3b")
-        ax_period.set_facecolor(face)
-        ax_period.grid(color=grid, alpha=0.8, linewidth=0.6)
-        ax_period.tick_params(colors="#5f5f5f", labelsize=9)
-        for spine in ax_period.spines.values():
-            spine.set_color("#cfc3b3")
+        ax_period.set_title(rule, fontsize=11, color=TEXT_COLOR)
+        ax_period.set_ylabel("Selected period" if col == 0 else "", fontsize=10, color=TEXT_COLOR)
+        ax_period.tick_params(labelsize=9)
+        apply_axis_theme(ax_period, facecolor=BACKGROUND_COLOR, tick_color=SECONDARY_COLOR, spine_color=GRID_COLOR, grid=True)
         ax_period.set_ylim(0, max(1, int(group["selected_period"].max())) + 1)
 
         margins = group["margin"].replace([np.inf], np.nan)
         ax_margin.plot(group["T"], margins, "s-", linewidth=2.2, markersize=5, color=colors["margin"])
-        ax_margin.set_xlabel("Horizon T", fontsize=10, color="#3b3b3b")
-        ax_margin.set_ylabel("Margin (bits)" if col == 0 else "", fontsize=10, color="#3b3b3b")
-        ax_margin.set_facecolor(face)
-        ax_margin.grid(color=grid, alpha=0.8, linewidth=0.6)
-        ax_margin.tick_params(colors="#5f5f5f", labelsize=9)
-        for spine in ax_margin.spines.values():
-            spine.set_color("#cfc3b3")
+        ax_margin.set_xlabel("Horizon T", fontsize=10, color=TEXT_COLOR)
+        ax_margin.set_ylabel("Margin (bits)" if col == 0 else "", fontsize=10, color=TEXT_COLOR)
+        ax_margin.tick_params(labelsize=9)
+        apply_axis_theme(ax_margin, facecolor=BACKGROUND_COLOR, tick_color=SECONDARY_COLOR, spine_color=GRID_COLOR, grid=True)
 
-    fig.patch.set_facecolor("#efe2d0")
-    fig.suptitle("How the selected period stabilizes in representative 1D, 2D, and 3D rules", fontsize=14, y=0.98, color="#b00300")
+    apply_figure_theme(fig)
+    fig.suptitle("How the selected period stabilizes in representative 1D, 2D, and 3D rules", fontsize=14, y=0.98, color=ACCENT_COLOR)
     fig.text(
         0.5,
         0.02,
@@ -82,7 +83,7 @@ def build_summary_figure(
         ha="center",
         va="bottom",
         fontsize=10,
-        color="#3b3b3b",
+        color=TEXT_COLOR,
     )
     fig.tight_layout(rect=(0.02, 0.05, 0.98, 0.95))
     save_figure(fig, output_path, extra_formats=extra_formats)

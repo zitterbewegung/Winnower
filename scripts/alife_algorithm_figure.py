@@ -17,17 +17,30 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from relative_symmetry_repair.alife_style import (  # noqa: E402
+    ACCENT_COLOR,
+    ACCENT_SOFT_COLOR,
+    BACKGROUND_COLOR,
+    BLUSH_COLOR,
+    GRID_COLOR,
+    MUTED_COLOR,
+    ONE_COLOR,
+    SECONDARY_COLOR,
+    TEXT_COLOR,
+    ZERO_COLOR,
+    apply_figure_theme,
+)
 from relative_symmetry_repair.plotting import save_figure  # noqa: E402
 
-TEXT = "#3b3b3b"
-ACCENT = "#b00300"
-ARROW = "#5f5f5f"
-BORDER = "#cfc3b3"
-PANEL_BG = "#efe2d0"
-CARD_BG = "#fcdeb9"
-MUTED = "#e2e2e2"
-ZERO = CARD_BG
-ONE = TEXT
+TEXT = TEXT_COLOR
+ACCENT = ACCENT_COLOR
+ARROW = SECONDARY_COLOR
+BORDER = GRID_COLOR
+PANEL_BG = BACKGROUND_COLOR
+CARD_BG = ACCENT_SOFT_COLOR
+MUTED = MUTED_COLOR
+ZERO = ZERO_COLOR
+ONE = ONE_COLOR
 
 
 def _panel(ax: plt.Axes, number: int, title: str) -> None:
@@ -141,7 +154,7 @@ def _orbit_panel(ax: plt.Axes) -> None:
     _panel(ax, 2, "Orbit classes")
     _panel_subtitle(ax, "Apply $(t,x)\\mapsto(t+p,x+s)$.", "Same color = same orbit.")
 
-    colors = [CARD_BG, PANEL_BG, MUTED, "#f3d5d0"]
+    colors = [CARD_BG, PANEL_BG, MUTED, BLUSH_COLOR]
     labels = np.array(
         [
             [1, 2, 3, 4, 1, 2],
@@ -312,7 +325,7 @@ def build_figure(output_path: Path, *, extra_formats: tuple[str, ...], bundle_pn
         gridspec_kw={"width_ratios": [1.00, 1.00, 0.98, 1.10]},
     )
     fig.subplots_adjust(left=0.018, right=0.982, top=0.89, bottom=0.075, wspace=0.072)
-    fig.patch.set_facecolor(PANEL_BG)
+    apply_figure_theme(fig)
     fig.suptitle("Relative-periodic domain selection by Bernoulli NML", fontsize=22, fontweight="bold", y=0.968, color=ACCENT)
 
     _observed_panel(axes[0])

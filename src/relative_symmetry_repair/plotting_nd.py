@@ -6,24 +6,30 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.colors import ListedColormap
-from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
+from .alife_style import (
+    BACKGROUND_COLOR,
+    BINARY_CMAP,
+    DEFECT_CMAP,
+    DEFECT_COLOR,
+    GRID_COLOR,
+    LEGEND_EDGE_COLOR,
+    ONE_COLOR,
+    PAPER_COLOR,
+    SECONDARY_COLOR,
+    TEXT_COLOR,
+    ZERO_COLOR,
+    apply_axis_theme,
+    apply_figure_theme,
+)
 from .repair_nd import RelativePeriodicFitND
-
-ZERO_COLOR = "#f4f3ee"
-ONE_COLOR = "#111111"
-DEFECT_COLOR = "#c83f49"
-
-BINARY_CMAP = ListedColormap([ZERO_COLOR, ONE_COLOR])
-DEFECT_CMAP = ListedColormap([ZERO_COLOR, DEFECT_COLOR])
 
 
 def _binary_legend_handles() -> list[Patch]:
     return [
-        Patch(facecolor=ZERO_COLOR, edgecolor="#444444", label="0 = white"),
-        Patch(facecolor=ONE_COLOR, edgecolor="#444444", label="1 = black"),
+        Patch(facecolor=ZERO_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="0 = light"),
+        Patch(facecolor=ONE_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="1 = dark"),
     ]
 
 
@@ -40,7 +46,9 @@ def plot_2d_slices(spacetime: np.ndarray, *, title: str = "", max_slices: int = 
         ax.set_title(f"t={t}", fontsize=9)
         ax.set_xticks([])
         ax.set_yticks([])
+        apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
     fig.suptitle(title or "2D CA time slices", fontsize=11)
+    apply_figure_theme(fig)
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.92))
     return fig, axes
 
@@ -68,6 +76,8 @@ def plot_2d_decomposition(
     for ax in axes:
         ax.set_xticks([])
         ax.set_yticks([])
+        apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
+    apply_figure_theme(fig)
     fig.tight_layout()
     return fig, axes
 
@@ -84,6 +94,8 @@ def plot_2d_kymograph(spacetime: np.ndarray, *, axis: int = 1, title: str = ""):
     ax.set_xlabel(f"{dim_label} index")
     ax.set_ylabel("time (top to bottom)")
     ax.set_title(title or f"Kymograph (averaged over {'y' if axis == 1 else 'x'})")
+    apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
+    apply_figure_theme(fig)
     fig.tight_layout()
     return fig, ax
 
@@ -103,7 +115,9 @@ def plot_3d_slices(spacetime: np.ndarray, *, z_index: int | None = None, title: 
         ax.set_title(f"t={t}, z={z_index}", fontsize=9)
         ax.set_xticks([])
         ax.set_yticks([])
+        apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
     fig.suptitle(title or "3D CA time slices (z-slice)", fontsize=11)
+    apply_figure_theme(fig)
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.92))
     return fig, axes
 
@@ -134,6 +148,8 @@ def plot_3d_decomposition(
     for ax in axes:
         ax.set_xticks([])
         ax.set_yticks([])
+        apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
+    apply_figure_theme(fig)
     fig.tight_layout()
     return fig, axes
 
@@ -169,10 +185,15 @@ def plot_spectrum_nd(frame: pd.DataFrame, *, value: str = "defect_rate", title: 
         ax.set_ylabel("period")
 
     ax.set_title(title or value.replace("_", " ").title())
+    apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
     best_row, best_col = np.unravel_index(np.nanargmin(pivot.values), pivot.shape)
-    ax.scatter(best_col, best_row, s=240, marker="s", facecolors="none", edgecolors="black", linewidths=2.6)
-    ax.scatter(best_col, best_row, s=200, marker="s", facecolors="none", edgecolors="white", linewidths=1.5)
+    ax.scatter(best_col, best_row, s=240, marker="s", facecolors="none", edgecolors=TEXT_COLOR, linewidths=2.6)
+    ax.scatter(best_col, best_row, s=200, marker="s", facecolors="none", edgecolors=PAPER_COLOR, linewidths=1.5)
     display_value = value.replace("_", " ")
-    fig.colorbar(image, ax=ax, label=f"{display_value} (lower is better)")
+    colorbar = fig.colorbar(image, ax=ax, label=f"{display_value} (lower is better)")
+    colorbar.ax.yaxis.label.set_color(TEXT_COLOR)
+    colorbar.ax.tick_params(colors=SECONDARY_COLOR)
+    colorbar.outline.set_edgecolor(GRID_COLOR)
+    apply_figure_theme(fig)
     fig.tight_layout()
     return fig, ax

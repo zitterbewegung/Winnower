@@ -5,31 +5,40 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.colors import ListedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
+from .alife_style import (
+    ACCENT_COLOR,
+    BACKGROUND_COLOR,
+    BINARY_CMAP,
+    DEFECT_CMAP,
+    DEFECT_COLOR,
+    GRID_COLOR,
+    LEGEND_EDGE_COLOR,
+    ONE_COLOR,
+    PAPER_COLOR,
+    SECONDARY_COLOR,
+    TEXT_COLOR,
+    ZERO_COLOR,
+    apply_axis_theme,
+    apply_figure_theme,
+)
 from .repair import RelativePeriodicFit
-
-ZERO_COLOR = "#fcdeb9"
-ONE_COLOR = "#3b3b3b"
-DEFECT_COLOR = "#b00300"
-
-BINARY_CMAP = ListedColormap([ZERO_COLOR, ONE_COLOR])
-DEFECT_CMAP = ListedColormap([ZERO_COLOR, DEFECT_COLOR])
 
 
 def _binary_legend_handles() -> list[Patch]:
     return [
-        Patch(facecolor=ZERO_COLOR, edgecolor="#444444", label="0 = light"),
-        Patch(facecolor=ONE_COLOR, edgecolor="#444444", label="1 = dark"),
+        Patch(facecolor=ZERO_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="0 = light"),
+        Patch(facecolor=ONE_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="1 = dark"),
     ]
 
 
 def _decorate_figure(fig, *, caption: str, legend_handles: list | None = None, legend_ncol: int | None = None) -> None:
+    apply_figure_theme(fig)
     fig.tight_layout(rect=(0.0, 0.07, 1.0, 0.88))
     if legend_handles:
-        fig.legend(
+        legend = fig.legend(
             handles=legend_handles,
             loc="upper center",
             bbox_to_anchor=(0.5, 0.985),
@@ -38,7 +47,9 @@ def _decorate_figure(fig, *, caption: str, legend_handles: list | None = None, l
             handlelength=1.6,
             columnspacing=1.3,
         )
-    fig.text(0.5, 0.02, caption, ha="center", va="bottom", fontsize=9)
+        for text in legend.get_texts():
+            text.set_color(TEXT_COLOR)
+    fig.text(0.5, 0.02, caption, ha="center", va="bottom", fontsize=9, color=TEXT_COLOR)
 
 
 def _style_binary_axis(ax, title: str | None = None) -> None:
@@ -46,6 +57,7 @@ def _style_binary_axis(ax, title: str | None = None) -> None:
     ax.set_ylabel("time (top to bottom)")
     if title:
         ax.set_title(title)
+    apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
 
 
 def plot_spacetime(spacetime: np.ndarray, *, title: str | None = None):
@@ -71,15 +83,19 @@ def plot_spectrum(frame: pd.DataFrame, *, value: str = "defect_rate", title: str
     ax.set_xlabel("shift")
     ax.set_ylabel("period")
     ax.set_title(title or value.replace("_", " ").title())
+    apply_axis_theme(ax, facecolor=BACKGROUND_COLOR)
 
     best_row, best_col = np.unravel_index(np.nanargmin(pivot.values), pivot.shape)
     best_shift = int(pivot.columns[best_col])
     best_period = int(pivot.index[best_row])
-    ax.scatter(best_col, best_row, s=240, marker="s", facecolors="none", edgecolors="black", linewidths=2.6)
-    ax.scatter(best_col, best_row, s=200, marker="s", facecolors="none", edgecolors="white", linewidths=1.5)
+    ax.scatter(best_col, best_row, s=240, marker="s", facecolors="none", edgecolors=TEXT_COLOR, linewidths=2.6)
+    ax.scatter(best_col, best_row, s=200, marker="s", facecolors="none", edgecolors=PAPER_COLOR, linewidths=1.5)
 
     display_value = value.replace("_", " ")
-    fig.colorbar(image, ax=ax, label=f"{display_value} (lower is better)")
+    colorbar = fig.colorbar(image, ax=ax, label=f"{display_value} (lower is better)")
+    colorbar.ax.yaxis.label.set_color(TEXT_COLOR)
+    colorbar.ax.tick_params(colors=SECONDARY_COLOR)
+    colorbar.outline.set_edgecolor(GRID_COLOR)
 
     if value == "defect_rate":
         caption = (
@@ -104,7 +120,7 @@ def plot_spectrum(frame: pd.DataFrame, *, value: str = "defect_rate", title: str
                 marker="s",
                 markersize=8,
                 markerfacecolor="none",
-                markeredgecolor="black",
+                markeredgecolor=TEXT_COLOR,
                 markeredgewidth=1.8,
                 linestyle="None",
                 label="minimum scanned value",
@@ -132,7 +148,7 @@ def plot_decomposition(fit: RelativePeriodicFit, *, source: np.ndarray, title_pr
         caption="Red cells disagree with the fitted background. Look for compact world-tubes and clean boundaries instead of diffuse pepper noise.",
         legend_handles=[
             *_binary_legend_handles(),
-            Patch(facecolor=DEFECT_COLOR, edgecolor="#444444", label="defect = red"),
+            Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="defect = red"),
         ],
     )
     return fig, axes

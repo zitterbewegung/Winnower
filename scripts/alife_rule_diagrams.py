@@ -29,6 +29,14 @@ from relative_symmetry_repair.experiment_suite import (  # noqa: E402
     simulate_case,
     write_json_manifest,
 )
+from relative_symmetry_repair.alife_style import (  # noqa: E402
+    ACCENT_COLOR,
+    ACCENT_SOFT_COLOR,
+    BACKGROUND_COLOR,
+    GRID_COLOR,
+    SECONDARY_COLOR,
+    TEXT_COLOR as ALIFE_TEXT_COLOR,
+)
 from relative_symmetry_repair.plotting import (  # noqa: E402
     BINARY_CMAP,
     DEFECT_CMAP,
@@ -68,14 +76,13 @@ PAPER_MECHANISMS_CAPTION = (
     "These mechanism diagrams clarify the local rule families whose global spatiotemporal organization is analyzed by the NML selector."
 )
 
-ALIFE_BG = "#efe2d0"
-ALIFE_CARD = "#fcdeb9"
-TITLE_COLOR = "#b00300"
-BIRTH_COLOR = "#b00300"
-SURVIVE_COLOR = "#5f5f5f"
-CENTER_COLOR = "#fcdeb9"
-GRID_COLOR = "#cfc3b3"
-TEXT_COLOR = "#3b3b3b"
+ALIFE_BG = BACKGROUND_COLOR
+ALIFE_CARD = ACCENT_SOFT_COLOR
+TITLE_COLOR = ACCENT_COLOR
+BIRTH_COLOR = ACCENT_COLOR
+SURVIVE_COLOR = SECONDARY_COLOR
+CENTER_COLOR = ACCENT_SOFT_COLOR
+TEXT_COLOR = ALIFE_TEXT_COLOR
 
 RULE_NOTES = {
     "ECA-30": "Chaotic texture with little large-scale repetition; the selector still prefers a simple background.",
