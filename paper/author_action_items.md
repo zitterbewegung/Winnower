@@ -7,9 +7,9 @@ Only items requiring manual verification or decision.
 ## Open Items
 
 ### 1. Stabilization theorem novelty claim
-**Location**: Section 1, last sentence of Introduction
-**Issue**: The text states "This is, to the extent we are aware, the first stabilization theorem for periodic template selection in CA spacetimes." Verify against computational mechanics literature. Crutchfield et al. have consistency results for epsilon-machines but for a different model class.
-**Status**: Requires literature search. Likely correct but unverified.
+**Location**: Section 1 (line 53 area)
+**Issue**: The text claims the stabilization theorem (Theorem 3) is the primary contribution relative to prior work. Deep research assessment (ChatGPT 5.4 Pro, March 2026) confirms: computational mechanics treats periodicity as exact symbolic structure (automata, languages, domain transducers), not as approximate Hamming-loss template selection with NML model-selection guarantees. No equivalent stabilization result exists in that literature. However, the *majority-vote lemma* (Theorem 1) is standard — now acknowledged via [14] (Lachish & Newman, 2011) with a Prior Art remark after the proof.
+**Status**: Novelty claim for Theorem 3 is defensible. Theorem 1 prior art now cited. No further action needed unless a specific competing stabilization result is found during peer review.
 
 ### ~~2. [RESOLVED] Fredkin Period-8 Interpretation~~
 Explanatory note added to Section 3.2.1b: Fredkin is NOT exact negation on the 64×64 torus (match rate ~50%). Period-8 wins because 32,768 fine-grained orbit classes capture temporal structure that coarser periods miss (NML drops from 415,361 to 396,557). Noted as possible finite-size effect.

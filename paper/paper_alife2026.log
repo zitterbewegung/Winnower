@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Homebrew) (preloaded format=pdflatex 2026.3.4)  11 MAR 2026 10:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Homebrew) (preloaded format=pdflatex 2026.3.4)  14 MAR 2026 10:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -448,39 +448,62 @@ m/m/it/10 c; T\OT1/cmr/m/n/10 ) =
  []
 
 [2]
-Underfull \hbox (badness 10000) in paragraph at lines 225--227
+<figures/alife_rule_mechanisms.png, id=189, 382.6295pt x 895.7465pt>
+File: figures/alife_rule_mechanisms.png Graphic file (type png)
+<use figures/alife_rule_mechanisms.png>
+Package pdftex.def Info: figures/alife_rule_mechanisms.png  used on input line 
+191.
+(pdftex.def)             Requested size: 222.2814pt x 520.36708pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 235--237
  []\OT1/ptm/b/n/10 Range-threshold sur-vey.[] \OT1/ptm/m/n/10 We sur-vey 1,050 
 range-
  []
 
 
-Underfull \hbox (badness 1924) in paragraph at lines 225--227
+Underfull \hbox (badness 1924) in paragraph at lines 235--237
 \OT1/ptm/m/n/10 threshold to-tal-is-tic rules on a $\OT1/cmr/m/n/10 48 \OMS/cms
 y/m/n/10 ^^B \OT1/cmr/m/n/10 48$ \OT1/ptm/m/n/10 torus (Moore
  []
 
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 2
-50.
+60.
 
 (/opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/tex/latex/psnfss/ts1ptm
 .fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [3]
-Overfull \hbox (0.84766pt too wide) in paragraph at lines 353--363
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [4 <./figures/alife_rule_mechanisms.png>]
+<figures/alife_representative_rules.png, id=219, 486.618pt x 895.7465pt>
+File: figures/alife_representative_rules.png Graphic file (type png)
+<use figures/alife_representative_rules.png>
+Package pdftex.def Info: figures/alife_representative_rules.png  used on input 
+line 359.
+(pdftex.def)             Requested size: 282.69157pt x 520.36708pt.
+
+Overfull \hbox (0.84766pt too wide) in paragraph at lines 370--380
  [][] 
  []
 
 
-Underfull \hbox (badness 1406) in paragraph at lines 394--395
+Underfull \hbox (badness 1406) in paragraph at lines 411--412
 \OT1/ptm/m/n/10 all grid sizes, con-sis-tent with a bulk (ex-ten-sive) phe-
  []
 
-[4]
-Underfull \hbox (badness 1072) in paragraph at lines 460--471
+[5]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [6 <./figures/alife_representative_rules.png>]
+Underfull \hbox (badness 1072) in paragraph at lines 477--488
 \OT1/ptm/m/n/10 All code is open-source. Key pa-ram-e-ters: 1D ECA:
  []
 
-[5] (./paper_alife2026.aux)
+[7] (./paper_alife2026.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -489,13 +512,13 @@ Package rerunfilecheck Info: File `paper_alife2026.out' has not changed.
 (rerunfilecheck)             Checksum: F62F5614C3BD9887366EBC3BE0E6B7BA;3811.
  ) 
 Here is how much of TeX's memory you used:
- 10452 strings out of 467525
- 159672 string characters out of 5408440
- 589563 words of memory out of 5000000
- 39149 multiletter control sequences out of 15000+600000
+ 10474 strings out of 467525
+ 160410 string characters out of 5408440
+ 589653 words of memory out of 5000000
+ 39167 multiletter control sequences out of 15000+600000
  655204 words of font info for 101 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,13n,79p,552b,474s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,13n,79p,694b,474s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fonts/type1/public/am
 sfonts/cm/cmbx10.pfb></opt/homebrew/Cellar/texlive/20260301/share/texmf-dist/fo
 nts/type1/public/amsfonts/cm/cmex10.pfb></opt/homebrew/Cellar/texlive/20260301/
@@ -518,10 +541,10 @@ type1/public/amsfonts/symbols/msbm10.pfb></opt/homebrew/Cellar/texlive/20260301
 /share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></opt/homebrew/Cellar/texliv
 e/20260301/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></opt/homebrew/Cel
 lar/texlive/20260301/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper_alife2026.pdf (5 pages, 222058 bytes).
+Output written on paper_alife2026.pdf (7 pages, 1894043 bytes).
 PDF statistics:
- 329 PDF objects out of 1000 (max. 8388607)
- 283 compressed objects within 3 object streams
- 70 named destinations out of 1000 (max. 500000)
- 193 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 350 PDF objects out of 1000 (max. 8388607)
+ 298 compressed objects within 3 object streams
+ 74 named destinations out of 1000 (max. 500000)
+ 203 words of extra memory for PDF output out of 10000 (max. 10000000)
 
