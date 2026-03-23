@@ -1,6 +1,8 @@
 \documentclass[tikz,border=4pt]{standalone}
 \usepackage{pgfplots}
 \usepackage{xcolor}
+\usepackage[scaled=0.96]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
 \input{pgfplots_common_format_alife.tex}
 \pagecolor{PosterBg}
 \begin{document}
@@ -15,9 +17,9 @@
   xtick=data,
   enlarge x limits=0.28,
   nodes near coords,
-  every node near coord/.append style={font=\scriptsize, /pgf/number format/precision=0, text=PosterInk},
+  every node near coord/.append style={font=\footnotesize, /pgf/number format/precision=0, text=PosterInk},
   legend columns=3,
-  legend style={at={(0.5,-0.18)}, anchor=north}
+  legend style={at={(0.5,-0.18)}, anchor=north, font=\footnotesize}
 ]
 \addplot+[ybar, bar width=10pt, bar shift=-12pt, draw=none, fill=PosterCard] coordinates {(Residual,16) (NLL,0) (NML,97)};
 \addplot+[ybar, bar width=10pt, bar shift=0pt, draw=none, fill=PosterBlush] coordinates {(Residual,8) (NLL,0) (NML,7)};

@@ -104,6 +104,16 @@ PRESENTATION_FOCUS_RULES_2D = ("Diamoeba", "Maze with Mice", "S37/B11")
 PRESENTATION_FOCUS_RULES_3D = ("3d-life", "clouds", "diamoeba3d")
 EXPORT_FORMATS: tuple[str, ...] = ()
 
+POSTER_DIAGRAM_RC = {
+    **PLOT_RC,
+    "font.family": "DejaVu Sans",
+    "font.size": 13,
+    "axes.titlesize": 16,
+    "axes.labelsize": 15,
+    "xtick.labelsize": 13,
+    "ytick.labelsize": 13,
+}
+
 
 @dataclass(slots=True)
 class DiagramPayload:
@@ -672,11 +682,11 @@ def _poster_summary_lines(payload: DiagramPayload) -> list[str]:
 
 
 def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
-    with plt.rc_context({**PLOT_RC, "axes.titlepad": 8}):
+    with plt.rc_context({**POSTER_DIAGRAM_RC, "axes.titlepad": 10}):
         fig, axes = plt.subplots(
             len(payloads),
             5,
-            figsize=(18.2, 7.6),
+            figsize=(16.8, 7.8),
             gridspec_kw={"width_ratios": [1.55, 2.35, 2.35, 2.35, 2.35]},
         )
         if len(payloads) == 1:
@@ -684,7 +694,7 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
 
         headers = ["Case", "Observed t = mid", "Observed t = last", "Background at last", "Defect at last"]
         for col, header in enumerate(headers):
-            axes[0, col].set_title(header, fontsize=13.4, color=TEXT_COLOR)
+            axes[0, col].set_title(header, fontsize=18.0, color=TEXT_COLOR)
 
         for row, payload in enumerate(payloads):
             info_ax = axes[row, 0]
@@ -695,9 +705,9 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
                 "\n".join(_poster_summary_lines(payload)),
                 ha="left",
                 va="center",
-                fontsize=11.8,
+                fontsize=15.2,
                 color=TEXT_COLOR,
-                linespacing=1.34,
+                linespacing=1.28,
             )
 
             _, t_mid, t_last = _time_indices(payload.spacetime.shape[0])
@@ -724,11 +734,11 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
 
 
 def _plot_poster_focus_3d(payload: DiagramPayload, path: Path) -> None:
-    with plt.rc_context({**PLOT_RC, "axes.titlepad": 8}):
+    with plt.rc_context({**POSTER_DIAGRAM_RC, "axes.titlepad": 10}):
         fig, axes = plt.subplots(1, 4, figsize=(12.4, 3.1))
         headers = ["Observed t = mid", "Observed t = last", "Background", "Defect"]
         for ax, header in zip(axes, headers):
-            ax.set_title(header, fontsize=12.5, color=TEXT_COLOR)
+            ax.set_title(header, fontsize=13.8, color=TEXT_COLOR)
 
         _, t_mid, t_last = _time_indices(payload.spacetime.shape[0])
         raw_mid = _extract_projection(payload, t_mid)
@@ -753,12 +763,12 @@ def _plot_poster_focus_3d(payload: DiagramPayload, path: Path) -> None:
 
 
 def _plot_poster_rule_mechanisms(path: Path) -> None:
-    with plt.rc_context({**PLOT_RC, "axes.titlepad": 6}):
-        fig = plt.figure(figsize=(17.2, 4.9))
-        outer = fig.add_gridspec(2, 3, height_ratios=[0.28, 1.0], wspace=0.34, hspace=0.08)
+    with plt.rc_context({**POSTER_DIAGRAM_RC, "axes.titlepad": 8}):
+        fig = plt.figure(figsize=(15.8, 5.4))
+        outer = fig.add_gridspec(2, 3, height_ratios=[0.36, 1.0], wspace=0.34, hspace=0.08)
 
         heading_text = [
-            ("1D elementary CA", "Three-cell lookup table", None),
+            ("1D elementary CA", "Three-cell lookup table", "Rule 54"),
             ("2D totalistic rules", "Birth/survival counts on 8 neighbors", "S37/B11"),
             ("3D totalistic rules", "Birth/survival counts on 26 neighbors", "diamoeba3d"),
         ]
@@ -771,7 +781,7 @@ def _plot_poster_rule_mechanisms(path: Path) -> None:
                 title,
                 ha="left",
                 va="top",
-                fontsize=14.5,
+                fontsize=16.2,
                 color=TITLE_COLOR,
                 fontweight="bold",
             )
@@ -781,17 +791,17 @@ def _plot_poster_rule_mechanisms(path: Path) -> None:
                 subtitle,
                 ha="left",
                 va="bottom",
-                fontsize=11.2,
+                fontsize=13.2,
                 color=TEXT_COLOR,
             )
             if exemplar is not None:
                 ax.text(
                     0.0,
-                    -0.28,
+                    -0.12,
                     f"example: {exemplar}",
                     ha="left",
                     va="bottom",
-                    fontsize=10.2,
+                    fontsize=11.4,
                     color=TEXT_COLOR,
                 )
 
@@ -827,6 +837,7 @@ def _draw_count_strip(
     y: float,
     color: str,
     label: str,
+    poster: bool = False,
 ) -> None:
     for count in range(max_neighbors + 1):
         active = count in counts
@@ -839,7 +850,8 @@ def _draw_count_strip(
             linewidth=0.8,
         )
         ax.add_patch(rect)
-    ax.text(-1.2, y, label, ha="right", va="center", fontsize=9, color=TEXT_COLOR)
+    label_x = -0.2 if poster else -1.2
+    ax.text(label_x, y, label, ha="right", va="center", fontsize=10.5 if poster else 9, color=TEXT_COLOR)
 
 
 def _draw_count_rule(
@@ -852,21 +864,25 @@ def _draw_count_rule(
 ) -> None:
     ax.set_xlim(-1.8, max_neighbors + 0.8)
     ax.set_ylim(-0.8, 1.6)
-    _draw_count_strip(ax, counts=birth, max_neighbors=max_neighbors, y=1.0, color=BIRTH_COLOR, label="birth")
-    _draw_count_strip(ax, counts=survive, max_neighbors=max_neighbors, y=0.0, color=SURVIVE_COLOR, label="survive")
+    _draw_count_strip(ax, counts=birth, max_neighbors=max_neighbors, y=1.0, color=BIRTH_COLOR, label="birth", poster=poster)
+    _draw_count_strip(ax, counts=survive, max_neighbors=max_neighbors, y=0.0, color=SURVIVE_COLOR, label="survive", poster=poster)
 
     ticks = list(range(max_neighbors + 1))
     ax.set_xticks(ticks)
-    tick_fontsize = 9 if poster else 8
+    tick_fontsize = 10.5 if poster else 8
     if max_neighbors <= 8:
         ax.set_xticklabels([str(value) for value in ticks], fontsize=tick_fontsize)
     else:
-        labels = [str(value) if value % 2 == 0 or value == max_neighbors else "" for value in ticks]
-        ax.set_xticklabels(labels, fontsize=tick_fontsize)
+        if poster:
+            labels = [str(value) if value % 4 == 0 or value == max_neighbors else "" for value in ticks]
+            ax.set_xticklabels(labels, fontsize=9.5)
+        else:
+            labels = [str(value) if value % 2 == 0 or value == max_neighbors else "" for value in ticks]
+            ax.set_xticklabels(labels, fontsize=tick_fontsize)
     ax.set_yticks([])
-    ax.set_xlabel("neighbor count", fontsize=10 if poster else 9)
+    ax.set_xlabel("neighbor count", fontsize=12 if poster else 9)
     ax.xaxis.label.set_color(TEXT_COLOR)
-    ax.set_title("Local rule", fontsize=11 if poster else 10, color=TEXT_COLOR)
+    ax.set_title("Local rule", fontsize=12.8 if poster else 10, color=TEXT_COLOR)
     for spine in ax.spines.values():
         spine.set_visible(False)
     ax.tick_params(axis="x", length=0, colors=TEXT_COLOR)
@@ -880,7 +896,7 @@ def _draw_2d_neighborhood(ax: plt.Axes, *, poster: bool = False) -> None:
             face = CENTER_COLOR if (x, y) == (1, 1) else ZERO_COLOR
             rect = Rectangle((x - 0.45, y - 0.45), 0.9, 0.9, facecolor=face, edgecolor=GRID_COLOR, linewidth=0.9)
             ax.add_patch(rect)
-    ax.text(1.0, 1.0, "cell", ha="center", va="center", fontsize=9 if poster else 8, color=TEXT_COLOR)
+    ax.text(1.0, 1.0, "cell", ha="center", va="center", fontsize=10.5 if poster else 8, color=TEXT_COLOR)
     if not poster:
         ax.text(
             1.0,
@@ -891,7 +907,7 @@ def _draw_2d_neighborhood(ax: plt.Axes, *, poster: bool = False) -> None:
             fontsize=8.5,
             color=TEXT_COLOR,
         )
-    ax.set_title("2D neighborhood", fontsize=11 if poster else 10, color=TEXT_COLOR)
+    ax.set_title("2D neighborhood", fontsize=12.8 if poster else 10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -914,7 +930,7 @@ def _draw_3d_neighborhood(ax: plt.Axes, *, poster: bool = False) -> None:
                     linewidth=0.8,
                 )
                 ax.add_patch(rect)
-        ax.text(x_offset + 1.0, 2.95, layer_label, ha="center", va="bottom", fontsize=9 if poster else 8.5, color=TEXT_COLOR)
+        ax.text(x_offset + 1.0, 2.95, layer_label, ha="center", va="bottom", fontsize=10.5 if poster else 8.5, color=TEXT_COLOR)
 
     ax.set_xlim(-0.8, 9.0)
     ax.set_ylim(-0.6, 3.4)
@@ -931,7 +947,7 @@ def _draw_3d_neighborhood(ax: plt.Axes, *, poster: bool = False) -> None:
             fontsize=8.3,
             color=TEXT_COLOR,
         )
-    ax.set_title("3D neighborhood", fontsize=11 if poster else 10, color=TEXT_COLOR)
+    ax.set_title("3D neighborhood", fontsize=12.8 if poster else 10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -944,12 +960,14 @@ def _draw_eca_table(ax: plt.Axes, rule: int, *, poster: bool = False) -> None:
     grid = np.array([[*bits, out] for bits, out in rows], dtype=np.uint8)
     ax.imshow(grid, cmap=BINARY_CMAP, vmin=0, vmax=1, aspect="equal", interpolation="nearest")
     ax.set_xticks([0, 1, 2, 3])
-    ax.set_xticklabels(["L", "C", "R", "next"], fontsize=9 if poster else 8)
+    ax.set_xticklabels(["L", "C", "R", "next"], fontsize=10.5 if poster else 8)
     ax.xaxis.tick_top()
     ax.set_yticks(range(8))
-    ax.set_yticklabels([f"{bits[0]}{bits[1]}{bits[2]}" for bits, _ in rows], fontsize=9 if poster else 8)
+    ax.set_yticklabels([f"{bits[0]}{bits[1]}{bits[2]}" for bits, _ in rows], fontsize=10.5 if poster else 8)
     ax.axvline(2.5, color=GRID_COLOR, linewidth=1.2)
-    ax.set_title(f"Rule {rule}" if poster else f"Local update table for rule {rule}", fontsize=11 if poster else 10, color=TEXT_COLOR)
+    title = "" if poster else f"Local update table for rule {rule}"
+    if title:
+        ax.set_title(title, fontsize=12.5 if poster else 10, color=TEXT_COLOR)
     ax.set_xticks(np.arange(-0.5, 4.0, 1.0), minor=True)
     ax.set_yticks(np.arange(-0.5, 8.0, 1.0), minor=True)
     ax.grid(which="minor", color=GRID_COLOR, linewidth=0.8)

@@ -1,6 +1,8 @@
 \documentclass[tikz,border=4pt]{standalone}
 \usepackage{pgfplots}
 \usepackage{xcolor}
+\usepackage[scaled=0.96]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
 \input{pgfplots_common_format_alife.tex}
 \pagecolor{PosterBg}
 \begin{document}
@@ -13,10 +15,10 @@
   symbolic x coords={Raw,Background,Residual},
   xtick=data,
   xticklabels={Raw,Bg,Res},
-  x tick label style={align=center, font=\scriptsize, text=PosterInk},
-  yticklabel style={font=\scriptsize, text=PosterInk},
-  title style={font=\scriptsize, align=center, text=PosterInk},
-  ylabel style={font=\scriptsize, text=PosterInk},
+  x tick label style={align=center, font=\footnotesize, text=PosterInk},
+  yticklabel style={font=\footnotesize, text=PosterInk},
+  title style={font=\footnotesize, align=center, text=PosterInk},
+  ylabel style={font=\small, text=PosterInk},
   journalbar,
   enlarge x limits=0.18
 ]
@@ -35,9 +37,9 @@
 \node[anchor=north] at ($(group c1r1.south)!0.5!(group c3r1.south)+(0,-9mm)$) {%
   \begin{tikzpicture}[baseline]
     \fill[PosterCard] (0,0) rectangle +(0.35,0.18);
-    \node[anchor=west, font=\scriptsize, text=PosterInk] at (0.45,0.09) {Marginal $H$};
+    \node[anchor=west, font=\footnotesize, text=PosterInk] at (0.45,0.09) {Marginal $H$};
     \fill[PosterAccent] (2.8,0) rectangle +(0.35,0.18);
-    \node[anchor=west, font=\scriptsize, text=PosterInk] at (3.25,0.09) {Conditional $H$};
+    \node[anchor=west, font=\footnotesize, text=PosterInk] at (3.25,0.09) {Conditional $H$};
   \end{tikzpicture}};
 \end{tikzpicture}
 \end{document}

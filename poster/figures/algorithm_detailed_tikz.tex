@@ -1,4 +1,4 @@
-\documentclass[tikz,border=6pt]{standalone}
+\documentclass[12pt,tikz,border=6pt]{standalone}
 \usepackage{amsmath}
 \usepackage[scaled=0.96]{helvet}
 \renewcommand{\familydefault}{\sfdefault}
@@ -41,7 +41,7 @@
   \begin{scope}[on background layer]
     \node[draw=PosterBorder, dashed, rounded corners=4pt, inner sep=8pt,
       fit=(data)(cand)(orbit)(majority)(stats)(score)(select),
-      label={[font=\small, text=PosterGray]above:Per-candidate pipeline}] {};
+      label={[font=\normalsize, text=PosterGray]above:Per-candidate pipeline}] {};
   \end{scope}
 \end{tikzpicture}
 \end{document}
