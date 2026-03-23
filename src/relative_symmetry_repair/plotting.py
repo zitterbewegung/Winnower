@@ -158,6 +158,8 @@ def save_figure(fig, path: str | Path, *, extra_formats: tuple[str, ...] = ()) -
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     raster_formats = {"png", "jpg", "jpeg", "tif", "tiff", "webp"}
+    raster_dpi = 360
+    vector_image_dpi = 320
 
     def _save(target: Path) -> None:
         fmt = target.suffix.lower().lstrip(".")
@@ -168,7 +170,10 @@ def save_figure(fig, path: str | Path, *, extra_formats: tuple[str, ...] = ()) -
             "edgecolor": fig.get_edgecolor(),
         }
         if fmt in raster_formats:
-            kwargs["dpi"] = 180
+            kwargs["dpi"] = raster_dpi
+        else:
+            # Vector backends still rasterize image artists like imshow panels.
+            kwargs["dpi"] = vector_image_dpi
         fig.savefig(target, **kwargs)
 
     _save(path)

@@ -656,6 +656,169 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
         plt.close(fig)
 
 
+def _payload_by_name(payloads: list[DiagramPayload], name: str) -> DiagramPayload:
+    for payload in payloads:
+        if payload.case.name == name:
+            return payload
+    raise KeyError(f"Missing payload for {name}")
+
+
+def _poster_summary_lines(payload: DiagramPayload) -> list[str]:
+    return [
+        payload.case.name,
+        f"winner: p = {payload.selected_period}, s = {payload.selected_shift}",
+        f"defect rate = {payload.defect_rate:.3f}",
+    ]
+
+
+def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
+    with plt.rc_context({**PLOT_RC, "axes.titlepad": 8}):
+        fig, axes = plt.subplots(
+            len(payloads),
+            5,
+            figsize=(18.2, 7.6),
+            gridspec_kw={"width_ratios": [1.55, 2.35, 2.35, 2.35, 2.35]},
+        )
+        if len(payloads) == 1:
+            axes = np.asarray([axes])
+
+        headers = ["Case", "Observed t = mid", "Observed t = last", "Background at last", "Defect at last"]
+        for col, header in enumerate(headers):
+            axes[0, col].set_title(header, fontsize=13.4, color=TEXT_COLOR)
+
+        for row, payload in enumerate(payloads):
+            info_ax = axes[row, 0]
+            info_ax.axis("off")
+            info_ax.text(
+                0.0,
+                0.58,
+                "\n".join(_poster_summary_lines(payload)),
+                ha="left",
+                va="center",
+                fontsize=11.8,
+                color=TEXT_COLOR,
+                linespacing=1.34,
+            )
+
+            _, t_mid, t_last = _time_indices(payload.spacetime.shape[0])
+            raw_mid = payload.spacetime[t_mid]
+            raw_last = payload.spacetime[t_last]
+            background_last = payload.background[t_last]
+            defect_last = payload.defect_mask[t_last].astype(np.uint8)
+            bbox = _activity_bbox([raw_mid, raw_last, background_last, defect_last], padding=4)
+            images = [
+                _crop_image(raw_mid, bbox),
+                _crop_image(raw_last, bbox),
+                _crop_image(background_last, bbox),
+                _crop_image(defect_last, bbox),
+            ]
+            for col, image in enumerate(images, start=1):
+                ax = axes[row, col]
+                cmap = DEFECT_CMAP if col == 5 else BINARY_CMAP
+                ax.imshow(image, interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
+                _decorate_binary_axis(ax)
+
+        fig.tight_layout(rect=(0.0, 0.0, 1.0, 1.0))
+        _save_diagram(fig, path)
+        plt.close(fig)
+
+
+def _plot_poster_focus_3d(payload: DiagramPayload, path: Path) -> None:
+    with plt.rc_context({**PLOT_RC, "axes.titlepad": 8}):
+        fig, axes = plt.subplots(1, 4, figsize=(12.4, 3.1))
+        headers = ["Observed t = mid", "Observed t = last", "Background", "Defect"]
+        for ax, header in zip(axes, headers):
+            ax.set_title(header, fontsize=12.5, color=TEXT_COLOR)
+
+        _, t_mid, t_last = _time_indices(payload.spacetime.shape[0])
+        raw_mid = _extract_projection(payload, t_mid)
+        raw_last = _extract_projection(payload, t_last)
+        background_last = _extract_background_projection(payload, t_last)
+        defect_last = _extract_defect_projection(payload, t_last)
+        bbox = _activity_bbox([raw_mid, raw_last, background_last, defect_last], padding=3)
+        images = [
+            _crop_image(raw_mid, bbox),
+            _crop_image(raw_last, bbox),
+            _crop_image(background_last, bbox),
+            _crop_image(defect_last, bbox),
+        ]
+        for index, (ax, image) in enumerate(zip(axes, images), start=1):
+            cmap = DEFECT_CMAP if index == 4 else BINARY_CMAP
+            ax.imshow(image, interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
+            _decorate_binary_axis(ax)
+
+        fig.tight_layout(rect=(0.0, 0.0, 1.0, 1.0))
+        _save_diagram(fig, path)
+        plt.close(fig)
+
+
+def _plot_poster_rule_mechanisms(path: Path) -> None:
+    with plt.rc_context({**PLOT_RC, "axes.titlepad": 6}):
+        fig = plt.figure(figsize=(17.2, 4.9))
+        outer = fig.add_gridspec(2, 3, height_ratios=[0.28, 1.0], wspace=0.34, hspace=0.08)
+
+        heading_text = [
+            ("1D elementary CA", "Three-cell lookup table", None),
+            ("2D totalistic rules", "Birth/survival counts on 8 neighbors", "S37/B11"),
+            ("3D totalistic rules", "Birth/survival counts on 26 neighbors", "diamoeba3d"),
+        ]
+        for col, (title, subtitle, exemplar) in enumerate(heading_text):
+            ax = fig.add_subplot(outer[0, col])
+            ax.axis("off")
+            ax.text(
+                0.0,
+                0.90,
+                title,
+                ha="left",
+                va="top",
+                fontsize=14.5,
+                color=TITLE_COLOR,
+                fontweight="bold",
+            )
+            ax.text(
+                0.0,
+                0.08,
+                subtitle,
+                ha="left",
+                va="bottom",
+                fontsize=11.2,
+                color=TEXT_COLOR,
+            )
+            if exemplar is not None:
+                ax.text(
+                    0.0,
+                    -0.28,
+                    f"example: {exemplar}",
+                    ha="left",
+                    va="bottom",
+                    fontsize=10.2,
+                    color=TEXT_COLOR,
+                )
+
+        ax_1d = fig.add_subplot(outer[1, 0])
+        _draw_eca_table(ax_1d, 54, poster=True)
+
+        case_2d = next(case for case in REPRESENTATIVE_CASES_2D if case.name == "S37/B11")
+        birth_2d, survive_2d, max_2d = _counts_for_case(case_2d)
+        inner_2d = outer[1, 1].subgridspec(1, 2, width_ratios=[0.95, 1.55], wspace=0.20)
+        ax_2d_neighborhood = fig.add_subplot(inner_2d[0, 0])
+        ax_2d_counts = fig.add_subplot(inner_2d[0, 1])
+        _draw_2d_neighborhood(ax_2d_neighborhood, poster=True)
+        _draw_count_rule(ax_2d_counts, birth=birth_2d, survive=survive_2d, max_neighbors=max_2d, poster=True)
+
+        case_3d = next(case for case in REPRESENTATIVE_CASES_3D if case.name == "diamoeba3d")
+        birth_3d, survive_3d, max_3d = _counts_for_case(case_3d)
+        inner_3d = outer[1, 2].subgridspec(1, 2, width_ratios=[1.05, 1.8], wspace=0.20)
+        ax_3d_neighborhood = fig.add_subplot(inner_3d[0, 0])
+        ax_3d_counts = fig.add_subplot(inner_3d[0, 1])
+        _draw_3d_neighborhood(ax_3d_neighborhood, poster=True)
+        _draw_count_rule(ax_3d_counts, birth=birth_3d, survive=survive_3d, max_neighbors=max_3d, poster=True)
+
+        fig.tight_layout(rect=(0.0, 0.0, 1.0, 1.0))
+        _save_diagram(fig, path)
+        plt.close(fig)
+
+
 def _draw_count_strip(
     ax: plt.Axes,
     *,
@@ -679,7 +842,14 @@ def _draw_count_strip(
     ax.text(-1.2, y, label, ha="right", va="center", fontsize=9, color=TEXT_COLOR)
 
 
-def _draw_count_rule(ax: plt.Axes, *, birth: list[int], survive: list[int], max_neighbors: int) -> None:
+def _draw_count_rule(
+    ax: plt.Axes,
+    *,
+    birth: list[int],
+    survive: list[int],
+    max_neighbors: int,
+    poster: bool = False,
+) -> None:
     ax.set_xlim(-1.8, max_neighbors + 0.8)
     ax.set_ylim(-0.8, 1.6)
     _draw_count_strip(ax, counts=birth, max_neighbors=max_neighbors, y=1.0, color=BIRTH_COLOR, label="birth")
@@ -687,21 +857,22 @@ def _draw_count_rule(ax: plt.Axes, *, birth: list[int], survive: list[int], max_
 
     ticks = list(range(max_neighbors + 1))
     ax.set_xticks(ticks)
+    tick_fontsize = 9 if poster else 8
     if max_neighbors <= 8:
-        ax.set_xticklabels([str(value) for value in ticks], fontsize=8)
+        ax.set_xticklabels([str(value) for value in ticks], fontsize=tick_fontsize)
     else:
         labels = [str(value) if value % 2 == 0 or value == max_neighbors else "" for value in ticks]
-        ax.set_xticklabels(labels, fontsize=8)
+        ax.set_xticklabels(labels, fontsize=tick_fontsize)
     ax.set_yticks([])
-    ax.set_xlabel("live-neighbor count", fontsize=9)
+    ax.set_xlabel("neighbor count", fontsize=10 if poster else 9)
     ax.xaxis.label.set_color(TEXT_COLOR)
-    ax.set_title("Local threshold rule", fontsize=10, color=TEXT_COLOR)
+    ax.set_title("Local rule", fontsize=11 if poster else 10, color=TEXT_COLOR)
     for spine in ax.spines.values():
         spine.set_visible(False)
     ax.tick_params(axis="x", length=0, colors=TEXT_COLOR)
 
 
-def _draw_2d_neighborhood(ax: plt.Axes) -> None:
+def _draw_2d_neighborhood(ax: plt.Axes, *, poster: bool = False) -> None:
     ax.set_xlim(-0.6, 2.6)
     ax.set_ylim(-0.6, 2.6)
     for y in range(3):
@@ -709,9 +880,18 @@ def _draw_2d_neighborhood(ax: plt.Axes) -> None:
             face = CENTER_COLOR if (x, y) == (1, 1) else ZERO_COLOR
             rect = Rectangle((x - 0.45, y - 0.45), 0.9, 0.9, facecolor=face, edgecolor=GRID_COLOR, linewidth=0.9)
             ax.add_patch(rect)
-    ax.text(1.0, 1.0, "cell", ha="center", va="center", fontsize=8, color=TEXT_COLOR)
-    ax.text(1.0, -0.38, "count live neighbors in the 8 surrounding cells", ha="center", va="top", fontsize=8.5, color=TEXT_COLOR)
-    ax.set_title("2D Moore neighborhood", fontsize=10, color=TEXT_COLOR)
+    ax.text(1.0, 1.0, "cell", ha="center", va="center", fontsize=9 if poster else 8, color=TEXT_COLOR)
+    if not poster:
+        ax.text(
+            1.0,
+            -0.38,
+            "count live neighbors in the 8 surrounding cells",
+            ha="center",
+            va="top",
+            fontsize=8.5,
+            color=TEXT_COLOR,
+        )
+    ax.set_title("2D neighborhood", fontsize=11 if poster else 10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -719,7 +899,7 @@ def _draw_2d_neighborhood(ax: plt.Axes) -> None:
     ax.set_aspect("equal")
 
 
-def _draw_3d_neighborhood(ax: plt.Axes) -> None:
+def _draw_3d_neighborhood(ax: plt.Axes, *, poster: bool = False) -> None:
     def draw_layer(x_offset: float, layer_label: str, center: bool) -> None:
         for y in range(3):
             for x in range(3):
@@ -734,15 +914,24 @@ def _draw_3d_neighborhood(ax: plt.Axes) -> None:
                     linewidth=0.8,
                 )
                 ax.add_patch(rect)
-        ax.text(x_offset + 1.0, 2.95, layer_label, ha="center", va="bottom", fontsize=8.5, color=TEXT_COLOR)
+        ax.text(x_offset + 1.0, 2.95, layer_label, ha="center", va="bottom", fontsize=9 if poster else 8.5, color=TEXT_COLOR)
 
     ax.set_xlim(-0.8, 9.0)
     ax.set_ylim(-0.6, 3.4)
     draw_layer(0.0, "z - 1", center=False)
     draw_layer(3.2, "z", center=True)
     draw_layer(6.4, "z + 1", center=False)
-    ax.text(4.2, -0.28, "count all live voxels except the center cell = 26 neighbors", ha="center", va="top", fontsize=8.3, color=TEXT_COLOR)
-    ax.set_title("3D Moore neighborhood", fontsize=10, color=TEXT_COLOR)
+    if not poster:
+        ax.text(
+            4.2,
+            -0.28,
+            "count all live voxels except the center cell = 26 neighbors",
+            ha="center",
+            va="top",
+            fontsize=8.3,
+            color=TEXT_COLOR,
+        )
+    ax.set_title("3D neighborhood", fontsize=11 if poster else 10, color=TEXT_COLOR)
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
@@ -750,17 +939,17 @@ def _draw_3d_neighborhood(ax: plt.Axes) -> None:
     ax.set_aspect("equal")
 
 
-def _draw_eca_table(ax: plt.Axes, rule: int) -> None:
+def _draw_eca_table(ax: plt.Axes, rule: int, *, poster: bool = False) -> None:
     rows = _eca_rule_rows(rule)
     grid = np.array([[*bits, out] for bits, out in rows], dtype=np.uint8)
     ax.imshow(grid, cmap=BINARY_CMAP, vmin=0, vmax=1, aspect="equal", interpolation="nearest")
     ax.set_xticks([0, 1, 2, 3])
-    ax.set_xticklabels(["L", "C", "R", "next"], fontsize=8)
+    ax.set_xticklabels(["L", "C", "R", "next"], fontsize=9 if poster else 8)
     ax.xaxis.tick_top()
     ax.set_yticks(range(8))
-    ax.set_yticklabels([f"{bits[0]}{bits[1]}{bits[2]}" for bits, _ in rows], fontsize=8)
+    ax.set_yticklabels([f"{bits[0]}{bits[1]}{bits[2]}" for bits, _ in rows], fontsize=9 if poster else 8)
     ax.axvline(2.5, color=GRID_COLOR, linewidth=1.2)
-    ax.set_title(f"Local update table for rule {rule}", fontsize=10, color=TEXT_COLOR)
+    ax.set_title(f"Rule {rule}" if poster else f"Local update table for rule {rule}", fontsize=11 if poster else 10, color=TEXT_COLOR)
     ax.set_xticks(np.arange(-0.5, 4.0, 1.0), minor=True)
     ax.set_yticks(np.arange(-0.5, 8.0, 1.0), minor=True)
     ax.grid(which="minor", color=GRID_COLOR, linewidth=0.8)
@@ -1161,6 +1350,9 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
     presentation_1d_path = output_dir / "presentation_rules_1d.png"
     presentation_2d_path = output_dir / "presentation_rules_2d.png"
     presentation_3d_path = output_dir / "presentation_rules_3d.png"
+    poster_presentation_2d_path = output_dir / "presentation_rules_2d_poster.png"
+    poster_presentation_3d_focus_path = output_dir / "presentation_rule_3d_focus.png"
+    poster_mechanisms_path = output_dir / "poster_rule_mechanisms.png"
 
     _plot_1d_overview(payloads_1d, overview_1d_path)
     _plot_nd_overview(
@@ -1198,6 +1390,9 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
     _plot_presentation_1d(presentation_payloads_1d, presentation_1d_path)
     _plot_presentation_2d(presentation_payloads_2d, presentation_2d_path)
     _plot_presentation_3d(presentation_payloads_3d, presentation_3d_path)
+    _plot_poster_presentation_2d(presentation_payloads_2d, poster_presentation_2d_path)
+    _plot_poster_focus_3d(_payload_by_name(presentation_payloads_3d, "diamoeba3d"), poster_presentation_3d_focus_path)
+    _plot_poster_rule_mechanisms(poster_mechanisms_path)
 
     guide_path = _write_rule_diagram_guide(
         output_dir,
@@ -1243,6 +1438,9 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
             "presentation_1d": str(presentation_1d_path.resolve()),
             "presentation_2d": str(presentation_2d_path.resolve()),
             "presentation_3d": str(presentation_3d_path.resolve()),
+            "poster_presentation_2d": str(poster_presentation_2d_path.resolve()),
+            "poster_presentation_3d_focus": str(poster_presentation_3d_focus_path.resolve()),
+            "poster_mechanisms": str(poster_mechanisms_path.resolve()),
             "guide": str(guide_path.resolve()),
             "presentation_guide": str(presentation_guide_path.resolve()),
             "paper_overview": str(paper_overview_path.resolve()),

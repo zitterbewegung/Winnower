@@ -26,7 +26,7 @@
 
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.34em}
+\setlength{\parskip}{0.38em}
 \setlist[itemize]{leftmargin=1.05em, itemsep=0.18em, topsep=0.18em}
 \setlength{\tabcolsep}{8pt}
 \renewcommand{\arraystretch}{1.20}
@@ -47,7 +47,7 @@
   \vspace{0.32em}%
   \noindent\colorbox{PosterAccentSoft}{%
     \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
-      \vspace{0.18em}\color{PosterAccent}\fontsize{26}{30}\selectfont\bfseries #1\vspace{0.16em}%
+      \vspace{0.18em}\color{PosterAccent}\fontsize{30}{34}\selectfont\bfseries #1\vspace{0.16em}%
     }%
   }%
   \vspace{0.28em}%
@@ -56,7 +56,7 @@
 \newcommand{\LeadBox}[1]{%
   \noindent\fcolorbox{PosterBorder}{PosterAccentSoft}{%
     \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-      \vspace{0.22em}\fontsize{20}{24}\selectfont #1\vspace{0.20em}%
+      \vspace{0.22em}\fontsize{22}{27}\selectfont #1\vspace{0.20em}%
     }%
   }%
 }
@@ -70,7 +70,7 @@
 \begin{document}
 \pagecolor{PosterBg}
 \color{PosterInk}
-\fontsize{21}{27}\selectfont
+\fontsize{23}{29}\selectfont
 
 \noindent
 \colorbox{PosterAccent}{%
@@ -93,9 +93,9 @@
 \begin{minipage}[t]{0.285\textwidth}
 
 \SectionHeader{Problem}
-Cellular automata often contain broad domains together with particles, interfaces, and other persistent defects. For a finite spacetime, the practical question is which global period and shift give the best explanation of the observed pattern.
+Cellular automata often mix broad regular domains with particles, interfaces, and other persistent defects. The practical finite-data question is which global period and shift best explain the observed spacetime.
 
-\LeadBox{\textbf{Guiding idea.} First fit the global scaffold, and then inspect the residual mask that remains.}
+\LeadBox{\textbf{Guiding idea.} Fit the global scaffold first, then inspect the residual mask that remains.}
 
 \SectionHeader{Selector}
 \begin{itemize}
@@ -142,15 +142,15 @@ Residual minimization and Bernoulli NLL both inflate period because fit can only
 \begin{minipage}[t]{0.415\textwidth}
 
 \SectionHeader{2D Main Result}
-These panels distinguish the broad scaffold from the residual structure that remains after subtraction.
+These panels focus on the columns that matter at poster scale: the evolving pattern, the fitted scaffold, and the defect mask that remains.
 
 \PosterCard{
   \vspace{0.12em}
-  \includegraphics[width=\linewidth]{presentation_rules_2d.png}
+  \includegraphics[width=\linewidth]{presentation_rules_2d_poster.png}
   \vspace{0.05em}
 }
 
-\vspace{0.24em}
+\vspace{0.12em}
 \LeadBox{\textbf{Main visual claim.} In 2D, the fitted scaffold explains broad regular domains, but the residual mask does not become featureless. Instead, it often retains sparse coherent structure.}
 
 \SectionHeader{Focal 2D Cases}
@@ -166,7 +166,7 @@ These panels distinguish the broad scaffold from the residual structure that rem
   \includegraphics[width=\linewidth]{presentation_rule_3d_focus.png}
   \vspace{0.08em}
 
-  {\fontsize{15}{19}\selectfont \textbf{Diamoeba3d, max projection over $z$.} Bulky volumetric domains remain visible over time; the scaffold removes the simple background, and the residual marks the interfaces it misses.}
+  {\fontsize{18}{22}\selectfont \textbf{Diamoeba3d, max projection over $z$.} Left to right: the active volume at mid horizon, the later observed state, the fitted background, and the residual interfaces.}
 
   \vspace{0.03em}
 }
@@ -174,11 +174,11 @@ These panels distinguish the broad scaffold from the residual structure that rem
 \SectionHeader{Rule Mechanisms}
 \PosterCard{
   \vspace{0.08em}
-  \includegraphics[width=\linewidth,height=2.0in,keepaspectratio]{alife_rule_mechanisms.png}
+  \includegraphics[width=\linewidth]{poster_rule_mechanisms.png}
   \vspace{0.04em}
 }
 
-This manuscript figure summarizes the local rule families behind the poster examples: 1D lookup tables, 2D Moore-neighborhood birth/survival counts, and 3D totalistic thresholds.
+Readable local-rule summary: 1D lookup tables, 2D Moore-neighborhood birth/survival counts, and 3D totalistic thresholds.
 
 \end{minipage}\hfill
 \begin{minipage}[t]{0.285\textwidth}
@@ -231,23 +231,19 @@ The manuscript entropy decomposition makes the poster's qualitative point more p
 \noindent\fcolorbox{PosterBorder}{PosterPaper}{%
   \parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{%
     \begin{minipage}[t]{0.78\textwidth}
-    {\fontsize{15}{19}\selectfont
-    \textbf{Repository and figure sources.} The selector diagram, selector-ablation chart, and stabilization chart are generated from the TikZ sources in \texttt{poster/figures/}. The presentation panels are generated in \texttt{outputs/alife\_2026/rule\_diagrams}. The local-rule mechanisms panel is reused from \texttt{paper/figures/alife\_rule\_mechanisms.png}.
+    {\fontsize{16}{20}\selectfont
+    \textbf{Repository.} \url{https://github.com/zitterbewegung/relative_symmetry_repair}
 
-    \vspace{0.20em}
-    \textbf{Supporting data.} Control summaries are in \texttt{outputs/alife\_2026/null\_controls}. Multi-seed and scaling summaries are in \texttt{outputs/strengthening\_v2}. The entropy comparison is adapted from the Complex Systems manuscript bundle.
-
-    \vspace{0.20em}
-    \textbf{Project link.} \url{https://github.com/zitterbewegung/relative_symmetry_repair}
+    \vspace{0.18em}
+    \textbf{Figure sources.} TikZ schematics live in \texttt{poster/figures/}. Poster-facing rule panels are regenerated from \texttt{scripts/alife\_rule\_diagrams.py}. The entropy comparison is adapted from the Complex Systems manuscript bundle.
     }
     \end{minipage}\hfill
     \begin{minipage}[t]{0.18\textwidth}
     \raggedleft
     \qrcode[height=1.45in]{https://github.com/zitterbewegung/relative_symmetry_repair}
 
-    {\fontsize{13}{16}\selectfont
-    Scan for repo, paper assets, and scripts.\\
-    Replace with a preprint URL if needed.
+    {\fontsize{14}{17}\selectfont
+    Scan for repo, poster assets, and scripts.
     }
     \end{minipage}
   }%
