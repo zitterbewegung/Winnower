@@ -1,0 +1,28 @@
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\input{pgfplots_common_format_alife.tex}
+\pagecolor{PosterBg}
+\begin{document}
+\begin{tikzpicture}
+\begin{axis}[
+  journalbar,
+  width=13.6cm,
+  height=6.8cm,
+  ymin=0, ymax=112,
+  ylabel={Rules selected},
+  symbolic x coords={Residual,NLL,NML},
+  xtick=data,
+  enlarge x limits=0.28,
+  nodes near coords,
+  every node near coord/.append style={font=\scriptsize, /pgf/number format/precision=0, text=PosterInk},
+  legend columns=3,
+  legend style={at={(0.5,-0.18)}, anchor=north}
+]
+\addplot+[ybar, bar width=10pt, bar shift=-12pt, draw=none, fill=PosterCard] coordinates {(Residual,16) (NLL,0) (NML,97)};
+\addplot+[ybar, bar width=10pt, bar shift=0pt, draw=none, fill=PosterBlush] coordinates {(Residual,8) (NLL,0) (NML,7)};
+\addplot+[ybar, bar width=10pt, bar shift=12pt, draw=none, fill=PosterGray] coordinates {(Residual,81) (NLL,105) (NML,1)};
+\legend{$p=1$,$p=2$,$p\ge 4$}
+\end{axis}
+\end{tikzpicture}
+\end{document}

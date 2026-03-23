@@ -1,0 +1,43 @@
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\input{pgfplots_common_format_alife.tex}
+\pagecolor{PosterBg}
+\begin{document}
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=3 by 1, horizontal sep=9mm},
+  width=3.45cm,
+  height=4.15cm,
+  ymin=0, ymax=1.08,
+  symbolic x coords={Raw,Background,Residual},
+  xtick=data,
+  xticklabels={Raw,Bg,Res},
+  x tick label style={align=center, font=\scriptsize, text=PosterInk},
+  yticklabel style={font=\scriptsize, text=PosterInk},
+  title style={font=\scriptsize, align=center, text=PosterInk},
+  ylabel style={font=\scriptsize, text=PosterInk},
+  journalbar,
+  enlarge x limits=0.18
+]
+\nextgroupplot[title={Rule 54\\$p=4$, defect $=29.5\%$}, ylabel={Entropy (bits/site)}]
+\addplot+[ybar, bar width=6.5pt, bar shift=-4pt, draw=none, fill=PosterCard] coordinates {(Raw,1.00) (Background,0.995) (Residual,0.876)};
+\addplot+[ybar, bar width=6.5pt, bar shift=4pt, draw=none, fill=PosterAccent] coordinates {(Raw,0.000) (Background,0.000) (Residual,0.149)};
+
+\nextgroupplot[title={Rule 110\\$p=7$, defect $=29.3\%$}]
+\addplot+[ybar, bar width=6.5pt, bar shift=-4pt, draw=none, fill=PosterCard] coordinates {(Raw,0.985) (Background,0.962) (Residual,0.872)};
+\addplot+[ybar, bar width=6.5pt, bar shift=4pt, draw=none, fill=PosterAccent] coordinates {(Raw,0.000) (Background,0.201) (Residual,0.386)};
+
+\nextgroupplot[title={Rule 30\\$p=1$, defect $=48.5\%$}]
+\addplot+[ybar, bar width=6.5pt, bar shift=-4pt, draw=none, fill=PosterCard] coordinates {(Raw,1.000) (Background,0.985) (Residual,0.999)};
+\addplot+[ybar, bar width=6.5pt, bar shift=4pt, draw=none, fill=PosterAccent] coordinates {(Raw,0.000) (Background,0.000) (Residual,0.098)};
+\end{groupplot}
+\node[anchor=north] at ($(group c1r1.south)!0.5!(group c3r1.south)+(0,-9mm)$) {%
+  \begin{tikzpicture}[baseline]
+    \fill[PosterCard] (0,0) rectangle +(0.35,0.18);
+    \node[anchor=west, font=\scriptsize, text=PosterInk] at (0.45,0.09) {Marginal $H$};
+    \fill[PosterAccent] (2.8,0) rectangle +(0.35,0.18);
+    \node[anchor=west, font=\scriptsize, text=PosterInk] at (3.25,0.09) {Conditional $H$};
+  \end{tikzpicture}};
+\end{tikzpicture}
+\end{document}
