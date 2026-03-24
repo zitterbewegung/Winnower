@@ -1,17 +1,17 @@
 \documentclass[letterpaper]{article}
 \usepackage{natbib,alifeconf}
 \usepackage{amsmath,amssymb,amsthm}
-\usepackage{booktabs,graphicx}
-\usepackage{hyperref}
+\usepackage{booktabs,graphicx,microtype}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{figures/}{../outputs/alife_2026/editable_figures/}{../poster/figures/}}
+\setlength{\textfloatsep}{7pt plus 1pt minus 1pt}
+\setlength{\floatsep}{6pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{0pt}
 
 \newtheorem{theorem}{Theorem}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\theoremstyle{remark}
-\newtheorem{remark}[theorem]{Remark}
 
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\bs}{\mathbf{s}}
@@ -19,10 +19,9 @@
 \newcommand{\bx}{\mathbf{x}}
 \newcommand{\NML}{\operatorname{NML}}
 \newcommand{\NLL}{\operatorname{NLL}}
-\newcommand{\RL}{\operatorname{RL}}
 \newcommand{\Hb}{H_b}
 
-\title{Model Selection Stabilization for Relative-Periodic Decomposition of Cellular Automaton Spacetimes}
+\title{Selecting Relative-Periodic Domains in Cellular Automaton Spacetime with Bernoulli NML}
 
 \author{Anonymous$^{1}$ \\
 \mbox{}\\
@@ -33,217 +32,107 @@ anonymous@example.com}
 \maketitle
 
 \begin{abstract}
-We prove that Bernoulli NML model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes stabilizes as the observation window grows: every candidate whose asymptotic per-site NLL rate exceeds the minimum is eventually excluded (Theorem~3). When the rate-minimizing candidate is unique---which holds in all cases we test---the selected model locks to a single winner.
-The argument rests on a dimension-agnostic \emph{orbit-class reduction}: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem~1), partition refinement along constant-velocity chains makes higher periods monotonically more expressive (Theorem~2), and the Bernoulli NML criterion's $O(\log T)$ complexity penalty is eventually dominated by $\Theta(T)$ data-fit gaps between candidates with distinct rates.
-We also show by explicit construction that background period recovery is impossible in general without additional assumptions (Theorem~4).
-The theory applies identically to 1D, 2D, and 3D automata.
-
-Cross-dimensional experiments are consistent with the stabilization prediction: selected periods lock for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (773 non-trivial from 1{,}050 candidates, plus all 106 named Life-like rules from the LifeWiki), and a 3D totalistic rule---with margins growing after stabilization.
-The LifeWiki survey supports the practical relevance of the predicted finite-sample tradeoff: Diamoeba transitions from period~1 to period~2 between $T{=}100$ and $T{=}400$ as the NLL gap crosses the complexity threshold, while Fredkin (B1357/S02468) is the only rule achieving period~8.
-As an application, the framework identifies 2D rules with persistent structured projection residuals, including one (S37/B11) exhibiting extensive residual scaling verified at 400 steps, across multiple seeds, and at grid sizes up to $192 \times 192$.
+Cellular automata often form broad periodic domains together with interfaces, defects, and particle-like activity. We introduce a fast global front end for that setting: scan relative-periodic templates, fit each template by majority vote on orbit classes, and return both a selected background scaffold and the residual mask that the scaffold does not explain. The Bernoulli normalized maximum likelihood (NML) score makes the comparison complexity-aware, preventing the period inflation that occurs with raw defect minimization and Bernoulli likelihood alone. Across 1D, 2D, and 3D examples, the selected scaffold usually stabilizes quickly, while 2D surveys show that most Life-like rules stay at low period and only a small number reveal longer periodic organization at larger horizons. The same decomposition isolates structured residuals in named rules such as Diamoeba, Maze with Mice, and S37/B11, where the residual mask is sparse but visibly organized rather than featureless noise. The supporting theory explains why higher-period templates overfit along refinement chains and why candidates with worse asymptotic fit are eventually excluded. The result is a scalable way to generate domain hypotheses and defect masks for downstream ALIFE analysis.
 \end{abstract}
 
 %======================================================================
 \section{Introduction}
 %======================================================================
 
-Cellular automata (CA) generate complex spatiotemporal patterns from simple local rules.
-Decomposing these patterns into regular and irregular components is a central problem in CA theory, with applications to understanding emergent computation, classifying rule complexity, and identifying coherent structures.
+Cellular automata (CA) frequently produce spacetime patterns in which broad regular domains coexist with defects, interfaces, and particle-rich activity. For ALIFE work, those domains matter because they provide the background against which coherent structures become visible. A practical problem follows immediately: given a finite spacetime, which global periodic organization best explains it, and what structure remains once that organization is removed?
 
-The computational mechanics program \citep{crutchfield1997,hanson1992} builds local epsilon-machine models that identify domains, particles, and their interactions.
-\citet{redeker2017} formalized particle catalogs via de Bruijn diagrams.
-\citet{rupe2018} generalized local causal states to arbitrary dimensions.
-\citet{shalizi2006} developed automatic coherent-structure filters.
-These methods build rich local models at significant computational cost.
+Two established traditions address nearby questions. Computational mechanics and local causal-state methods recover local statistical structure and can identify domains, particles, and interactions in rich detail \citep{crutchfield1997,hanson1992,rupe2018,shalizi2006}. Survey-oriented and compression-oriented work instead emphasize broad rule catalogs and low-cost global summaries \citep{packard1985,boccara1999,zenil2010}. The method here is meant as a middle ground. It does not replace local structure reconstruction. Instead it provides a global front end that can be applied cheaply across many rules, yielding a compact domain hypothesis together with a residual mask that highlights where richer local analysis is likely to pay off.
 
-We take a different approach: rather than building local models, we ask a global model-selection question.
-\emph{Given a finite family of relative-periodic templates, which template best describes the data?}
-We show that this question has a clean answer---the NML-optimal period stabilizes---and that the stabilization proof is dimension-agnostic, applying uniformly to 1D, 2D, and 3D automata.
+A candidate period $p$ and shift $\bs$ induce a relative-periodic model class. Fitting that candidate reduces to a majority vote on orbit classes, producing a background scaffold $B^*(p,\bs)$ and residual mask $M = U \oplus B^*(p,\bs)$. Candidates are compared with a Bernoulli NML score that balances orbit-wise fit against model complexity. The resulting selector is fast enough for survey use, while still admitting theorem-level analysis of overcapacity and stabilization.
 
-\subsection{Contributions}
+Concretely, the paper contributes a relative-periodic CA model family, an orbit-class fitting rule that runs in $O(|U|)$ time per candidate, a complexity-aware selector that avoids systematic period inflation, a compact stabilization theorem for finite candidate families, and cross-dimensional evidence that the scaffold-plus-residual decomposition is useful for CA structure discovery. The paper's claim is deliberately modest: the selected period is a global explanatory scaffold, not a complete account of particles or interactions.
 
-\begin{enumerate}
-    \item \textbf{Orbit-class reduction} (Theorem~\ref{thm:projection}): fitting a relative-periodic background reduces to independent majority voting on orbit classes, yielding the Hamming-optimal projection in $O(|U|)$ time per candidate.
-    \item \textbf{Monotonicity} (Theorem~\ref{thm:monotonicity}): higher periods achieve lower residual counts along constant-velocity divisibility chains, necessitating complexity control.
-    \item \textbf{Model selection stabilization} (Theorem~\ref{thm:stabilization}): under convergent orbit-class frequencies, every suboptimal candidate is eventually excluded; when the rate-minimizer is unique, selection locks.
-    \item \textbf{Nonidentifiability} (Theorem~\ref{thm:nonident}): background period recovery is impossible in general; periodic residual structure can be absorbed by higher-period templates.
-    \item \textbf{Cross-dimensional experiments}: empirical stabilization for 1D (ECA 30/54/110), 2D (773 totalistic + 106 LifeWiki rules), and 3D.
-    \item \textbf{Application}: identification of persistent structured projection residuals in 2D, with extensive scaling in S37/B11.
-\end{enumerate}
-
-\subsection{Relationship to Prior Work}
-
-\citet{packard1985} surveyed 2D rules qualitatively.
-\citet{boccara1999} identified period-2 families.
-\citet{zenil2010} used compression for CA classification.
-Our contribution is a \emph{stabilization theorem} for period selection that applies across dimensions.
-Unlike computational mechanics \citep{crutchfield1997,rupe2018}, our model class is global (relative-periodic) rather than local (epsilon-machine), with the trade-off of missing local particle structure but gaining a provable stabilization guarantee and $O(|U|)$ cost per candidate.
-
-%======================================================================
-\section{Theory}
-%======================================================================
-
-\subsection{Relative-Periodic Model Class}
-
-\begin{definition}[Relative-periodic model class]\label{def:model}
-Given a binary spacetime $U \in \{0,1\}^{T \times D_1 \times \cdots \times D_n}$, shift $\bs \in \mathbb{Z}^n$, and period $p \geq 1$, the \emph{relative-periodic model class} $\mathcal{B}(p, \bs)$ consists of all fields $B$ satisfying $B[t {+} p,\; \bx {+} \bs \bmod \bD] = B[t, \bx]$
-for all valid indices.
-This partitions spacetime into \emph{orbit classes} $\{O_j\}_{j=1}^{k}$ where $k = p \prod_i D_i$.
-Within each class, $B$ is constant.
-\end{definition}
-
-\subsection{Orbit-Class Reduction}
-
-\begin{theorem}[Optimal Hamming Projection]\label{thm:projection}
-Let $n_j^{(1)} = |\{(t,\bx) \in O_j : U[t,\bx] = 1\}|$ and $n_j^{(0)} = |O_j| - n_j^{(1)}$.
-The Hamming distance $d(U, B)$ is minimized over $\mathcal{B}(p, \bs)$ by majority vote: $b_j = [n_j^{(1)} > n_j^{(0)}]$.
-The minimum residual count is $\sum_j \min(n_j^{(0)}, n_j^{(1)})$.
-The minimizer is unique iff no orbit class has $n_j^{(0)} = n_j^{(1)}$.
-\end{theorem}
-
-\begin{proof}
-The Hamming distance decomposes additively over orbit classes.
-Since $B$ is constant on each $O_j$, choosing $b_j$ independently minimizes each $d_j = \min(n_j^{(0)}, n_j^{(1)})$.
-\end{proof}
-
-This is the \emph{orbit-class reduction}: the spatiotemporal fitting problem decomposes into $k$ independent binary estimation problems, exact in any dimension.
-
-\subsection{Monotonicity and Overcapacity}
-
-\begin{theorem}[Monotonicity]\label{thm:monotonicity}
-If $(p_2, \bs_2)$ is a velocity-matched multiple of $(p_1, \bs_1)$---i.e., $p_2 = m \cdot p_1$ and $s_2^{(i)} \equiv m \cdot s_1^{(i)} \pmod{D_i}$---then the orbit partition under $(p_2, \bs_2)$ refines that under $(p_1, \bs_1)$, and $d^*(p_2, \bs_2) \leq d^*(p_1, \bs_1)$.
-\end{theorem}
-
-\begin{proof}
-The periodicity map $\tau_2$ equals $\tau_1^m$, so $\tau_2$-orbits refine $\tau_1$-orbits.
-Optimizing over a finer partition cannot increase total disagreement (Theorem~\ref{thm:projection}).
-\end{proof}
-
-Along any constant-velocity chain, the residual count is non-increasing.
-This \emph{overcapacity problem} motivates complexity-penalized selection.
-
-\subsection{Bernoulli NML Criterion}
-
-Each model $(p, \bs)$ decomposes the data into $k = p \prod_i D_i$ independent Bernoulli estimation problems (Theorem~\ref{thm:projection}).
-
-\begin{definition}[Bernoulli NML score]\label{def:nml}
-\[
-\NML(p, \bs) = \underbrace{\sum_{j=1}^{k} n_j \, \Hb(\hat{\theta}_j)}_{\text{NLL (data fit)}} + \underbrace{\sum_{j=1}^{k} \tfrac{1}{2} \log_2 n_j}_{\text{parametric complexity}},
-\]
-where $\hat{\theta}_j = n_j^{(1)}/n_j$ and $\Hb$ is binary entropy.
-The complexity term is the asymptotic NML parametric complexity for Bernoulli families \citep{grunwald2007,shtarkov1987}.
-\end{definition}
-
-The NML score depends only on orbit-class statistics $(n_j, n_j^{(1)})$---it is independent of spatial arrangement and traversal order.
-
-\subsection{Stabilization Theorem}
-
-\begin{theorem}[Stabilization]\label{thm:stabilization}
-Let $\mathcal{C}$ be a finite candidate set.
-Assume convergent orbit-class frequencies: $\hat{\theta}_j(T) \to \theta_j^*$ as $T \to \infty$.
-Define the per-site NLL rate $\lambda_c = \frac{1}{k_c} \sum_{j} \Hb(\theta_j^*)$, and let $\lambda^* = \min_c \lambda_c$.
-Then:
-\begin{enumerate}
-    \item[\textup{(i)}] $\NML(c, T) = \lambda_c \cdot N(T) + \frac{k_c}{2}\log_2 T + o(N(T))$.
-    \item[\textup{(ii)}] Every candidate with $\lambda_c > \lambda^*$ is eventually excluded.
-    \item[\textup{(iii)}] If $\lambda^*$ is achieved uniquely, selection locks to a single winner.
-\end{enumerate}
-\end{theorem}
-
-\begin{proof}
-Under convergent frequencies, $\NLL(c,T) = \lambda_c N(T) + o(N(T))$ and complexity is $\frac{k_c}{2}\log_2 T + O(1)$.
-For $\lambda_{c_1} > \lambda_{c_2}$, the $\Theta(T)$ gap dominates $O(\log T)$ complexity, so $c_1$ is eventually beaten.
-Since $|\mathcal{C}|$ is finite, all suboptimal candidates are excluded.
-\end{proof}
-
-\begin{corollary}[Dimension-agnostic]
-Theorem~\ref{thm:stabilization} makes no reference to spatial dimension.
-\end{corollary}
-
-\subsection{Nonidentifiability and Identifiability}
-
-\begin{theorem}[Nonidentifiability]\label{thm:nonident}
-For any period $p_0$ and shift $\bs$, there exist spacetimes for which no MDL-type criterion (with $O(\log T)$ penalty) selects $p_0$ for large $T$.
-\end{theorem}
-
-\emph{Proof sketch.} Construct $U$ with residuals under $(p_0, \bs)$ that are themselves periodic with period $q$. The candidate $(q \cdot p_0, q \cdot \bs \bmod \bD)$ absorbs the residuals, achieving $\lambda = 0$ vs $\lambda_{p_0} > 0$.
-
-\begin{theorem}[Identifiability for exact backgrounds]\label{thm:ident}
-If all orbit classes under $p_0$ have $\theta_j^* \in \{0,1\}$ (exactly periodic background), then NML selects $p_0$ over all velocity-matched multiples for large $T$.
-\end{theorem}
-
-\begin{proof}
-Both candidates have $\lambda = 0$, but the multiple has $m \cdot k_{p_0}$ orbit classes vs $k_{p_0}$.
-The complexity difference $\frac{(m-1)k_{p_0}}{2}\log_2 T \to +\infty$ favors $p_0$.
-\end{proof}
-
-Theorems~\ref{thm:nonident} and~\ref{thm:ident} are complementary: NML recovers the true period when the background is exactly periodic, and absorbs periodic residual structure into higher-period templates when it is not.
-
-%======================================================================
-\section{Cross-Dimensional Experiments}
-%======================================================================
-
-We complement the quantitative results below with two visual summaries.
-Figure~\ref{fig:alife-rule-mechanisms} shows the local update families for the representative 1D, 2D, and 3D rules discussed in this section, while Figure~\ref{fig:alife-representative-rules} shows the corresponding observed/background/defect decompositions.
-
-\begin{figure*}[!t]
-  \centering
-  \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/alife_rule_mechanisms.png}
-  \caption{Local update mechanisms for the representative rule panel. (A) The studied 1D elementary rules are lookup tables on three-cell neighborhoods. (B) The studied 2D rules are totalistic Moore-neighborhood rules on eight neighbors, specified by birth and survival counts. (C) The studied 3D rules are totalistic 26-neighbor rules, again determined only by birth and survival counts. These mechanism diagrams clarify the local rule families whose global spatiotemporal organization is analyzed by the NML selector.}
-  \label{fig:alife-rule-mechanisms}
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.92\textwidth]{algorithm_detailed.pdf}
+    \caption{Algorithm sketch. A candidate period/shift pair induces an orbit partition of the observed spacetime. Majority vote on each orbit gives the nearest relative-periodic background $B^*(p,\bs)$, the residual mask is $M = U \oplus B^*(p,\bs)$, and Bernoulli NML compares candidates by orbit-wise fit plus complexity.}
+    \label{fig:algorithm}
 \end{figure*}
 
-\subsection{1D Elementary CA}
+%======================================================================
+\section{Method}
+%======================================================================
 
-ECA rules 30, 54, and 110 on a ring of width 192, scanning shifts $\pm 6$, periods 1--10.
+\paragraph{Relative-periodic candidates.}
+For a binary spacetime $U \in \{0,1\}^{T \times D_1 \times \cdots \times D_n}$, period $p \geq 1$, and shift $\bs \in \mathbb{Z}^n$, the relative-periodic model class $\mathcal{B}(p,\bs)$ consists of fields $B$ satisfying
+\[
+B[t+p,\bx+\bs \bmod \bD] = B[t,\bx].
+\]
+The corresponding spacetime translation partitions the observation into orbit classes $\{O_j\}_{j=1}^{k}$ with $k = p \prod_i D_i$. A candidate background therefore assigns one bit to each orbit class.
 
-\begin{table}[!htb]
+\begin{proposition}[Orbitwise fitting]\label{prop:projection}
+For a fixed candidate $(p,\bs)$, the Hamming-optimal background in $\mathcal{B}(p,\bs)$ is obtained by majority vote on each orbit class. If $n_j^{(1)}$ and $n_j^{(0)}$ denote the number of ones and zeros in class $O_j$, then the minimum residual count is $\sum_j \min(n_j^{(0)}, n_j^{(1)})$.
+\end{proposition}
+
+This orbit-class reduction is the computational core of the method. Once the orbit partition is known, fitting is a single pass over the data.
+
+\paragraph{Bernoulli NML score.}
+Each orbit class becomes a Bernoulli estimation problem with empirical parameter $\hat{\theta}_j = n_j^{(1)}/n_j$, where $n_j = |O_j|$. We score a candidate by
+\[
+\NML(p,\bs) = \sum_j n_j \Hb(\hat{\theta}_j) + \frac{1}{2}\sum_j \log_2 n_j,
+\]
+where the first term is Bernoulli negative log-likelihood and the second is the asymptotic NML complexity penalty for Bernoulli families \citep{grunwald2007,shtarkov1987}. The selector minimizes this score over the scanned period/shift family.
+
+\begin{theorem}[Refinement and overcapacity]\label{thm:refinement}
+If $(p_2,\bs_2)$ is a velocity-matched multiple of $(p_1,\bs_1)$, then the orbit partition under $(p_2,\bs_2)$ refines the partition under $(p_1,\bs_1)$. Consequently both optimal residual count and Bernoulli NLL are non-increasing along that chain.
+\end{theorem}
+
+The practical message of Theorem~\ref{thm:refinement} is that raw defect minimization and raw Bernoulli likelihood systematically overselect larger templates whenever refinement is available. Complexity control is therefore necessary, not cosmetic.
+
+\begin{theorem}[Stabilization]\label{thm:stabilization}
+Let $\mathcal{C}$ be a finite candidate set and let $N(T)$ denote the number of observed sites. If the orbit-class frequencies for each candidate converge as the observation horizon grows, then
+\[
+\NML(c,T) = \lambda_c N(T) + \frac{k_c}{2}\log_2 T + o(N(T)),
+\]
+where $\lambda_c$ is the candidate's asymptotic per-site Bernoulli fit rate and $k_c$ is its number of orbit classes. Every candidate with $\lambda_c$ above the minimum is eventually excluded, and if the minimum rate is unique then the selector locks to a single winner.
+\end{theorem}
+
+This is the standard MDL/NML rate-separation argument specialized to relative-periodic orbit models: asymptotic fit differences grow linearly in data size, while complexity grows only logarithmically. It supports treating the selected candidate as the best global explanation of the observed spacetime. That need not coincide with a physicist's ``true'' background period: if the residual itself contains periodic organization, a larger template can absorb it; when the background is exactly periodic, the smaller true period wins because matched multiples pay higher complexity.
+
+%======================================================================
+\section{Results}
+%======================================================================
+
+\subsection{Representative Decompositions}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{alife_representative_rules.png}
+  \caption{Representative decompositions across 1D, 2D, and 3D. The same selector extracts a broad relative-periodic scaffold and the residual mask left after subtraction. In the focal 2D cases, the residual remains sparse but visibly structured rather than collapsing to featureless noise.}
+  \label{fig:representative}
+\end{figure*}
+
+Figure~\ref{fig:representative} shows the main empirical use case. Across dimensions, the selector removes the broad regular scaffold while leaving behind the defects and interfaces that the scaffold does not explain. In the 2D named rules that matter most for ALIFE interpretation, Diamoeba (B35678/S5678) and Maze with Mice (B37/S12345) produce low-period scaffolds with concentrated residual masks, while S37/B11 retains a visibly organized residual population even after the background is removed.
+
+The 1D examples provide the same kind of scaffold extraction under joint shift-period optimization: Rule~54 locks to period~4, Rule~110 passes through a short transient and then locks to period~4 with shift $-2$, and Rule~30 remains at period~1. In 3D, the tested diamoeba rule shows an analogous decomposition once the early small-sample transient disappears.
+
+\subsection{Why the Penalty Matters}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{selector_ablation_tikz.pdf}
+    \caption{Selector ablation on nontrivial Life-like rules at $T=100$. Raw residual minimization and Bernoulli NLL are pulled toward larger periods along refinement chains. Bernoulli NML prevents that period inflation and concentrates selections at low period.}
+    \label{fig:ablation}
+\end{figure}
+
+Figure~\ref{fig:ablation} is the key practical argument for NML. On the 105 nontrivial Life-like rules at $T=100$, Bernoulli NLL selects the largest tested period in every case. Bernoulli NML instead selects period~1 for 97 rules, period~2 for 7 rules, and period~8 for 1 rule. Residual minimization shows the same upward pull toward more expressive templates. The complexity term is therefore doing real work: it prevents the selector from confusing refinement capacity with meaningful periodic structure.
+
+\subsection{Cross-Dimensional Behavior and 2D Surveys}
+
+We surveyed all 106 named Life-like rules from the LifeWiki on a $64 \times 64$ torus with periods 1--8 and shifts $\pm 2$. Most nontrivial rules remain low period at both horizons we tested. Only four rules change period between $T=100$ and $T=400$: Diamoeba and Maze with Mice move from period~1 to period~2, B017/S01 moves from period~2 to period~4, and Serviettes (B234/S) drops from period~2 to period~1 as a transient disappears. Fredkin (B1357/S02468) is the only named rule that reaches period~8.
+
+\begin{table}[t]
 \centering
-\caption{NML-optimal decomposition ($T = 144$).}\label{tab:1d-nml}
-\begin{tabular}{lccccc}
+\caption{Life-like survey period distribution (nontrivial rules only).}
+\label{tab:lifewiki}
+\begin{tabular}{lcc}
 \toprule
-Rule & $(s, p)$ & Defect & NLL & Cmplx & NML \\
-\midrule
-54  & $(0, 4)$ & 20.1\% & 17{,}477 & 1{,}985 & 19{,}462 \\
-110 & $(0, 7)$ & 30.8\% & 22{,}842 & 2{,}931 & 25{,}774 \\
-30  & $(5, 1)$ & 46.3\% & 27{,}489 & 688     & 28{,}177 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The known complexity hierarchy Rule~54 $<$ Rule~110 $<$ Rule~30 \citep{crutchfield1997,redeker2017} is recovered.
-
-\begin{table}[!htb]
-\centering
-\caption{Period stabilization (1D).}\label{tab:1d-stab}
-\begin{tabular}{lcccccc}
-\toprule
-Rule & $T{=}50$ & 100 & 200 & 400 & 800 & Margin \\
-\midrule
-ECA-54  & 4 & 4 & 4 & 4 & 4 & 1{,}993 \\
-ECA-110 & 7 & 7 & 7 & 7 & 7 & 18{,}378 \\
-ECA-30  & 1 & 1 & 1 & 1 & 1 & 598 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-All three rules show \emph{immediate} stabilization from $T{=}50$ with growing margins, consistent with Theorem~\ref{thm:stabilization}.
-
-\subsection{2D Totalistic Rules}
-
-\subsubsection{Range-threshold survey.}
-We survey 1{,}050 range-threshold totalistic rules on a $48 \times 48$ torus (Moore neighborhood, 40 steps, density 0.5, seed 11).
-Of 773 non-trivial rules, 614 select period~1, 159 select period~2, and 172 have nonzero best-fit shift.
-
-\subsubsection{LifeWiki named rules survey.}
-We survey all 106 named Life-like rules from the LifeWiki, including rules with non-contiguous B/S sets (e.g., B36/S23, B3678/S34678), on a $64 \times 64$ torus with periods 1--8 and shifts $\pm 2$.
-
-\begin{table}[!htb]
-\centering
-\caption{LifeWiki survey period distribution (nontrivial rules only; 1 trivial at $T{=}100$, 3 at $T{=}400$).}\label{tab:lifewiki}
-\begin{tabular}{lccc}
-\toprule
-Period & $T{=}100$ & $T{=}400$ \\
+Period & $T=100$ & $T=400$ \\
 \midrule
 $p=1$ & 97 & 94 \\
 $p=2$ & 7 & 7 \\
@@ -255,240 +144,48 @@ Nontrivial & 105 / 106 & 103 / 106 \\
 \end{tabular}
 \end{table}
 
-Four rules change period between $T{=}100$ and $T{=}400$ (two additional rules became trivial, accounting for the nontrivial count dropping from 105 to 103):
-\begin{itemize}
-    \item \textbf{Diamoeba} (B35678/S5678): $p{=}1 \to p{=}2$. NLL gap grows from 7{,}749 to 17{,}085 bits, crossing the complexity threshold at $T{\approx}400$.
-    \item \textbf{Maze with Mice} (B37/S12345): $p{=}1 \to p{=}2$.
-    \item \textbf{B017/S01}: $p{=}2 \to p{=}4$. Deeper periodic structure revealed.
-    \item \textbf{Serviettes} (B234/S): $p{=}2 \to p{=}1$. Transient signal correctly eliminated.
-\end{itemize}
+The same stabilization picture appears across dimensions, but with different transient behaviors. In 2D persistent-residual rules, longer horizons can reveal additional periodic structure before the selector locks. In 3D diamoeba3d, the initial period~6 selection is a small-sample artifact and period~1 takes over by $T=40$ with growing margin. These cases match the theoretical picture: the selector changes when longer observation windows uncover fit improvements strong enough to beat the logarithmic complexity penalty.
 
-This is consistent with Theorem~\ref{thm:stabilization}: genuine periodic signals grow as $\Theta(T)$ and overcome the $O(\log T)$ complexity penalty, while spurious signals are eliminated.
-
-\begin{table}[!htb]
+\begin{table}[t]
 \centering
-\caption{LifeWiki rules with period $> 1$ at $T{=}400$.}\label{tab:lifewiki-higher}
-\begin{tabular}{llcr}
-\toprule
-Rule & Name & $p$ & Margin \\
-\midrule
-B01245/S01245 & --- & 2 & 23{,}437 \\
-B014/S2       & Oils & 2 & 24{,}354 \\
-B026/S1       & --- & 2 & 7{,}441 \\
-B345/S5       & Long Life & 2 & 23{,}673 \\
-B35678/S5678  & Diamoeba & 2 & 369 \\
-B37/S12345    & Maze w/ Mice & 2 & 10{,}230 \\
-B45678/S5678  & Majority & 2 & 25{,}169 \\
-B017/S01      & --- & 4 & 3{,}106 \\
-B1357/S02468  & Fredkin & 8 & 153{,}305 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Fredkin} (B1357/S02468) achieves period~8---the only period $>4$ in the catalog---due to its parity-rule replication cycle.
-Diamoeba's small margin (369 bits) reflects its recent transition; margins grow as Theorem~\ref{thm:stabilization} predicts.
-
-\subsubsection{Period stabilization (2D).}
-
-\begin{table}[!htb]
-\centering
-\caption{Period stabilization (2D).}\label{tab:2d-stab}
-\begin{tabular}{lcccccc}
-\toprule
-Rule & $T{=}60$ & 100 & 200 & 400 & 800 & Margin \\
-\midrule
-S24/B11 & 1 & 1 & 1 & 2 & 2 & 13{,}115 \\
-S11/B37 & 2 & 2 & 2 & 4 & 4 & 22{,}352 \\
-S37/B11 & 1 & 1 & 2 & 2 & 2 & 16{,}006 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-These rules show \emph{progressive} stabilization: the period increases in jumps then locks with growing margins.
-This is the regime of Theorem~\ref{thm:nonident}: periodic residual structure is absorbed into higher-period templates.
-Notably, NML selects \emph{lower} periods than a previous RL-based MDL formulation (e.g., period~2 vs period~6 for S24/B11), because the RL artifact inflated data-fit terms for higher periods.
-
-\subsubsection{Multi-seed robustness.}
-We verified 6 rules across 10 seeds ($64 \times 64$, 60 steps):
-
-\begin{table}[!htb]
-\centering
-\caption{Multi-seed robustness.}\label{tab:multiseed}
+\caption{Compact cross-dimensional summary of the selected scaffold behavior.}
+\label{tab:summary}
 \small
-\begin{tabular}{lcccc}
+\begin{tabular}{p{0.21\linewidth}p{0.67\linewidth}}
 \toprule
-Rule & $p$ & Rate & CV & Cons. \\
+Setting & Main observation \\
 \midrule
-S14/B11 & 1 & 0.59\% & 8.4\%  & 10/10 \\
-S25/B12 & 2 & 0.58\% & 15.6\% & 8/10 \\
-S66/B36 & 2 & 0.63\% & 10.5\% & 10/10 \\
-S24/B11 & 2 & 2.78\% & 9.4\%  & 10/10 \\
-S11/B37 & 4 & 2.75\% & 18.7\% & 7/10 \\
-S37/B11 & 2 & 4.41\% & 12.4\% & 10/10 \\
+1D ECA 30/54/110 & Rule~54 locks to period~4, Rule~110 locks to period~4 with shift $-2$ after a short transient, and Rule~30 remains at period~1. \\
+2D Life-like survey & At $T=400$, 94 of 103 nontrivial named rules select period~1; only 9 named rules select period $>1$. \\
+2D focal persistent-residual rules & S24/B11 and S37/B11 move to period~2, S11/B37 moves to period~4, and all retain organized residual structure after subtraction. \\
+3D diamoeba3d & A short small-sample transient favors period~6, but the selector stabilizes to period~1 by $T=40$. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Rules with near-zero NML margins (S25/B12, S11/B37) show seed-dependent period selection at short horizons---consistent with Theorem~\ref{thm:stabilization}, which requires the linear NLL gap to dominate at large $T$.
+\subsection{Structured Residuals as the ALIFE Payoff}
 
-\subsection{3D Totalistic Rules}
-
-Diamoeba3d (survive 5--8, birth 5--8) on a $16^3$ torus:
-
-\begin{table}[!htb]
-\centering
-\caption{Period stabilization (3D).}\label{tab:3d-stab}
-\begin{tabular}{cccc}
-\toprule
-$T$ & Period & NML Bits & Margin \\
-\midrule
-10 & 6 & 26{,}406  & 5{,}560 \\
-20 & 6 & 75{,}703  & 3{,}055 \\
-40 & 1 & 158{,}154 & 3{,}505 \\
-60 & 1 & 232{,}856 & 4{,}872 \\
-80 & 1 & 303{,}209 & 5{,}840 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The initial period~6 selection is a small-sample artifact (1--3 cycles per orbit class).
-By $T{=}40$, NML stabilizes to period~1 with growing margins.
-
-\begin{figure*}[!t]
-  \centering
-  \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/alife_representative_rules.png}
-  \caption{Representative rules across 1D, 2D, and 3D. (A) Elementary cellular automata show the raw spacetime, the selected relative-periodic background, and the residual defect mask. (B) Representative 2D rules show early, middle, and late slices together with the selected background and the final residual mask. (C) Representative 3D rules show midplane slices through the observed spacetime, selected background, and residual mask. Across dimensions, the same selector extracts a global scaffold and isolates the structured residuals that remain.}
-  \label{fig:alife-representative-rules}
-\end{figure*}
-
-\subsection{Stabilization Summary}
-
-\begin{table}[!htb]
-\centering
-\caption{Cross-dimensional stabilization.}\label{tab:summary}
-\small
-\begin{tabular}{llll}
-\toprule
-Dim & Rules & Onset & Behavior \\
-\midrule
-1D & ECA 30/54/110 & $T{=}50$ & Immediate \\
-2D & 3 pers.-res. & $T{=}200$--400 & Progressive \\
-2D & 106 LifeWiki & $T{=}100$--400 & 4 change; 103 stable \\
-3D & diamoeba3d & $T{=}40$ & Transient, locked \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-%======================================================================
-\section{Application: Persistent Structured Defects in 2D}
-%======================================================================
-
-\subsection{400-Step Verification}
-
-All three rules (S24/B11, S11/B37, S37/B11) show stable defect populations from $t{=}100$ through $t{=}400$ on a $64 \times 64$ grid, with mean defect counts varying by $<15\%$ between early and late windows.
-
-\subsection{Size Scaling}
-
-Five seeds, grid sizes 32--192, 100 steps.
-\emph{Defect density} is late defects divided by spatial grid area $D^2$.
-
-\begin{table}[!htb]
-\centering
-\caption{S37/B11 size scaling (extensive).}\label{tab:s37b11-scale}
-\begin{tabular}{lccc}
-\toprule
-Grid & Mean Rate & Late Defects & Density \\
-\midrule
-$32^2$  & 3.47\% & $11.4 \pm 5.3$  & 0.011 \\
-$64^2$  & 3.26\% & $45.7 \pm 6.6$  & 0.011 \\
-$96^2$  & 3.11\% & $101.9 \pm 8.0$ & 0.011 \\
-$128^2$ & 3.33\% & $196.5 \pm 10.6$ & 0.012 \\
-$192^2$ & 3.14\% & $428.5 \pm 32.4$ & 0.012 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Defect density is approximately constant (${\sim}0.011$) across all grid sizes, consistent with a bulk (extensive) phenomenon.
-
-\begin{table}[!htb]
-\centering
-\caption{S11/B37 size scaling (sub-extensive).}\label{tab:s11b37-scale}
-\begin{tabular}{lccc}
-\toprule
-Grid & Mean Rate & Late Defects & Density \\
-\midrule
-$32^2$  & 1.46\% & $1.6 \pm 0.6$   & 0.0016 \\
-$64^2$  & 1.81\% & $11.1 \pm 6.3$  & 0.0027 \\
-$96^2$  & 1.71\% & $18.6 \pm 6.2$  & 0.0020 \\
-$128^2$ & 1.58\% & $32.7 \pm 4.1$  & 0.0020 \\
-$192^2$ & 1.69\% & $79.5 \pm 16.7$ & 0.0022 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-S11/B37 defect density drops then stabilizes at ${\sim}0.002$, consistent with sub-extensive scaling.
+The main ALIFE value of the method is not just period selection. The selected background acts as a domain hypothesis, and the residual mask highlights where particles, interfaces, and other coherent departures remain. In Diamoeba and Maze with Mice the residual is sparse but clearly localized. In S37/B11, the residual remains organized under stronger checks: the same rule continues to show persistent structured defects at 400 steps, across 10 seeds, and at grid sizes up to $192 \times 192$. That makes the decomposition useful as a survey-scale triage tool. It tells us which rules, horizons, and spatial regions merit the heavier cost of local causal-state or particle-level analysis.
 
 %======================================================================
 \section{Discussion}
 %======================================================================
 
-\subsection{What the Theory Provides}
+This method is deliberately modest. It is complementary to computational mechanics rather than a replacement for it. The output is a compact global scaffold and a residual mask, not a full account of interaction structure. What it buys in exchange is scale: the same orbit-class computation can be applied across many rules and across 1D, 2D, and 3D settings without changing the basic pipeline.
 
-The orbit-class reduction transforms spatiotemporal fitting into standard Bernoulli estimation, enabling:
-(1) Hamming-optimal decomposition in $O(|U|)$ time for any dimension;
-(2) a formal explanation of overcapacity (Theorem~\ref{thm:monotonicity});
-(3) a stabilization theorem (Theorem~\ref{thm:stabilization}) with no assumption on residual geometry;
-(4) a nonidentifiability result (Theorem~\ref{thm:nonident}) with recovery guaranteed when the background is exactly periodic (Theorem~\ref{thm:ident}).
-
-The same framework---orbit classes $\to$ Bernoulli estimation $\to$ NML stabilization---applies without modification across spatial dimensions.
-
-\subsection{NML vs Legacy MDL}
-
-A previous formulation used run-length codelength as the data-fit term.
-This had three weaknesses: model mismatch (RL is not the Bernoulli NLL), geometry dependence (RL depends on traversal order), and an extra convergence assumption.
-NML and MDL agree for 1D rules but diverge for 2D rules with periodic residuals, where NML selects lower, more parsimonious periods (e.g., period~2 vs period~6 for S24/B11).
-
-\subsection{Limitations}
-
-Monotonicity requires velocity matching (satisfied for shift-zero, the dominant case).
-The Bernoulli i.i.d.\ assumption within orbit classes ignores temporal correlations (which do not affect asymptotic rates).
-NML selects the best-compressing period, not necessarily a physicist's ``true'' period (Theorem~\ref{thm:nonident}).
-The method identifies \emph{where} residuals are but not \emph{how} they interact---it does not recover domain/particle structure in the computational mechanics sense \citep{crutchfield1997}.
-
-\subsection{Future Work}
-
-Component tracking (lifetimes, velocities, collision catalogs), direct comparison with local causal states \citep{rupe2018}, larger surveys (1000+ 2D rules), exact finite-sample NML normalizers, and joint shift--period optimization.
+The theory explains why that pipeline behaves sensibly. Majority-vote fitting gives a cheap global projection, refinement explains why unpenalized selectors overfit, and the stabilization result explains why longer observation windows typically reduce ambiguity rather than increase it. The main limitations are equally clear: the selector chooses the best-compressing global explanation, not necessarily a unique physical background period, and the residual mask indicates where structure is but not how it interacts. The next steps are direct comparisons with local causal states, component tracking within the residual mask, and exact finite-sample NML normalizers. All experiments and figures reported here come from the same open-source project repository and reuse the existing 1D, 2D, and 3D survey outputs rather than introducing new experiments.
 
 %======================================================================
 \section{Conclusion}
 %======================================================================
 
-We have proved that Bernoulli NML model selection over relative-periodic CA backgrounds stabilizes: every candidate whose per-site NLL rate exceeds the minimum is eventually excluded (Theorem~\ref{thm:stabilization}).
-When the rate-minimizing candidate is unique---as in all cases we test---the selected model locks, though the selected period need not correspond to any external notion of ``true background period'' (Theorem~\ref{thm:nonident}).
-The proof requires only convergent orbit-class frequencies, is dimension-agnostic, and rests on the orbit-class reduction that decomposes spatiotemporal fitting into independent Bernoulli estimation.
+Bernoulli NML selection of relative-periodic templates provides a scalable front end for CA structure discovery. It yields a domain hypothesis and residual mask, avoids period inflation, and supports rapid comparison of periodic explanations across rules and dimensions. The supporting theory explains why complexity control is necessary and why the selected scaffold usually stabilizes as the observation window grows.
 
-Cross-dimensional experiments on 1D elementary CA, 2D totalistic and Life-like rules (including all 106 named LifeWiki rules), and a 3D totalistic rule are consistent with the stabilization prediction.
-As an application, the framework identifies 2D rules with persistent structured projection residuals exhibiting extensive scaling.
-
-%======================================================================
-\section*{Reproducibility}
-%======================================================================
-
-All code is open-source.
-Key parameters:
-1D ECA: width${}=192$, steps${}=144$, density${}=0.5$, seed${}=11$, shifts${}=-6..{+}6$, periods${}=1..10$.
-1D convergence: $T \in \{50, 100, 200, 400, 600, 800\}$.
-2D range-threshold survey: $48 \times 48$, steps${}=40$, 1{,}050 candidates (773 non-trivial).
-2D LifeWiki survey: $64 \times 64$, steps${}=\{100, 400\}$, density${}=0.5$, seed${}=42$, periods${}=1..8$, shifts${}=\pm 2$.
-2D convergence: $64 \times 64$, $T \in \{60, 100, 200, 400, 600, 800\}$.
-3D: $16^3$, $T \in \{10, 20, 40, 60, 80\}$.
-Multi-seed: seeds $= \{11, 42, 73, 99, 137, 200, 314, 500, 777, 1024\}$.
-Size scaling: grids $\in \{32, 64, 96, 128, 192\}$, steps${}=100$, 5 seeds.
-400-step verification: $64 \times 64$, seed${}=11$.
+For ALIFE, the main payoff is practical. The method makes it easier to screen many rules, isolate where coherent departures from a broad background remain, and focus richer local analyses on the cases where they are most likely to be informative.
 
 \footnotesize
 \bibliographystyle{apalike}
-\begin{thebibliography}{10}
+\begin{thebibliography}{9}
 
 \bibitem[Boccara and Roger, 1999]{boccara1999}
 Boccara, N. and Roger, M. (1999).
@@ -514,11 +211,6 @@ The attractor-basin portrait of a cellular automaton.
 Packard, N.~H. and Wolfram, S. (1985).
 Two-dimensional cellular automata.
 \emph{J.\ Statistical Physics}, 38:901--946.
-
-\bibitem[Redeker, 2017]{redeker2017}
-Redeker, M. (2017).
-A language for particle interactions in Rule~54 and other cellular automata.
-\emph{Complex Systems}, 26(1):1--32.
 
 \bibitem[Rupe and Crutchfield, 2018]{rupe2018}
 Rupe, A. and Crutchfield, J.~P. (2018).
