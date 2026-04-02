@@ -78,9 +78,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 
 ### 3d-life
 
-- Selected winner: `(p, s) = (1, (-2, -2, -1))`
-- Winner margin: `6897.4` bits
-- Defect rate: `0.013`
+- Selected winner: `(p, s) = (1, (0, 0, 0))`
+- Winner margin: `6775.0` bits
+- Defect rate: `0.100`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -89,8 +89,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### clouds
 
 - Selected winner: `(p, s) = (1, (0, 0, 0))`
-- Winner margin: `7161.4` bits
-- Defect rate: `0.055`
+- Winner margin: `8396.3` bits
+- Defect rate: `0.009`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.

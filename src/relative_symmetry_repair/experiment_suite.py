@@ -14,7 +14,7 @@ import pandas as pd
 
 from .alife_style import BACKGROUND_COLOR, TEXT_COLOR
 from .ca2d import parse_rulestring, random_initial_grid, simulate_2d, simulate_2d_general
-from .ca3d import RULES_3D, random_initial_volume, simulate_3d
+from .ca3d import RULES_3D, RULES_3D_DENSITY, random_initial_volume, simulate_3d
 from .eca import random_initial_state, simulate_eca
 from .plotting import plot_decomposition, save_figure
 from .plotting_nd import plot_2d_decomposition, plot_3d_decomposition
@@ -324,6 +324,7 @@ REPRESENTATIVE_CASES_3D = tuple(
         name,
         survive=(values[0], values[1]),
         birth=(values[2], values[3]),
+        density=RULES_3D_DENSITY.get(name, 0.5),
     )
     for name, values in RULES_3D.items()
 )

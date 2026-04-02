@@ -59,6 +59,17 @@ RULES_3D: dict[str, tuple[int, int, int, int]] = {
     "diamoeba3d": (5, 8, 5, 8),       # 3D diamoeba analogue
 }
 
+# Per-rule initial densities tuned so each rule sustains activity over the
+# diagram horizon.  Rules whose survival/birth thresholds require many live
+# neighbors (clouds) need high density; rules with low thresholds (crystal)
+# need sparse starts; the default 0.5 only suits diamoeba3d.
+RULES_3D_DENSITY: dict[str, float] = {
+    "3d-life": 0.2,
+    "clouds": 0.6,
+    "crystal": 0.1,
+    "diamoeba3d": 0.5,
+}
+
 
 def simulate_3d(
     initial: np.ndarray,

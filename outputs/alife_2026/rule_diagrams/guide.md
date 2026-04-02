@@ -47,9 +47,9 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 
 ## Representative 3D rules
 
-- `3d-life`: best `(p, s) = (1, (-2, -2, -1))`, margin `6897.4` bits, defect rate `0.013`. Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.
-- `clouds`: best `(p, s) = (1, (0, 0, 0))`, margin `7161.4` bits, defect rate `0.055`. High-count thresholds create bulky, cloud-like regions instead of thin fronts.
-- `crystal`: best `(p, s) = (1, (-2, -2, -2))`, margin `6896.4` bits, defect rate `0.013`. Low-count thresholds favor sparse growth and faceted, crystal-like fronts.
+- `3d-life`: best `(p, s) = (1, (0, 0, 0))`, margin `6775.0` bits, defect rate `0.100`. Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.
+- `clouds`: best `(p, s) = (1, (0, 0, 0))`, margin `8396.3` bits, defect rate `0.009`. High-count thresholds create bulky, cloud-like regions instead of thin fronts.
+- `crystal`: best `(p, s) = (2, (0, 0, 0))`, margin `6832.9` bits, defect rate `0.207`. Low-count thresholds favor sparse growth and faceted, crystal-like fronts.
 - `diamoeba3d`: best `(p, s) = (1, (0, 2, 1))`, margin `5495.7` bits, defect rate `0.265`. Large volumetric domains survive for long periods, so the midplane slices show broad coherent masses.
 
 ## Suggested talking points
