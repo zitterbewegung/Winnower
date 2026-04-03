@@ -25,8 +25,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### ECA-54
 
 - Selected winner: `(p, s) = (4, 0)`
-- Winner margin: `1517.9` bits
-- Defect rate: `0.224`
+- Winner margin: `1484.9` bits
+- Defect rate: `0.179`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -34,9 +34,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 
 ### ECA-110
 
-- Selected winner: `(p, s) = (4, -2)`
-- Winner margin: `1533.0` bits
-- Defect rate: `0.305`
+- Selected winner: `(p, s) = (7, 0)`
+- Winner margin: `857.0` bits
+- Defect rate: `0.314`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -46,9 +46,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 
 ### Diamoeba
 
-- Selected winner: `(p, s) = (1, (0, 0))`
-- Winner margin: `13183.7` bits
-- Defect rate: `0.077`
+- Selected winner: `(p, s) = (2, (0, 0))`
+- Winner margin: `369.3` bits
+- Defect rate: `0.114`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -57,8 +57,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### Maze with Mice
 
 - Selected winner: `(p, s) = (2, (0, 0))`
-- Winner margin: `5323.5` bits
-- Defect rate: `0.008`
+- Winner margin: `10230.3` bits
+- Defect rate: `0.007`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -67,8 +67,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### S37/B11
 
 - Selected winner: `(p, s) = (2, (0, 0))`
-- Winner margin: `14459.0` bits
-- Defect rate: `0.015`
+- Winner margin: `20464.8` bits
+- Defect rate: `0.016`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -79,8 +79,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### 3d-life
 
 - Selected winner: `(p, s) = (1, (0, 0, 0))`
-- Winner margin: `6775.0` bits
-- Defect rate: `0.100`
+- Winner margin: `6765.0` bits
+- Defect rate: `0.111`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -89,8 +89,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### clouds
 
 - Selected winner: `(p, s) = (1, (0, 0, 0))`
-- Winner margin: `8396.3` bits
-- Defect rate: `0.009`
+- Winner margin: `8366.1` bits
+- Defect rate: `0.017`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
@@ -98,8 +98,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 
 ### diamoeba3d
 
-- Selected winner: `(p, s) = (1, (0, 2, 1))`
-- Winner margin: `5495.7` bits
+- Selected winner: `(p, s) = (1, (0, -2, 1))`
+- Winner margin: `5507.5` bits
 - Defect rate: `0.265`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.

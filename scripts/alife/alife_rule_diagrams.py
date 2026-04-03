@@ -1481,7 +1481,7 @@ def main() -> None:
     global EXPORT_FORMATS
     parser = argparse.ArgumentParser(description="Render manuscript-friendly overview and mechanism diagrams for the representative ALIFE rules.")
     parser.add_argument("--output-root", type=Path, default=ROOT / "outputs" / "alife_2026")
-    parser.add_argument("--base-seed", type=int, default=11)
+    parser.add_argument("--base-seed", type=int, default=42)
     parser.add_argument("--paper-dir", type=Path, default=ROOT / "paper")
     parser.add_argument(
         "--export-formats",

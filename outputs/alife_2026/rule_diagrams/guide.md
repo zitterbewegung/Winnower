@@ -33,24 +33,24 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 
 ## Representative 1D rules
 
-- `ECA-30`: best `(p, s) = (1, 4)`, margin `153.5` bits, defect rate `0.468`. Chaotic texture with little large-scale repetition; the selector still prefers a simple background.
-- `ECA-54`: best `(p, s) = (4, 0)`, margin `1517.9` bits, defect rate `0.224`. Alternating domains and clearer phase locking make the periodic scaffold easier to see.
-- `ECA-110`: best `(p, s) = (4, -2)`, margin `1533.0` bits, defect rate `0.305`. Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.
+- `ECA-30`: best `(p, s) = (1, -2)`, margin `153.4` bits, defect rate `0.471`. Chaotic texture with little large-scale repetition; the selector still prefers a simple background.
+- `ECA-54`: best `(p, s) = (4, 0)`, margin `1484.9` bits, defect rate `0.179`. Alternating domains and clearer phase locking make the periodic scaffold easier to see.
+- `ECA-110`: best `(p, s) = (7, 0)`, margin `857.0` bits, defect rate `0.314`. Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.
 
 ## Representative 2D rules
 
-- `Diamoeba`: best `(p, s) = (1, (0, 0))`, margin `13183.7` bits, defect rate `0.077`. Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.
-- `Maze with Mice`: best `(p, s) = (2, (0, 0))`, margin `5323.5` bits, defect rate `0.008`. Maze-like corridors remain coherent while local fluctuations ride on top of them.
-- `S24/B11`: best `(p, s) = (1, (0, 0))`, margin `1496.0` bits, defect rate `0.014`. Sparse patches form and dissolve, so the background captures only the broadest cadence.
-- `S11/B37`: best `(p, s) = (2, (0, 0))`, margin `1907.5` bits, defect rate `0.015`. Explosive local birth competes with fast die-out, producing noisy but still structured slices.
-- `S37/B11`: best `(p, s) = (2, (0, 0))`, margin `14459.0` bits, defect rate `0.015`. Persistent residual structure remains after fitting, making the defect mask especially informative.
+- `Diamoeba`: best `(p, s) = (2, (0, 0))`, margin `369.3` bits, defect rate `0.114`. Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.
+- `Maze with Mice`: best `(p, s) = (2, (0, 0))`, margin `10230.3` bits, defect rate `0.007`. Maze-like corridors remain coherent while local fluctuations ride on top of them.
+- `S24/B11`: best `(p, s) = (1, (0, 0))`, margin `1949.2` bits, defect rate `0.014`. Sparse patches form and dissolve, so the background captures only the broadest cadence.
+- `S11/B37`: best `(p, s) = (2, (0, 0))`, margin `6111.3` bits, defect rate `0.014`. Explosive local birth competes with fast die-out, producing noisy but still structured slices.
+- `S37/B11`: best `(p, s) = (2, (0, 0))`, margin `20464.8` bits, defect rate `0.016`. Persistent residual structure remains after fitting, making the defect mask especially informative.
 
 ## Representative 3D rules
 
-- `3d-life`: best `(p, s) = (1, (0, 0, 0))`, margin `6775.0` bits, defect rate `0.100`. Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.
-- `clouds`: best `(p, s) = (1, (0, 0, 0))`, margin `8396.3` bits, defect rate `0.009`. High-count thresholds create bulky, cloud-like regions instead of thin fronts.
-- `crystal`: best `(p, s) = (2, (0, 0, 0))`, margin `6832.9` bits, defect rate `0.207`. Low-count thresholds favor sparse growth and faceted, crystal-like fronts.
-- `diamoeba3d`: best `(p, s) = (1, (0, 2, 1))`, margin `5495.7` bits, defect rate `0.265`. Large volumetric domains survive for long periods, so the midplane slices show broad coherent masses.
+- `3d-life`: best `(p, s) = (1, (0, 0, 0))`, margin `6765.0` bits, defect rate `0.111`. Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.
+- `clouds`: best `(p, s) = (1, (0, 0, 0))`, margin `8366.1` bits, defect rate `0.017`. High-count thresholds create bulky, cloud-like regions instead of thin fronts.
+- `crystal`: best `(p, s) = (2, (0, 0, 0))`, margin `7435.7` bits, defect rate `0.209`. Low-count thresholds favor sparse growth and faceted, crystal-like fronts.
+- `diamoeba3d`: best `(p, s) = (1, (0, -2, 1))`, margin `5507.5` bits, defect rate `0.265`. Large volumetric domains survive for long periods, so the midplane slices show broad coherent masses.
 
 ## Suggested talking points
 
