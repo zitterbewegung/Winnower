@@ -724,7 +724,7 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
             ]
             for col, image in enumerate(images, start=1):
                 ax = axes[row, col]
-                cmap = DEFECT_CMAP if col == 5 else BINARY_CMAP
+                cmap = DEFECT_CMAP if col == len(images) else BINARY_CMAP
                 ax.imshow(image, interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
                 _decorate_binary_axis(ax)
 
