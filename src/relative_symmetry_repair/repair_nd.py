@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
+from ._orbit_scoring import RelativePeriodicOrbitWorkspace
 from .coding import (
     combinatorial_repair_bits, lz4_mask_bits, nml_score_bits,
     run_length_bits, template_bits_raw, template_bits_nml,
@@ -120,6 +121,109 @@ def _majority_binary_by_labels_nd(
     return majority_values[labels]
 
 
+def _fit_relative_periodic_background_nd_reference(
+    spacetime: np.ndarray,
+    shift: tuple[int, ...],
+    period: int,
+    *,
+    rule_error_fn=None,
+    nml_mode: str = "hybrid",
+) -> RelativePeriodicFitND:
+    """Reference N-D fit retained for correctness tests and benchmarks."""
+    spatial_dims = spacetime.shape[1:]
+    labels = component_labels_nd(spacetime.shape, shift=shift, period=period)
+    n_labels = period
+    for dim_size in spatial_dims:
+        n_labels *= dim_size
+
+    background = _majority_binary_by_labels_nd(
+        spacetime.astype(np.uint8),
+        labels,
+        n_labels,
+    )
+    defect_mask = spacetime.astype(np.uint8) != background
+    defect_sites = int(defect_mask.sum())
+    total_sites = int(defect_mask.size)
+    rule_error = None if rule_error_fn is None else rule_error_fn(background)
+
+    rl_bits = run_length_bits(defect_mask)
+    steps = spacetime.shape[0]
+    t_bits_raw = template_bits_raw(period, spatial_dims)
+    t_bits_nml = template_bits_nml(period, spatial_dims, steps)
+    mdl = t_bits_nml + rl_bits
+    nll, nml_comp, nml_total = nml_score_bits(
+        spacetime.astype(np.uint8),
+        labels,
+        n_labels,
+        mode=nml_mode,
+    )
+
+    return RelativePeriodicFitND(
+        shift=tuple(int(component) for component in shift),
+        period=int(period),
+        background=background.astype(np.uint8),
+        defect_mask=defect_mask,
+        defect_sites=defect_sites,
+        total_sites=total_sites,
+        defect_rate=defect_sites / total_sites if total_sites > 0 else 0.0,
+        combinatorial_bits=combinatorial_repair_bits(total_sites, defect_sites, alphabet_size=2),
+        run_length_bits=rl_bits,
+        lz4_bits=lz4_mask_bits(defect_mask),
+        template_bits=t_bits_raw,
+        mdl_bits=mdl,
+        nll_bits=nll,
+        nml_complexity=nml_comp,
+        nml_bits=nml_total,
+        nml_mode=nml_mode,
+        rule_error=rule_error,
+    )
+
+
+def _fit_relative_periodic_background_nd_from_workspace(
+    workspace: RelativePeriodicOrbitWorkspace,
+    spacetime: np.ndarray,
+    shift: tuple[int, ...],
+    period: int,
+    *,
+    rule_error_fn=None,
+    nml_mode: str = "hybrid",
+) -> RelativePeriodicFitND:
+    """Optimized grouped-reduction path for a single N-D candidate."""
+    reduction = workspace.evaluate_candidate(tuple(int(component) for component in shift), int(period), nml_mode=nml_mode)
+    background = reduction.background_flat.reshape(spacetime.shape).copy()
+    defect_mask = reduction.defect_flat.reshape(spacetime.shape).astype(bool, copy=True)
+    defect_sites = reduction.defect_sites
+    total_sites = int(defect_mask.size)
+    rule_error = None if rule_error_fn is None else rule_error_fn(background)
+
+    rl_bits = run_length_bits(defect_mask)
+    steps = spacetime.shape[0]
+    spatial_dims = spacetime.shape[1:]
+    t_bits_raw = template_bits_raw(period, spatial_dims)
+    t_bits_nml = template_bits_nml(period, spatial_dims, steps)
+    mdl = t_bits_nml + rl_bits
+
+    return RelativePeriodicFitND(
+        shift=tuple(int(component) for component in shift),
+        period=int(period),
+        background=background.astype(np.uint8, copy=False),
+        defect_mask=defect_mask,
+        defect_sites=defect_sites,
+        total_sites=total_sites,
+        defect_rate=defect_sites / total_sites if total_sites > 0 else 0.0,
+        combinatorial_bits=combinatorial_repair_bits(total_sites, defect_sites, alphabet_size=2),
+        run_length_bits=rl_bits,
+        lz4_bits=lz4_mask_bits(defect_mask),
+        template_bits=t_bits_raw,
+        mdl_bits=mdl,
+        nll_bits=reduction.nll_bits,
+        nml_complexity=reduction.nml_complexity,
+        nml_bits=reduction.nml_bits,
+        nml_mode=nml_mode,
+        rule_error=rule_error,
+    )
+
+
 def fit_relative_periodic_background_nd(
     spacetime: np.ndarray,
     shift: tuple[int, ...],
@@ -145,51 +249,48 @@ def fit_relative_periodic_background_nd(
     spatial_dims = spacetime.shape[1:]
     if len(shift) != len(spatial_dims):
         raise ValueError(f"shift has {len(shift)} components but spacetime has {len(spatial_dims)} spatial dims")
-
-    labels = component_labels_nd(spacetime.shape, shift=shift, period=period)
-    n_labels = period
-    for d in spatial_dims:
-        n_labels *= d
-
-    background = _majority_binary_by_labels_nd(spacetime.astype(np.uint8), labels, n_labels)
-    defect_mask = spacetime.astype(np.uint8) != background
-    defect_sites = int(defect_mask.sum())
-    total_sites = int(defect_mask.size)
-    rule_error = None if rule_error_fn is None else rule_error_fn(background)
-
-    rl_bits = run_length_bits(defect_mask)
-    steps = spacetime.shape[0]
-    t_bits_raw = template_bits_raw(period, spatial_dims)
-    t_bits_nml = template_bits_nml(period, spatial_dims, steps)
-    mdl = t_bits_nml + rl_bits
-
-    # Bernoulli NML score on orbit classes, with explicit scoring mode.
-    nll, nml_comp, nml_total = nml_score_bits(
-        spacetime.astype(np.uint8),
-        labels,
-        n_labels,
-        mode=nml_mode,
-    )
-
-    return RelativePeriodicFitND(
-        shift=tuple(int(s) for s in shift),
-        period=int(period),
-        background=background.astype(np.uint8),
-        defect_mask=defect_mask,
-        defect_sites=defect_sites,
-        total_sites=total_sites,
-        defect_rate=defect_sites / total_sites if total_sites > 0 else 0.0,
-        combinatorial_bits=combinatorial_repair_bits(total_sites, defect_sites, alphabet_size=2),
-        run_length_bits=rl_bits,
-        lz4_bits=lz4_mask_bits(defect_mask),
-        template_bits=t_bits_raw,
-        mdl_bits=mdl,
-        nll_bits=nll,
-        nml_complexity=nml_comp,
-        nml_bits=nml_total,
+    workspace = RelativePeriodicOrbitWorkspace(spacetime, residue_major=False)
+    return _fit_relative_periodic_background_nd_from_workspace(
+        workspace,
+        np.asarray(spacetime, dtype=np.uint8),
+        shift,
+        period,
+        rule_error_fn=rule_error_fn,
         nml_mode=nml_mode,
-        rule_error=rule_error,
     )
+
+
+def _scan_relative_periodicity_nd_reference(
+    spacetime: np.ndarray,
+    shift_ranges: Sequence[Iterable[int]],
+    periods: Iterable[int],
+    *,
+    rule_error_fn=None,
+    nml_mode: str = "hybrid",
+) -> tuple[pd.DataFrame, dict[tuple, RelativePeriodicFitND]]:
+    """Reference N-D candidate scan retained for benchmarks and tests."""
+    import itertools
+
+    shift_lists = [list(axis) for axis in shift_ranges]
+    fits: dict[tuple, RelativePeriodicFitND] = {}
+    records: list[dict] = []
+
+    for period in periods:
+        for shift_combo in itertools.product(*shift_lists):
+            fit = _fit_relative_periodic_background_nd_reference(
+                spacetime,
+                shift=shift_combo,
+                period=period,
+                rule_error_fn=rule_error_fn,
+                nml_mode=nml_mode,
+            )
+            key = (shift_combo, period)
+            fits[key] = fit
+            records.append(fit.to_record())
+
+    frame = pd.DataFrame.from_records(records)
+    sort_cols = ["period"] + [column for column in frame.columns if column.startswith("shift_")]
+    return frame.sort_values(sort_cols).reset_index(drop=True), fits
 
 
 def scan_relative_periodicity_nd(
@@ -211,16 +312,24 @@ def scan_relative_periodicity_nd(
     """
     import itertools
 
+    if spacetime.ndim < 2:
+        raise ValueError("spacetime must be at least 2D (time + spatial)")
+    if np.any((spacetime != 0) & (spacetime != 1)):
+        raise ValueError("spacetime must be binary")
+
     shift_lists = [list(sr) for sr in shift_ranges]
     period_list = list(periods)
+    binary = np.ascontiguousarray(spacetime, dtype=np.uint8)
+    workspace = RelativePeriodicOrbitWorkspace(binary, residue_major=False)
 
     fits: dict[tuple, RelativePeriodicFitND] = {}
     records: list[dict] = []
 
     for period in period_list:
         for shift_combo in itertools.product(*shift_lists):
-            fit = fit_relative_periodic_background_nd(
-                spacetime,
+            fit = _fit_relative_periodic_background_nd_from_workspace(
+                workspace,
+                binary,
                 shift=shift_combo,
                 period=period,
                 rule_error_fn=rule_error_fn,

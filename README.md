@@ -57,6 +57,12 @@ Open the notebook:
 jupyter notebook notebooks/relative_symmetry_repair_demo.ipynb
 ```
 
+Benchmark the candidate-scoring pipeline against the retained reference path:
+
+```bash
+PYTHONPYCACHEPREFIX=/tmp/pyc PYTHONPATH=src python scripts/analysis/benchmark_candidate_scoring.py
+```
+
 ## ALIFE experiment suite
 
 The repository now includes a manuscript-facing ALIFE experiment suite under `scripts/` and `src/relative_symmetry_repair/experiment_suite.py`. The suite reuses the existing simulation and period-first selection code, adds deterministic multi-seed orchestration, null controls, candidate-range robustness checks, large rule surveys, summary plots, manifests, and paper-ready markdown snippets.

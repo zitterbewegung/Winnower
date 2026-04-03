@@ -430,7 +430,7 @@ def derive_shift_zero_outputs(
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parent.parent
+    root = Path(__file__).resolve().parents[2]
     results_dir = root / "results"
     figures_dir = root / "figures"
     results_dir.mkdir(parents=True, exist_ok=True)

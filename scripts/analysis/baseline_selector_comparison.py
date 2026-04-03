@@ -348,7 +348,7 @@ def _summary_records(combined: pd.DataFrame) -> list[dict[str, object]]:
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parent.parent
+    root = Path(__file__).resolve().parents[2]
     data_path = root / "data" / "lifewiki_rules.json"
     results_dir = root / "results"
     results_dir.mkdir(parents=True, exist_ok=True)

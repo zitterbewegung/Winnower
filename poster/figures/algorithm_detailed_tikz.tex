@@ -14,30 +14,26 @@
   \node[computebox, below=of majority] (stats) {Count orbit statistics\\$n_j,\; n_j^{(1)},\; \hat{\theta}_j$};
   \node[scorebox, below=of stats] (score) {Score candidate by\\$\mathrm{NML}(p,\mathbf{s}) = \sum_j n_j H_b(\hat{\theta}_j) + \tfrac{1}{2}\sum_j \log_2 n_j$};
   \node[outputbox, below=of score] (select) {Choose minimizer\\$(p^*,\mathbf{s}^*) = \arg\min \mathrm{NML}$};
-
   \node[calloutbox, right=24mm of majority] (background) {Selected periodic\\background $B^*$};
   \node[calloutbox, below=16mm of background] (residual) {Residual mask\\$M = U \oplus B^*$};
-
   \node[infonote, left=12mm of majority] {Fast projection\\$O(|U|)$ per candidate};
   \node[infonote, left=12mm of score] {Fit term plus complexity\\penalty on orbit classes};
   \node[infonote, below=8mm of residual, anchor=north] {Residual keeps structured departures\\that the scaffold cannot explain};
-
   \draw[flowarrow] (data) -- (cand);
   \draw[flowarrow] (cand) -- (orbit);
   \draw[flowarrow] (orbit) -- (majority);
   \draw[flowarrow] (majority) -- (stats);
   \draw[flowarrow] (stats) -- (score);
   \draw[flowarrow] (score) -- (select);
-
   \coordinate (bgentry) at ($(background.west)+(-5mm,0)$);
   \coordinate (outerlane) at ($(background.east)+(10mm,0)$);
   \coordinate (lowerlane) at ($(residual.east)+(10mm,0)$);
-
   \draw[sidearrow] (majority.east) to[out=0,in=180] (bgentry) -- (background.west);
-  \draw[sidearrow] (select.east) .. controls +(20mm,0) and +(-20mm,-16mm) .. ([xshift=-3mm]background.south);
-  \draw[sidearrow] (background.south) to[out=-90,in=80] ([xshift=-8mm]residual.north);
+  % Route select→background AROUND the residual box via a wide right-side lane
+  \coordinate (selectlane) at ($(residual.east)+(18mm,0)$);
+  \draw[sidearrow] (select.east) -- ++(18mm,0) |- (background.east);
+  \draw[sidearrow] (background.south) -- (residual.north);
   \draw[sidearrow] (data.east) -- (outerlane) -- (lowerlane) to[out=180,in=0] (residual.east);
-
   \begin{scope}[on background layer]
     \node[draw=PosterBorder, dashed, rounded corners=4pt, inner sep=8pt,
       fit=(data)(cand)(orbit)(majority)(stats)(score)(select),
