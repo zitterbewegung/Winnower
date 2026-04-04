@@ -139,57 +139,49 @@ class TestPosterTextConsistency:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestXFailBugsStillPresent:
-    """Confirm each documented xfail bug is still present in the source code.
-    When a bug is fixed, the corresponding test here will fail, reminding us
-    to remove the xfail marker from the original test."""
+class TestBugsAreFixed:
+    """Confirm all previously-documented bugs have been fixed."""
 
-    def test_n1_regret_bug_still_present(self):
-        """_exact_bernoulli_regret(1) should return 1.0 but returns 0.0."""
+    def test_n1_regret_is_correct(self):
         from relative_symmetry_repair.coding import _exact_bernoulli_regret
 
-        result = _exact_bernoulli_regret(1)
-        assert result == 0.0, "Bug appears fixed! Remove xfail from test_n1_regret_is_one_bit"
+        assert _exact_bernoulli_regret(1) == 1.0
 
-    def test_hybrid_cutoff_discontinuity_still_present(self):
+    def test_hybrid_cutoff_discontinuity_is_small(self):
         from relative_symmetry_repair.coding import bernoulli_nml_complexity_single
 
         at_200 = bernoulli_nml_complexity_single(200, mode="hybrid")
         at_201 = bernoulli_nml_complexity_single(201, mode="hybrid")
         gap = at_200 - at_201
-        assert gap > 0.3, f"Gap is {gap:.3f} — bug appears fixed! Remove xfail"
+        assert gap < 0.1, f"Discontinuity still too large: {gap:.3f} bits"
 
-    def test_empty_scan_crash_still_present(self):
+    def test_empty_scan_returns_empty_frame(self):
         from relative_symmetry_repair.repair import scan_relative_periodicity
 
         st = np.zeros((10, 8), dtype=np.uint8)
-        with pytest.raises(KeyError):
-            scan_relative_periodicity(st, shifts=[], periods=[1])
+        frame, fits = scan_relative_periodicity(st, shifts=[], periods=[1])
+        assert frame.empty
+        assert len(fits) == 0
 
-    def test_control_seed_bug_still_present(self):
+    def test_control_seed_matches_actual(self):
         from relative_symmetry_repair.experiment_suite import CONTROL_ORDER
 
-        # "time_shuffled" is at index 1, so recorded seed = seed + 2*101 = seed+202
-        # but actual seed is seed+101
         idx = CONTROL_ORDER.index("time_shuffled")
-        recorded_offset = (idx + 1) * 101  # = 202
+        recorded_offset = idx * 101  # = 101
         actual_offset = 101
-        assert recorded_offset != actual_offset, "Bug appears fixed! Remove xfail"
+        assert recorded_offset == actual_offset
 
-    def test_diamoeba_named_rule_bug_still_present(self):
+    def test_diamoeba_not_in_life_rules(self):
         from relative_symmetry_repair.ca2d import LIFE_RULES
 
-        _, _, b_lo, _ = LIFE_RULES["diamoeba"]
-        assert b_lo > 3, "Bug appears fixed! Remove xfail from test_diamoeba_named_rule_missing_b3"
+        assert "diamoeba" not in LIFE_RULES
 
-    def test_convergence_density_bug_still_present(self):
+    def test_convergence_uses_per_rule_density(self):
         script = REPO_ROOT / "scripts/analysis/convergence_all_dims.py"
         if not script.exists():
             pytest.skip("convergence script not found")
         source = script.read_text()
-        assert "density=0.3" in source and "RULES_3D_DENSITY" not in source, (
-            "Bug appears fixed! Remove xfail from test_convergence_script_has_hardcoded_density"
-        )
+        assert "RULES_3D_DENSITY" in source
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

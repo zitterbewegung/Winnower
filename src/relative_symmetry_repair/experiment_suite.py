@@ -831,7 +831,7 @@ def run_null_controls_suite(
                 record = _record_base(case, seed=seed, horizon=horizon)
                 record["control_type"] = control_name
                 record["control_label"] = CONTROL_LABELS[control_name]
-                record["control_seed"] = int(seed + (control_index + 1) * 101)
+                record["control_seed"] = int(seed + control_index * 101) if control_index > 0 else None
                 record["observed_density"] = float(control_spacetime.mean())
                 _add_selection_metrics(record, outcome.selection)
                 batch.append(record)

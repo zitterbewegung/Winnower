@@ -121,7 +121,8 @@ LIFE_RULES: dict[str, tuple[int, int, int, int]] = {
     "highlife": (2, 3, 3, 6),     # B36/S23 — APPROXIMATE (includes B45)
     "seeds": (9, 9, 2, 2),        # B2/S (nothing survives)
     "daynight": (3, 6, 3, 6),     # B3678/S34678 — APPROXIMATE
-    "diamoeba": (5, 8, 5, 8),     # B5678/S5678
+    # NOTE: Diamoeba (B35678/S5678) cannot be represented as a contiguous
+    # range — use simulate_2d_general(rulestring="B35678/S5678") instead.
 }
 
 

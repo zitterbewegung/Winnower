@@ -255,6 +255,8 @@ def _scan_relative_periodicity_reference(
             fits[(int(shift), int(period))] = fit
             records.append(fit.to_record())
     frame = pd.DataFrame.from_records(records)
+    if frame.empty:
+        return frame, fits
     if rule is not None:
         frame["composite_score"] = frame["defect_rate"] + frame["rule_error"].fillna(0.0)
     return frame.sort_values(["period", "shift"]).reset_index(drop=True), fits
@@ -291,6 +293,8 @@ def scan_relative_periodicity(
             fits[(int(shift), int(period))] = fit
             records.append(fit.to_record())
     frame = pd.DataFrame.from_records(records)
+    if frame.empty:
+        return frame, fits
     if rule is not None:
         frame["composite_score"] = frame["defect_rate"] + frame["rule_error"].fillna(0.0)
     return frame.sort_values(["period", "shift"]).reset_index(drop=True), fits
@@ -300,6 +304,8 @@ def fit_reflection_symmetric_state(state: np.ndarray) -> ReflectionFit:
     """Nearest mirror-symmetric binary state (minimum Hamming distance, 0-bias on ties)."""
     if state.ndim != 1:
         raise ValueError("state must be 1D")
+    if state.size == 0:
+        raise ValueError("state must be non-empty")
     if np.any((state != 0) & (state != 1)):
         raise ValueError("state must be binary")
 

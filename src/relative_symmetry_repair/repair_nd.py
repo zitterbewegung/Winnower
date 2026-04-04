@@ -289,6 +289,8 @@ def _scan_relative_periodicity_nd_reference(
             records.append(fit.to_record())
 
     frame = pd.DataFrame.from_records(records)
+    if frame.empty:
+        return frame, fits
     sort_cols = ["period"] + [column for column in frame.columns if column.startswith("shift_")]
     return frame.sort_values(sort_cols).reset_index(drop=True), fits
 
@@ -340,6 +342,8 @@ def scan_relative_periodicity_nd(
             records.append(fit.to_record())
 
     frame = pd.DataFrame.from_records(records)
+    if frame.empty:
+        return frame, fits
     sort_cols = ["period"] + [c for c in frame.columns if c.startswith("shift_")]
     return frame.sort_values(sort_cols).reset_index(drop=True), fits
 

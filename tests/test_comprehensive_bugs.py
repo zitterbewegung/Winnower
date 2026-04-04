@@ -375,7 +375,6 @@ class TestRepair1D:
         fit = fit_relative_periodic_background(spacetime, shift=0, period=1)
         np.testing.assert_array_equal(fit.background[0], [1, 0])
 
-    @pytest.mark.xfail(reason="Known bug: empty shifts/periods causes KeyError in sort_values")
     def test_scan_with_empty_shifts_does_not_crash(self):
         """Scanning with empty shift list should return an empty frame, not crash."""
         from relative_symmetry_repair.repair import scan_relative_periodicity
@@ -385,7 +384,6 @@ class TestRepair1D:
         assert len(fits) == 0
         assert frame.empty or len(frame) == 0
 
-    @pytest.mark.xfail(reason="Known bug: empty shifts/periods causes KeyError in sort_values")
     def test_scan_with_empty_periods_does_not_crash(self):
         from relative_symmetry_repair.repair import scan_relative_periodicity
 
@@ -393,18 +391,13 @@ class TestRepair1D:
         frame, fits = scan_relative_periodicity(spacetime, shifts=[0], periods=[])
         assert len(fits) == 0
 
-    def test_reflection_fit_empty_state(self):
-        """Empty state should not crash with ZeroDivisionError."""
+    def test_reflection_fit_empty_state_raises(self):
+        """Empty state should raise ValueError, not ZeroDivisionError."""
         from relative_symmetry_repair.repair import fit_reflection_symmetric_state
 
         state = np.array([], dtype=np.uint8)
-        try:
-            fit = fit_reflection_symmetric_state(state)
-            # If it doesn't crash, defect_rate should be 0 or defined
-            assert math.isfinite(fit.defect_rate)
-        except (ZeroDivisionError, ValueError):
-            # Currently crashes — this documents the known bug
-            pytest.xfail("Known issue: ZeroDivisionError on empty state")
+        with pytest.raises(ValueError, match="non-empty"):
+            fit_reflection_symmetric_state(state)
 
     def test_reflection_fit_palindrome_is_exact(self):
         from relative_symmetry_repair.repair import fit_reflection_symmetric_state
@@ -454,7 +447,6 @@ class TestRepairND:
         assert fit.background.shape == st.shape
         assert fit.defect_mask.shape == st.shape
 
-    @pytest.mark.xfail(reason="Known bug: empty periods causes KeyError in sort_values")
     def test_scan_nd_empty_periods_does_not_crash(self):
         from relative_symmetry_repair.repair_nd import scan_relative_periodicity_nd
 
@@ -626,21 +618,16 @@ class TestExperimentSuite:
             "bernoulli_iid": seed + 303,
         }
 
-        # What the metadata records (from line 834):
+        # Verify recorded seeds match actual seeds
         for control_index, control_name in enumerate(CONTROL_ORDER):
-            recorded_seed = seed + (control_index + 1) * 101
-            if control_name == "original":
-                # "original" has no seed, but metadata records seed+101
-                assert recorded_seed == seed + 101
-                # This is misleading — documenting the known issue
-            elif control_name == "time_shuffled":
-                # Should be seed+101 but metadata records seed+202
-                actual = actual_seeds[control_name]
-                if recorded_seed != actual:
-                    pytest.xfail(
-                        f"Known bug: {control_name} actual seed={actual} "
-                        f"but recorded={recorded_seed}"
-                    )
+            if control_index == 0:
+                recorded_seed = None
+            else:
+                recorded_seed = seed + control_index * 101
+            actual = actual_seeds[control_name]
+            assert recorded_seed == actual, (
+                f"{control_name}: recorded={recorded_seed} != actual={actual}"
+            )
 
     def test_representative_3d_cases_use_tuned_densities(self):
         from relative_symmetry_repair.ca3d import RULES_3D_DENSITY

@@ -86,11 +86,9 @@ class TestDensityConsistency:
         if not script.exists():
             pytest.skip("convergence_all_dims.py not found")
         source = script.read_text()
-        if "density=0.3" in source and "RULES_3D_DENSITY" not in source:
-            pytest.xfail(
-                "Known issue: convergence_all_dims.py hardcodes density=0.3 "
-                "for all 3D rules instead of using per-rule RULES_3D_DENSITY"
-            )
+        assert "RULES_3D_DENSITY" in source, (
+            "convergence_all_dims.py should import and use RULES_3D_DENSITY"
+        )
 
     def test_baseline_selector_uses_correct_density_for_diamoeba(self):
         """baseline_selector_comparison.py only runs diamoeba3d at density=0.5,

@@ -212,6 +212,27 @@ def test_randomized_nd_candidates_match_reference_path():
         assert actual_selection.status == expected_selection.status
 
 
+def test_randomized_3d_candidates_match_reference_path():
+    """Verify fast-path and reference-path agreement for 3-spatial-dim (4D) arrays."""
+    rng = np.random.default_rng(9999)
+    shift_values = [-1, 0, 1]
+    periods = [1, 2]
+
+    for _ in range(3):
+        spacetime = rng.integers(0, 2, size=(4, 3, 3, 3), dtype=np.uint8)
+        for period in periods:
+            for sz in shift_values:
+                for sy in shift_values:
+                    shift = (sz, sy, 0)
+                    actual = fit_relative_periodic_background_nd(
+                        spacetime, shift=shift, period=period, nml_mode="exact",
+                    )
+                    expected = _fit_relative_periodic_background_nd_reference(
+                        spacetime, shift=shift, period=period, nml_mode="exact",
+                    )
+                    _assert_fit_equal(actual, expected)
+
+
 def test_fast_path_preserves_tie_break_background_bits_nd():
     spacetime = np.array(
         [

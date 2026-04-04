@@ -55,10 +55,13 @@ def _exact_bernoulli_regret(n: int) -> float:
 
     where the k=0 and k=n terms contribute 1 each (using 0^0 = 1).
 
-    For n=0 or n=1, the complexity is 0 (no free parameter to estimate).
+    For n=0 the complexity is 0 (no data).  For n=1 the normalizer is
+    C(1) = 2 (both x=0 and x=1 are MLE-maximised), giving regret = 1 bit.
     """
-    if n <= 1:
+    if n == 0:
         return 0.0
+    if n == 1:
+        return 1.0
     # Work in log space for numerical stability
     # Each term: binom(n, k) * (k/n)^k * ((n-k)/n)^(n-k)
     # log2(term) = log2_binom(n,k) + k*log2(k/n) + (n-k)*log2((n-k)/n)
@@ -92,13 +95,15 @@ def bernoulli_nml_complexity_single(
     ``mode="asymptotic"`` uses ``½ log₂ n`` throughout.
     """
     if n <= 1:
-        return 0.0
+        # n=0: no data, complexity is 0.  n=1: C(1)=2, exact regret is 1.0 bit.
+        # Use exact value for both to avoid the asymptotic formula going negative.
+        return _exact_bernoulli_regret(n)
     if mode == NML_MODE_EXACT:
         return _exact_bernoulli_regret(n)
     if mode == NML_MODE_HYBRID and n <= EXACT_NML_CUTOFF:
         return _exact_bernoulli_regret(n)
     if mode == NML_MODE_ASYMPTOTIC or mode == NML_MODE_HYBRID:
-        return 0.5 * math.log2(n)
+        return 0.5 * math.log2(n * math.pi / 2)
     raise ValueError(
         f"Unknown NML mode {mode!r}. Expected one of {sorted(VALID_NML_MODES)}."
     )

@@ -60,7 +60,8 @@ def test_asymptotic_complexity_is_half_log_sum_of_class_sizes():
         dtype=np.int32,
     )
     # Class sizes are [4, 2, 2].
-    expected = 0.5 * (math.log2(4) + math.log2(2) + math.log2(2))
+    # Asymptotic formula: 0.5 * log2(n * pi/2) per class
+    expected = 0.5 * (math.log2(4 * math.pi / 2) + math.log2(2 * math.pi / 2) + math.log2(2 * math.pi / 2))
     actual = nml_complexity_bits(labels, n_labels=3, mode="asymptotic")
     assert abs(actual - expected) < 1e-12
 

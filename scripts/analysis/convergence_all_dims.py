@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from relative_symmetry_repair.eca import random_initial_state, simulate_eca
 from relative_symmetry_repair.ca2d import random_initial_grid, simulate_2d
-from relative_symmetry_repair.ca3d import random_initial_volume, simulate_3d
+from relative_symmetry_repair.ca3d import RULES_3D_DENSITY, random_initial_volume, simulate_3d
 from relative_symmetry_repair.repair import fit_relative_periodic_background
 from relative_symmetry_repair.repair_nd import fit_relative_periodic_background_nd
 
@@ -132,7 +132,8 @@ def convergence_3d(max_period=6):
     for name, survive, birth in RULES_3D:
         print(f"\n  {name}:")
         max_T = max(T_VALUES_3D)
-        initial = random_initial_volume(sx=16, sy=16, sz=16, density=0.3, seed=11)
+        density = RULES_3D_DENSITY.get(name, 0.5)
+        initial = random_initial_volume(sx=16, sy=16, sz=16, density=density, seed=11)
         spacetime_full = simulate_3d(initial, steps=max_T, rule="custom",
                                      survive=survive, birth=birth)
 

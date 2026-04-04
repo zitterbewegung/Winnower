@@ -266,16 +266,14 @@ class TestControlSeedBug:
             "bernoulli_iid": seed + 303,
         }
         for control_index, control_name in enumerate(CONTROL_ORDER):
-            recorded = seed + (control_index + 1) * 101
-            actual = actual_seeds[control_name]
-            if control_name == "original":
-                # Original has no seed but records seed+101
-                assert recorded == seed + 101
+            if control_index == 0:
+                recorded = None
             else:
-                if recorded != actual:
-                    pytest.xfail(
-                        f"Known bug: {control_name} recorded={recorded} actual={actual}"
-                    )
+                recorded = seed + control_index * 101
+            actual = actual_seeds[control_name]
+            assert recorded == actual, (
+                f"{control_name}: recorded={recorded} != actual={actual}"
+            )
 
     def test_null_controls_preserve_shape(self):
         from relative_symmetry_repair.experiment_suite import make_null_controls

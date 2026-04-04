@@ -33,8 +33,6 @@ class TestExactBernoulliNML:
         from relative_symmetry_repair.coding import _exact_bernoulli_regret
 
         result = _exact_bernoulli_regret(1)
-        if result == 0.0:
-            pytest.xfail("Known bug: _exact_bernoulli_regret(1) returns 0.0, should be 1.0")
         assert abs(result - 1.0) < 1e-10
 
     def test_n2_regret_matches_analytical(self):
@@ -70,11 +68,10 @@ class TestExactBernoulliNML:
         hybrid = bernoulli_nml_complexity_single(1, mode="hybrid")
         asymp = bernoulli_nml_complexity_single(1, mode="asymptotic")
 
-        if exact == 0.0:
-            pytest.xfail("Known bug: complexity(n=1) returns 0.0 for all modes, should be 1.0")
-
-        assert exact == hybrid == 1.0
-        # Asymptotic is 0.5*log2(1)=0, which differs from exact — that's expected
+        # All modes use exact regret for n=1 to avoid negative asymptotic values
+        assert exact == 1.0
+        assert hybrid == 1.0
+        assert asymp == 1.0
 
     def test_hybrid_cutoff_discontinuity(self):
         """Document the ~0.38 bit discontinuity at EXACT_NML_CUTOFF=200."""
@@ -84,14 +81,8 @@ class TestExactBernoulliNML:
         at_201 = bernoulli_nml_complexity_single(201, mode="hybrid")
         gap = at_200 - at_201
 
-        # The exact value at 200 is ~4.20, asymptotic at 201 is ~3.83
-        # So hybrid jumps DOWN by ~0.38 bits
-        if gap > 0.3:
-            pytest.xfail(
-                f"Known issue: hybrid NML has {gap:.3f}-bit downward "
-                f"discontinuity at cutoff (n=200→201)"
-            )
-        assert gap < 0.05  # Would pass if the asymptotic had the pi/2 constant
+        # With corrected asymptotic formula 0.5*log2(n*pi/2), the gap should be small
+        assert gap < 0.1, f"Hybrid NML discontinuity at cutoff: {gap:.4f} bits"
 
     def test_exact_regret_large_n_approaches_asymptotic(self):
         """For large n, exact regret should approach (1/2)*log2(n*pi/2)."""
@@ -261,10 +252,7 @@ class TestStaleness:
         source = test_file.read_text()
         # Check for any 4D array creation (T, Z, Y, X)
         has_3d = "size=(4, 3, 3, 3)" in source or "size=(5, 3, 3, 3)" in source
-        if not has_3d:
-            pytest.xfail(
-                "test_candidate_scoring_fast_path.py has no 3-spatial-dim (4D array) test cases"
-            )
+        assert has_3d, "test_candidate_scoring_fast_path.py should have 3D test cases"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

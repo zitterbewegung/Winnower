@@ -29,39 +29,22 @@ class TestLifeRulesCorrectness:
         assert (s_lo, s_hi) == (2, 3), f"Life survive should be (2,3), got ({s_lo},{s_hi})"
         assert (b_lo, b_hi) == (3, 3), f"Life birth should be (3,3), got ({b_lo},{b_hi})"
 
-    def test_diamoeba_named_rule_missing_b3(self):
-        """LIFE_RULES['diamoeba'] is (5,8,5,8) = B5678/S5678, but canonical
-        Diamoeba is B35678/S5678. The range (5,8) misses B3.
-        The poster pipeline uses simulate_2d_general with the rulestring,
-        so it's unaffected, but simulate_2d(rule='diamoeba') is wrong."""
+    def test_diamoeba_removed_from_life_rules(self):
+        """Diamoeba (B35678/S5678) cannot be represented as a contiguous range,
+        so it should not be in LIFE_RULES. Users should use simulate_2d_general."""
         from relative_symmetry_repair.ca2d import LIFE_RULES
 
-        s_lo, s_hi, b_lo, b_hi = LIFE_RULES["diamoeba"]
-        # The range birth=(5,8) covers B5,B6,B7,B8 but NOT B3
-        # Canonical Diamoeba has B3 in its birth set
-        if b_lo > 3:
-            pytest.xfail(
-                f"Known bug: LIFE_RULES['diamoeba'] birth=({b_lo},{b_hi}) "
-                f"misses B3 — should be B35678/S5678, not B5678/S5678"
-            )
-
-    def test_diamoeba_rulestring_vs_named_rule_differ(self):
-        """The rulestring and named-rule paths should produce different results
-        since they encode different rules."""
-        from relative_symmetry_repair.ca2d import (
-            random_initial_grid,
-            simulate_2d,
-            simulate_2d_general,
+        assert "diamoeba" not in LIFE_RULES, (
+            "diamoeba should be removed from LIFE_RULES — use simulate_2d_general instead"
         )
+
+    def test_diamoeba_via_general_simulator(self):
+        """Canonical Diamoeba should be accessible via simulate_2d_general."""
+        from relative_symmetry_repair.ca2d import random_initial_grid, simulate_2d_general
 
         initial = random_initial_grid(16, 16, density=0.3, seed=42)
-        st_named = simulate_2d(initial, steps=20, rule="diamoeba")
-        st_general = simulate_2d_general(initial, steps=20, birth=[3, 5, 6, 7, 8], survive=[5, 6, 7, 8])
-        # They should differ because the named rule omits B3
-        assert not np.array_equal(st_named, st_general), (
-            "Named 'diamoeba' rule matches rulestring B35678/S5678 — "
-            "this means the bug was fixed"
-        )
+        st = simulate_2d_general(initial, steps=10, birth=[3, 5, 6, 7, 8], survive=[5, 6, 7, 8])
+        assert st.shape == (10, 16, 16)
 
     def test_seeds_rule_correctly_kills_all(self):
         """Seeds (B2/S) should kill every live cell — survive range is unreachable."""

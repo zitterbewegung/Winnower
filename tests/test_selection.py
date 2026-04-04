@@ -32,10 +32,10 @@ from relative_symmetry_repair.selection import (
 class TestExactBernoulliNML:
     """Tests for exact Bernoulli NML (Shtarkov normalizer)."""
 
-    def test_n0_and_n1_are_zero(self):
-        """No free parameter for n=0 or n=1."""
+    def test_n0_is_zero_n1_is_one(self):
+        """n=0: no data, regret=0.  n=1: C(1)=2, regret=log2(2)=1.0."""
         assert _exact_bernoulli_regret(0) == 0.0
-        assert _exact_bernoulli_regret(1) == 0.0
+        assert _exact_bernoulli_regret(1) == 1.0
 
     def test_n2_exact(self):
         """For n=2: C(2) = binom(2,0)*1 + binom(2,1)*(1/2)^2 + binom(2,2)*1 = 1 + 0.5 + 1 = 2.5
@@ -81,7 +81,7 @@ class TestExactBernoulliNML:
         c_small = bernoulli_nml_complexity_single(n_small)
         c_large = bernoulli_nml_complexity_single(n_large)
         assert c_small == _exact_bernoulli_regret(n_small)
-        assert c_large == 0.5 * math.log2(n_large)
+        assert abs(c_large - 0.5 * math.log2(n_large * math.pi / 2)) < 1e-10
 
     def test_nml_complexity_bits_exact_vs_asymptotic(self):
         """Exact mode should differ from asymptotic for small orbit classes."""
