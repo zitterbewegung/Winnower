@@ -15,7 +15,7 @@ from .experiment_suite import (
 )
 
 from .ca2d import LIFE_RULES, random_initial_grid, simulate_2d, rule_consistency_rate_2d
-from .ca3d import RULES_3D, random_initial_volume, simulate_3d, rule_consistency_rate_3d
+from .ca3d import RULES_3D, RULES_3D_DENSITY, random_initial_volume, simulate_3d, rule_consistency_rate_3d
 from .repair_nd import (
     extract_components_nd,
     scan_relative_periodicity_nd,
@@ -215,13 +215,22 @@ def analyze3d(
     sy: int = typer.Option(16, help="Grid size y."),
     sz: int = typer.Option(16, help="Grid size z."),
     steps: int = typer.Option(20, help="Number of time steps."),
-    density: float = typer.Option(0.3, help="Initial Bernoulli density."),
+    density: float = typer.Option(None, help="Initial density (default: per-rule from RULES_3D_DENSITY)."),
     seed: int = typer.Option(11, help="Random seed."),
     shift_radius: int = typer.Option(2, help="Scan shifts from -r to +r in each spatial dim."),
     max_period: int = typer.Option(4, help="Maximum period scanned."),
     output_dir: Path = typer.Option(Path("outputs"), help="Directory for CSV and PNG artifacts."),
 ) -> None:
     """Analyze a 3D cellular automaton with relative-periodic repair."""
+    if rule not in RULES_3D:
+        raise typer.BadParameter(
+            f"Unknown 3D rule {rule!r}. Choose from: {list(RULES_3D)}.",
+            param_hint="--rule",
+        )
+
+    if density is None:
+        density = RULES_3D_DENSITY.get(rule, 0.5)
+
     output_dir = Path(output_dir) / f"rule3d_{rule}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
