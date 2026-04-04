@@ -47,7 +47,7 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### Diamoeba
 
 - Selected winner: `(p, s) = (2, (0, 0))`
-- Winner margin: `369.3` bits
+- Winner margin: `1703.5` bits
 - Defect rate: `0.114`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
@@ -57,7 +57,7 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ### Maze with Mice
 
 - Selected winner: `(p, s) = (2, (0, 0))`
-- Winner margin: `10230.3` bits
+- Winner margin: `11564.5` bits
 - Defect rate: `0.007`
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.

@@ -39,9 +39,9 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 
 ## Representative 2D rules
 
-- `Diamoeba`: best `(p, s) = (2, (0, 0))`, margin `369.3` bits, defect rate `0.114`. Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.
-- `Maze with Mice`: best `(p, s) = (2, (0, 0))`, margin `10230.3` bits, defect rate `0.007`. Maze-like corridors remain coherent while local fluctuations ride on top of them.
-- `S24/B11`: best `(p, s) = (1, (0, 0))`, margin `1949.2` bits, defect rate `0.014`. Sparse patches form and dissolve, so the background captures only the broadest cadence.
+- `Diamoeba`: best `(p, s) = (2, (0, 0))`, margin `1703.5` bits, defect rate `0.114`. Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.
+- `Maze with Mice`: best `(p, s) = (2, (0, 0))`, margin `11564.5` bits, defect rate `0.007`. Maze-like corridors remain coherent while local fluctuations ride on top of them.
+- `S24/B11`: best `(p, s) = (1, (0, 0))`, margin `615.0` bits, defect rate `0.014`. Sparse patches form and dissolve, so the background captures only the broadest cadence.
 - `S11/B37`: best `(p, s) = (2, (0, 0))`, margin `6111.3` bits, defect rate `0.014`. Explosive local birth competes with fast die-out, producing noisy but still structured slices.
 - `S37/B11`: best `(p, s) = (2, (0, 0))`, margin `20464.8` bits, defect rate `0.016`. Persistent residual structure remains after fitting, making the defect mask especially informative.
 
