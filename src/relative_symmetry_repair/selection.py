@@ -193,6 +193,11 @@ def select_period_from_scan(
     # Retrieve the best fit object
     best_key = (selected.best_shift, selected.period)
     best_fit = fits.get(best_key)
+    if best_fit is None and fits:
+        raise KeyError(
+            f"Best-fit key {best_key!r} not found in fits dict "
+            f"(available keys: {list(fits.keys())[:5]}...)"
+        )
 
     result = SelectionResult(
         selected=selected,
@@ -264,6 +269,11 @@ def select_period_nd_from_scan(
     # Retrieve the best fit object
     best_key = (selected.best_shift, selected.period)
     best_fit = fits.get(best_key)
+    if best_fit is None and fits:
+        raise KeyError(
+            f"Best-fit key {best_key!r} not found in fits dict "
+            f"(available keys: {list(fits.keys())[:5]}...)"
+        )
 
     result = SelectionResult(
         selected=selected,
@@ -362,7 +372,7 @@ def selection_summary(result: SelectionResult) -> dict:
     if result.runner_up:
         d["runner_up_period"] = result.runner_up.period
         d["runner_up_nml_bits"] = result.runner_up.nml_bits
-    if result.residual:
+    if result.residual is not None:
         d["residual_rl_bits"] = result.residual.run_length_bits
         d["residual_lz4_bits"] = result.residual.lz4_bits
         d["residual_n_components"] = result.residual.n_components

@@ -82,8 +82,13 @@ def analyze(
 
     # Write structured selection summary
     import json
+    import math
+    safe_summary = {
+        k: (str(v) if isinstance(v, float) and not math.isfinite(v) else v)
+        for k, v in summary.items()
+    }
     with open(output_dir / f"rule_{rule}_selection.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
+        json.dump(safe_summary, f, indent=2, default=str)
 
     fig, _ = plot_spacetime(spacetime, title=f"Rule {rule} spacetime")
     save_figure(fig, output_dir / f"rule_{rule}_spacetime.png")
@@ -104,7 +109,7 @@ def analyze(
     if result.runner_up:
         typer.echo(f"Runner-up period: {result.runner_up.period} "
                    f"(+{result.margin:.1f} bits)")
-    if result.residual:
+    if result.residual is not None:
         typer.echo(f"Residual: {result.residual.n_components} components, "
                    f"RL={result.residual.run_length_bits} bits, "
                    f"defect_rate={result.residual.defect_rate:.4f}")
@@ -126,6 +131,13 @@ def analyze2d(
     """Analyze a 2D cellular automaton with relative-periodic repair."""
     output_dir = Path(output_dir) / f"rule2d_{rule}"
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    if rule not in LIFE_RULES:
+        raise typer.BadParameter(
+            f"Unknown rule {rule!r}. Choose from: {list(LIFE_RULES)}. "
+            f"For non-contiguous rules like Diamoeba, use the Python API with simulate_2d_general.",
+            param_hint="--rule",
+        )
 
     initial = random_initial_grid(width=width, height=height, density=density, seed=seed)
     spacetime = simulate_2d(initial, steps=steps, rule=rule)
@@ -163,8 +175,13 @@ def analyze2d(
     components.to_csv(output_dir / f"{rule}_components.csv", index=False)
 
     import json
+    import math
+    safe_summary = {
+        k: (str(v) if isinstance(v, float) and not math.isfinite(v) else v)
+        for k, v in summary.items()
+    }
     with open(output_dir / f"{rule}_selection.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
+        json.dump(safe_summary, f, indent=2, default=str)
 
     fig, _ = plot_2d_slices(spacetime, title=f"2D CA '{rule}' time slices")
     save_figure(fig, output_dir / f"{rule}_slices.png")
@@ -244,8 +261,13 @@ def analyze3d(
     components.to_csv(output_dir / f"{rule}_components.csv", index=False)
 
     import json
+    import math
+    safe_summary = {
+        k: (str(v) if isinstance(v, float) and not math.isfinite(v) else v)
+        for k, v in summary.items()
+    }
     with open(output_dir / f"{rule}_selection.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
+        json.dump(safe_summary, f, indent=2, default=str)
 
     fig, _ = plot_3d_slices(spacetime, title=f"3D CA '{rule}' time slices (z-midplane)")
     save_figure(fig, output_dir / f"{rule}_slices.png")
