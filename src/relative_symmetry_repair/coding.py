@@ -91,8 +91,8 @@ def bernoulli_nml_complexity_single(
 
     ``mode="exact"`` uses the exact Shtarkov normalizer for all ``n``.
     ``mode="hybrid"`` uses the exact normalizer up to ``EXACT_NML_CUTOFF``
-    and the asymptotic ``½ log₂ n`` approximation above that cutoff.
-    ``mode="asymptotic"`` uses ``½ log₂ n`` throughout.
+    and the asymptotic ``½ log₂(n·π/2)`` approximation above that cutoff.
+    ``mode="asymptotic"`` uses ``½ log₂(n·π/2)`` throughout.
     """
     if n <= 1:
         # n=0: no data, complexity is 0.  n=1: C(1)=2, exact regret is 1.0 bit.

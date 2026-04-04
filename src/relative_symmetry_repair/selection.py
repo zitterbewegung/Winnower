@@ -115,6 +115,8 @@ def _group_by_period(
     nd: bool = False,
 ) -> list[PeriodScore]:
     """Group scan results by period, taking min NML over shifts."""
+    if frame.empty or "period" not in frame.columns:
+        return []
     scores = []
     for period, group in frame.groupby("period"):
         best_row = group.loc[group["nml_bits"].idxmin()]

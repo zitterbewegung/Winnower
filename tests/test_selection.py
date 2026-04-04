@@ -65,14 +65,13 @@ class TestExactBernoulliNML:
             prev = curr
 
     def test_approaches_asymptotic(self):
-        """For large n, exact regret should approach ½ log₂(n) + const."""
+        """For large n, exact regret should approach ½ log₂(n·π/2)."""
         for n in [100, 150, 200]:
             exact = _exact_bernoulli_regret(n)
-            asymp = 0.5 * math.log2(n)
-            # The exact value should be close to asymptotic + O(1)
-            diff = exact - asymp
-            # The constant is ½ log₂(π/2) ≈ 0.326 bits
-            assert 0.0 < diff < 1.0, f"n={n}: exact-asymp = {diff}, expected ~0.33"
+            asymp = 0.5 * math.log2(n * math.pi / 2)
+            diff = abs(exact - asymp)
+            # Gap should be O(1/n), well under 0.1 bits for n >= 100
+            assert diff < 0.1, f"n={n}: |exact-asymp| = {diff:.4f}, expected < 0.1"
 
     def test_bernoulli_nml_complexity_single_exact_path(self):
         """For n <= cutoff, uses exact; for n > cutoff, uses asymptotic."""
