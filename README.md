@@ -1,174 +1,97 @@
-# Relative symmetry-repair analysis for cellular automata
+# Winnower: Relative-Periodic Decomposition for Cellular Automata
 
-This project implements a practical version of the **relative symmetry-repair** idea discussed in our paper drafts.
+[![Tests](https://img.shields.io/badge/tests-333%20passing-brightgreen)]()
 
-The code uses:
-- `numpy` for array programming
-- `numba` for fast ECA simulation
-- `pandas` for tabular spectrum summaries
-- `scipy` for component extraction and stable combinatorial codelengths
-- `matplotlib` for plots
-- `lz4` for a practical compression proxy
-- `typer` for a small modern CLI
-- `jupyter` for the companion notebook
+Fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured defect masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
 
-## What the program does
-
-For a binary spacetime field `U[t, x]`, and for each shift-period pair `(s, p)`, the program constructs the nearest background satisfying
-
-`B[t + p, (x + s) mod W] = B[t, x]`.
-
-It then reports:
-- defect count and defect rate
-- idealized combinatorial repair bits
-- run-length repair bits
-- an `lz4`-compressed repair-mask proxy
-- optional local-rule inconsistency of the fitted background
-
-This lets you:
-- build a **symmetry-defect spectrum**
-- compare rules such as 30, 54, and 110
-- extract connected defect world-tubes from the best fit
-- demonstrate that equal Hamming-distance defects can have different repair codelengths
-
-The primary background model scanned by the code is a relative-periodic spacetime pattern:
-
-`B[t + p, (x + s) mod W] = B[t, x]`
-
-where:
-- `p` is the temporal period
-- `s` is the spatial shift applied after each period
-- `W` is the ring width
-
-The CLI scans a grid of `(shift, period)` pairs and keeps the best-fitting background for each pair.
+**Paper:** *Structure Discovery in Cellular Automata via Relative-Periodic Decomposition* — submitted to ALIFE 2026.
 
 ## Quick start
 
-From the project root:
+```bash
+pip install -e .
+
+# Analyze a 1D elementary CA
+python -m relative_symmetry_repair analyze --rule 110
+
+# Analyze a 2D Life-like rule
+python -m relative_symmetry_repair analyze2d --rule life
+
+# Analyze a 3D rule
+python -m relative_symmetry_repair analyze3d --rule diamoeba3d
+```
+
+## Reproduce paper results
 
 ```bash
-python -m pip install -e .
-python -m relative_symmetry_repair.cli analyze --rule 110 --output-dir outputs/rule_110
+# Generate all survey data (takes a while)
+python scripts/alife/alife_run_all.py
+
+# Generate all figures
+python scripts/alife/alife_rule_diagrams.py
+
+# Run tests
+pytest tests/
 ```
 
-Open the notebook:
+See [REPRODUCING.md](REPRODUCING.md) for the full reproduction pipeline.
 
-```bash
-jupyter notebook notebooks/relative_symmetry_repair_demo.ipynb
+## Project structure
+
+```
+src/relative_symmetry_repair/   Core library
+  eca.py, ca2d.py, ca3d.py      CA simulators (1D, 2D, 3D)
+  repair.py, repair_nd.py       Relative-periodic background fitting
+  coding.py                     NML scoring, codelength metrics
+  selection.py                  Period-first model selection
+  cli.py                        Command-line interface
+
+scripts/                        Experiment and survey scripts
+  alife/                        ALIFE paper figure and data generation
+  surveys/                      Rule surveys (LifeWiki, ECA atlas, 2D range)
+  analysis/                     Convergence, baselines, stabilization
+
+paper/                          ALIFE 2026 submission (LaTeX)
+poster/                         Conference poster
+proofs/                         Lean 4 verification of Theorem A
+tests/                          Test suite (333 tests)
+notebooks/                      Demo and paper companion notebooks
+outputs/                        Generated CSVs, figures, survey results
+docs/                           Theory notes and claim audit trail
+data/                           Input data (LifeWiki rules JSON)
 ```
 
-Benchmark the candidate-scoring pipeline against the retained reference path:
+## How it works
 
-```bash
-PYTHONPYCACHEPREFIX=/tmp/pyc PYTHONPATH=src python scripts/analysis/benchmark_candidate_scoring.py
+For a binary spacetime `U[t, x]` and a candidate `(shift s, period p)`, the algorithm:
+
+1. **Partitions** cells into orbit equivalence classes under the shift-period symmetry
+2. **Majority-votes** within each class to build the optimal background `B`
+3. **Scores** the fit with Bernoulli NML = data-fit (NLL) + model complexity
+4. **Selects** the smallest period whose NML score beats alternatives
+
+The defect mask `D = U ⊕ B` captures what the periodic scaffold cannot explain — gliders, domain walls, and other structured residuals.
+
+## Key dependencies
+
+- `numpy`, `numba` — simulation and array ops
+- `scipy` — connected components, stable combinatorics
+- `pandas` — tabular results
+- `matplotlib` — visualization
+- `lz4` — compression-based codelength proxy
+- `typer` — CLI
+
+## Citation
+
+```bibtex
+@inproceedings{winnower2026,
+  title={Structure Discovery in Cellular Automata via Relative-Periodic Decomposition},
+  author={...},
+  booktitle={ALIFE 2026},
+  year={2026}
+}
 ```
 
-## ALIFE experiment suite
+## License
 
-The repository now includes a manuscript-facing ALIFE experiment suite under `scripts/` and `src/relative_symmetry_repair/experiment_suite.py`. The suite reuses the existing simulation and period-first selection code, adds deterministic multi-seed orchestration, null controls, candidate-range robustness checks, large rule surveys, summary plots, manifests, and paper-ready markdown snippets.
-
-Representative entry points:
-
-```bash
-python scripts/alife_null_controls.py
-python scripts/alife_seed_stability.py --n-seeds 10
-python scripts/alife_run_all.py
-```
-
-The package CLI also exposes lightweight wrappers for the main blocks:
-
-```bash
-relative-symmetry-repair alife-null-controls --output-root outputs/alife_2026
-relative-symmetry-repair alife-seed-stability --n-seeds 10
-relative-symmetry-repair alife-run-all --resume
-```
-
-Common suite outputs live under `outputs/alife_2026/`:
-
-```text
-outputs/alife_2026/
-  null_controls/
-  seed_stability/
-  candidate_range_robustness/
-  lifewiki_horizon_sweep/
-  eca_atlas/
-  survey_3d/
-  counterexample_stress/
-  results_manifest.json
-paper/
-  alife_experiment_summary.md
-  alife_table_snippets.md
-```
-
-Each experiment block writes per-run CSVs, summary CSVs, at least one PNG figure, and a small `manifest.json`. The top-level orchestrator aggregates these into `outputs/alife_2026/results_manifest.json` and regenerates the paper-facing markdown summaries.
-
-## Output guide
-
-Each rule directory under `outputs/` contains four PNG files plus CSV summaries.
-
-| File pattern | What it shows | How to read it | What to look for |
-| --- | --- | --- | --- |
-| `rule_<n>_spacetime.png` | The raw simulated CA spacetime. | Horizontal axis is cell index. Vertical axis is time, increasing from top to bottom. White means state `0`; black means state `1`. | Repeated diagonal motifs, stable domains, and long-lived boundaries or lanes. |
-| `rule_<n>_defect_rate.png` | Heatmap of defect rate over scanned `(shift, period)` pairs. | X-axis is shift, Y-axis is period. Darker cells are lower defect rate, so lower is better. The outlined square marks the minimum scanned value. | Dark basins or isolated minima. A broad dark valley suggests a robust relative-periodic fit. |
-| `rule_<n>_run_length_bits.png` | Heatmap of run-length repair cost for the defect mask. | Same axes as the defect-rate heatmap. Darker cells mean fewer run-length bits, so the defect mask is more structured and easier to compress. | Whether low-defect regions are also low-codelength regions. If not, the defects are numerous enough to fit well but still geometrically messy. |
-| `rule_<n>_decomposition.png` | Best-fit decomposition into source, fitted background, and defect mask. | Left: raw source spacetime. Middle: nearest relative-periodic background. Right: defect mask, where red cells disagree with the fitted background. | Compact defect world-tubes, coherent slanted boundaries, and whether the fitted background captures the large-scale domain structure. |
-
-The CSV files provide the same information numerically:
-- `rule_<n>_spectrum.csv`: one row per scanned `(shift, period)` pair, including `defect_rate`, `run_length_bits`, `lz4_bits`, and `rule_error`
-- `rule_<n>_components.csv`: connected components extracted from the best-fit defect mask
-- `best_relative_periodic_fits.csv`: best default fit per rule for the notebook runs
-- `reflection_repair_comparison.csv`: comparison showing that equal defect counts can still have very different repair codelengths
-
-## Common legend
-
-The generated PNGs now use a consistent visual language:
-- White in source and background plots means binary state `0`
-- Black in source and background plots means binary state `1`
-- Red in defect masks means the source disagrees with the fitted background at that site
-- Heatmap colorbars are quantitative legends; lower values are better
-- The outlined square on each heatmap marks the minimum scanned value in that chart
-
-## How to interpret the metrics
-
-- `defect_rate`: fraction of spacetime sites where the source differs from the fitted relative-periodic background. Lower means a closer fit.
-- `run_length_bits`: bit cost of a simple run-length code applied to the defect mask. Lower means defects are more spatially and temporally organized.
-- `combinatorial_bits`: idealized codelength that depends only on how many defects there are, not on where they sit.
-- `lz4_bits`: practical compressor proxy for the defect mask.
-- `rule_error`: local-rule inconsistency rate of the fitted background under the original ECA rule. Lower means the fitted background behaves more like a true CA orbit instead of only matching the spacetime statistically.
-
-### Selection criterion
-
-The CLI selects the best background using **period-first Bernoulli NML** selection:
-
-1. For each period, the best shift is the one minimizing the NML score (NLL + parametric complexity).
-2. The best period is the one with the lowest period-level NML score.
-3. Shift is secondary — it is the best shift *within* the selected period.
-
-The NML complexity uses **finite-sample correction** for small orbit classes (n ≤ 200), computing the exact Shtarkov normalizing constant via binomial sums. For larger orbit classes, it falls back to the standard asymptotic approximation (½ log₂ n).
-
-The CLI reports a **selection status**: `stable_winner` (clear margin), `near_tie` (margin < 2 bits), or `unresolved` (margin ≤ 0).
-
-### Two-stage pipeline
-
-- **Stage A (selection)**: Bernoulli NML selects the period and shift. This is the primary selector.
-- **Stage B (residual diagnostics)**: Run-length bits, LZ4 bits, and connected-component analysis characterize the residual mask geometry. These are diagnostics, not part of the selector.
-
-## What To Look For In The Checked-In PNGs
-
-The checked-in `outputs/` directory was produced with the CLI defaults (`width=192`, `steps=144`, `density=0.5`, `seed=11`, shifts `-6..6`, periods `1..10`).
-
-| Rule | Best `(shift, period)` | Reading of the PNGs |
-| --- | --- | --- |
-| `30` | `(-5, 10)` | The spacetime stays visually noisy, the defect-rate heatmap improves gradually rather than forming a sharp valley, and the decomposition mask remains diffuse. Interpret this as weak relative periodicity: the fit can lower the mismatch rate, but the remaining defects are not cleanly localized. |
-| `54` | `(0, 8)` | The heatmaps show a pronounced low-value basin and the decomposition mask collapses into clean world-tubes and domain walls. Interpret this as strong evidence for a relative-periodic domain background with localized excitations riding on top of it. |
-| `110` | `(0, 7)` | The heatmaps contain clear low-value pockets, but not as cleanly isolated as Rule 54. The decomposition shows a structured background plus persistent slanted defect structures. Interpret this as an intermediate case: real coherent organization, but with more complicated residual dynamics. |
-
-In practice:
-- If `defect_rate` is low and `run_length_bits` is also low, the fitted background is both close and structurally meaningful.
-- If `defect_rate` is low but `run_length_bits` stays high, the fit is close only in a pointwise sense; the defects are still scattered.
-- If the decomposition mask shows a few coherent tubes, the system has localized defects against a regular background.
-- If the decomposition mask looks like pepper noise everywhere, the chosen relative-periodic ansatz is probably not capturing the right organization.
-
-## Notes
-
-The notebook fits **relative-periodic backgrounds in spacetime**. It does *not* solve the harder inverse problem of finding a nearest state `y` such that `Phi^p(y) = g y` exactly under the CA dynamics. To keep that limitation visible, the code also computes a local-rule inconsistency score for each fitted background.
+See [LICENSE](LICENSE) for details.

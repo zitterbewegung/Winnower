@@ -13,3 +13,20 @@ venv/
 *.egg-info/
 .#*
 \#*#
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# Submission bundles (use git tags instead)
+*.zip
+
+# macOS duplicates
+*\ 2.*
+*\ 2/

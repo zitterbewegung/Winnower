@@ -1,0 +1,27 @@
+{
+  "base_seed": 11,
+  "counts": {
+    "period_distribution_rows": 4,
+    "run_rows": 2120,
+    "transition_rows": 106
+  },
+  "experiment": "alife_lifewiki_horizon_sweep",
+  "files": {
+    "final_distribution_csv": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_final_period_distribution.csv",
+    "heatmap_png": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_heatmap.png",
+    "runs_csv": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_runs.csv",
+    "transition_summary_csv": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_transition_summary.csv"
+  },
+  "horizons": [
+    100,
+    200,
+    400,
+    800
+  ],
+  "limit_rules": null,
+  "n_seeds": 5,
+  "nml_mode": "hybrid",
+  "output_dir": "outputs/alife_2026/lifewiki_horizon_sweep",
+  "resume": true,
+  "runtime_seconds": 34159.773352861404
+}
