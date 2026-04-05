@@ -1,0 +1,16 @@
+{
+  "counts": {
+    "candidate_range_instability": 13,
+    "nonunique_winners": 400,
+    "null_control_false_positives": 0,
+    "suspicious_repeated_ties": 16,
+    "very_small_margins": 0
+  },
+  "experiment": "alife_counterexample_stress",
+  "files": {
+    "report_json": "outputs/alife_2026/counterexample_stress/counterexample_stress_report.json",
+    "summary_markdown": "outputs/alife_2026/counterexample_stress/counterexample_stress_summary.md"
+  },
+  "output_dir": "outputs/alife_2026/counterexample_stress",
+  "runtime_seconds": 0.028918027877807617
+}

@@ -1,0 +1,2546 @@
+{
+  "base_seed": 11,
+  "experiment": "alife_run_all",
+  "flags": {
+    "generate_paper_markdown": true,
+    "run_3d_survey": true,
+    "run_candidate_range_robustness": true,
+    "run_counterexample_stress": true,
+    "run_eca_atlas": true,
+    "run_lifewiki_horizon_sweep": true,
+    "run_null_controls": true,
+    "run_seed_stability": true
+  },
+  "limits": {
+    "eca_limit": null,
+    "lifewiki_limit": null
+  },
+  "manifests": {
+    "candidate_range_robustness": {
+      "base_seed": 11,
+      "cases": [
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-30",
+          "rule_number": 30,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_30",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-54",
+          "rule_number": 54,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_54",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-110",
+          "rule_number": 110,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_110",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_rulestring",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "Diamoeba",
+          "rule_number": null,
+          "rulestring": "B35678/S5678",
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "diamoeba",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_rulestring",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "Maze with Mice",
+          "rule_number": null,
+          "rulestring": "B37/S12345",
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "maze_with_mice",
+          "survive": null
+        },
+        {
+          "birth": [
+            1,
+            1
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S24/B11",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s24_b11",
+          "survive": [
+            2,
+            4
+          ]
+        },
+        {
+          "birth": [
+            3,
+            7
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S11/B37",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s11_b37",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            1,
+            1
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S37/B11",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s37_b11",
+          "survive": [
+            3,
+            7
+          ]
+        },
+        {
+          "birth": [
+            5,
+            5
+          ],
+          "density": 0.2,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "3d-life",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "3d_life",
+          "survive": [
+            4,
+            5
+          ]
+        },
+        {
+          "birth": [
+            13,
+            14
+          ],
+          "density": 0.6,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "clouds",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "clouds",
+          "survive": [
+            13,
+            26
+          ]
+        },
+        {
+          "birth": [
+            1,
+            3
+          ],
+          "density": 0.1,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "crystal",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "crystal",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            5,
+            8
+          ],
+          "density": 0.5,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "diamoeba3d",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "diamoeba3d",
+          "survive": [
+            5,
+            8
+          ]
+        }
+      ],
+      "counts": {
+        "run_rows": 180,
+        "summary_rows": 12
+      },
+      "experiment": "alife_candidate_range_robustness",
+      "files": {
+        "runs_csv": "outputs/alife_2026/candidate_range_robustness/candidate_range_robustness_runs.csv",
+        "summary_csv": "outputs/alife_2026/candidate_range_robustness/candidate_range_robustness_summary.csv",
+        "summary_figure": "outputs/alife_2026/candidate_range_robustness/candidate_range_robustness.png"
+      },
+      "manifest_path": "outputs/alife_2026/candidate_range_robustness/manifest.json",
+      "n_seeds": 5,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/candidate_range_robustness",
+      "resume": true,
+      "runtime_seconds": 4181.5210201740265
+    },
+    "counterexample_stress": {
+      "counts": {
+        "candidate_range_instability": 13,
+        "nonunique_winners": 400,
+        "null_control_false_positives": 0,
+        "suspicious_repeated_ties": 16,
+        "very_small_margins": 0
+      },
+      "experiment": "alife_counterexample_stress",
+      "files": {
+        "report_json": "outputs/alife_2026/counterexample_stress/counterexample_stress_report.json",
+        "summary_markdown": "outputs/alife_2026/counterexample_stress/counterexample_stress_summary.md"
+      },
+      "manifest_path": "outputs/alife_2026/counterexample_stress/manifest.json",
+      "output_dir": "outputs/alife_2026/counterexample_stress",
+      "runtime_seconds": 0.028918027877807617
+    },
+    "eca_atlas": {
+      "base_seed": 11,
+      "counts": {
+        "run_rows": 6400,
+        "summary_rows": 256
+      },
+      "experiment": "alife_eca_atlas",
+      "files": {
+        "period_plot": "outputs/alife_2026/eca_atlas/eca_atlas_periods.png",
+        "runs_csv": "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
+        "stability_plot": "outputs/alife_2026/eca_atlas/eca_atlas_stability.png",
+        "summary_csv": "outputs/alife_2026/eca_atlas/eca_atlas_summary.csv"
+      },
+      "horizons": [
+        50,
+        100,
+        200,
+        400,
+        800
+      ],
+      "limit_rules": null,
+      "manifest_path": "outputs/alife_2026/eca_atlas/manifest.json",
+      "n_seeds": 5,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/eca_atlas",
+      "resume": true,
+      "runtime_seconds": 2950.736471891403,
+      "search": {
+        "label": "default_1d",
+        "periods": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "shift_ranges": [
+          [
+            -6,
+            -5,
+            -4,
+            -3,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        ]
+      }
+    },
+    "lifewiki_horizon_sweep": {
+      "base_seed": 11,
+      "counts": {
+        "period_distribution_rows": 4,
+        "run_rows": 2120,
+        "transition_rows": 106
+      },
+      "experiment": "alife_lifewiki_horizon_sweep",
+      "files": {
+        "final_distribution_csv": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_final_period_distribution.csv",
+        "heatmap_png": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_heatmap.png",
+        "runs_csv": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_runs.csv",
+        "transition_summary_csv": "outputs/alife_2026/lifewiki_horizon_sweep/lifewiki_horizon_transition_summary.csv"
+      },
+      "horizons": [
+        100,
+        200,
+        400,
+        800
+      ],
+      "limit_rules": null,
+      "manifest_path": "outputs/alife_2026/lifewiki_horizon_sweep/manifest.json",
+      "n_seeds": 5,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/lifewiki_horizon_sweep",
+      "resume": true,
+      "runtime_seconds": 34159.773352861404
+    },
+    "null_controls": {
+      "base_seed": 11,
+      "cases": [
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-30",
+          "rule_number": 30,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_30",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-54",
+          "rule_number": 54,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_54",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-110",
+          "rule_number": 110,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_110",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_rulestring",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "Diamoeba",
+          "rule_number": null,
+          "rulestring": "B35678/S5678",
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "diamoeba",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_rulestring",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "Maze with Mice",
+          "rule_number": null,
+          "rulestring": "B37/S12345",
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "maze_with_mice",
+          "survive": null
+        },
+        {
+          "birth": [
+            1,
+            1
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S24/B11",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s24_b11",
+          "survive": [
+            2,
+            4
+          ]
+        },
+        {
+          "birth": [
+            3,
+            7
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S11/B37",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s11_b37",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            1,
+            1
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S37/B11",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s37_b11",
+          "survive": [
+            3,
+            7
+          ]
+        },
+        {
+          "birth": [
+            5,
+            5
+          ],
+          "density": 0.2,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "3d-life",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "3d_life",
+          "survive": [
+            4,
+            5
+          ]
+        },
+        {
+          "birth": [
+            13,
+            14
+          ],
+          "density": 0.6,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "clouds",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "clouds",
+          "survive": [
+            13,
+            26
+          ]
+        },
+        {
+          "birth": [
+            1,
+            3
+          ],
+          "density": 0.1,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "crystal",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "crystal",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            5,
+            8
+          ],
+          "density": 0.5,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "diamoeba3d",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "diamoeba3d",
+          "survive": [
+            5,
+            8
+          ]
+        }
+      ],
+      "counts": {
+        "rule_level_rows": 48,
+        "summary_rows": 12
+      },
+      "experiment": "alife_null_controls",
+      "files": {
+        "decomposition_dir": null,
+        "defect_rate_plot": "outputs/alife_2026/null_controls/null_controls_defect_rate.png",
+        "margin_plot": "outputs/alife_2026/null_controls/null_controls_margin.png",
+        "rule_level_csv": "outputs/alife_2026/null_controls/null_controls_rule_level.csv",
+        "summary_csv": "outputs/alife_2026/null_controls/null_controls_summary.csv"
+      },
+      "manifest_path": "outputs/alife_2026/null_controls/manifest.json",
+      "n_seeds": 1,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/null_controls",
+      "resume": true,
+      "runtime_seconds": 0.6778218746185303
+    },
+    "paper_reports": {
+      "paper_summary": "paper/alife_experiment_summary.md",
+      "paper_tables": "paper/alife_table_snippets.md"
+    },
+    "seed_stability": {
+      "base_seed": 11,
+      "cases": [
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-30",
+          "rule_number": 30,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_30",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-54",
+          "rule_number": 54,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_54",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 1,
+          "family": "eca",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "ECA-110",
+          "rule_number": 110,
+          "rulestring": null,
+          "search": {
+            "label": "default_1d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "shift_ranges": [
+              [
+                -6,
+                -5,
+                -4,
+                -3,
+                -2,
+                -1,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            ]
+          },
+          "size": [
+            192
+          ],
+          "slug": "eca_110",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_rulestring",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "Diamoeba",
+          "rule_number": null,
+          "rulestring": "B35678/S5678",
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "diamoeba",
+          "survive": null
+        },
+        {
+          "birth": null,
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_rulestring",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "Maze with Mice",
+          "rule_number": null,
+          "rulestring": "B37/S12345",
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "maze_with_mice",
+          "survive": null
+        },
+        {
+          "birth": [
+            1,
+            1
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S24/B11",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s24_b11",
+          "survive": [
+            2,
+            4
+          ]
+        },
+        {
+          "birth": [
+            3,
+            7
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S11/B37",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s11_b37",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            1,
+            1
+          ],
+          "density": 0.5,
+          "dimension": 2,
+          "family": "life_range",
+          "horizons": [
+            50,
+            100,
+            200,
+            400,
+            600,
+            800
+          ],
+          "name": "S37/B11",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_2d",
+            "periods": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            64,
+            64
+          ],
+          "slug": "s37_b11",
+          "survive": [
+            3,
+            7
+          ]
+        },
+        {
+          "birth": [
+            5,
+            5
+          ],
+          "density": 0.2,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "3d-life",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "3d_life",
+          "survive": [
+            4,
+            5
+          ]
+        },
+        {
+          "birth": [
+            13,
+            14
+          ],
+          "density": 0.6,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "clouds",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "clouds",
+          "survive": [
+            13,
+            26
+          ]
+        },
+        {
+          "birth": [
+            1,
+            3
+          ],
+          "density": 0.1,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "crystal",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "crystal",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            5,
+            8
+          ],
+          "density": 0.5,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "diamoeba3d",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "diamoeba3d",
+          "survive": [
+            5,
+            8
+          ]
+        }
+      ],
+      "counts": {
+        "run_rows": 680,
+        "summary_rows": 12
+      },
+      "experiment": "alife_seed_stability",
+      "files": {
+        "runs_csv": "outputs/alife_2026/seed_stability/seed_stability_runs.csv",
+        "summary_csv": "outputs/alife_2026/seed_stability/seed_stability_summary.csv",
+        "summary_figure": "outputs/alife_2026/seed_stability/seed_stability_summary.png"
+      },
+      "manifest_path": "outputs/alife_2026/seed_stability/manifest.json",
+      "n_seeds": 10,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/seed_stability",
+      "resume": true,
+      "runtime_seconds": 6222.643450975418
+    },
+    "survey_3d": {
+      "base_seed": 11,
+      "cases": [
+        {
+          "birth": [
+            5,
+            5
+          ],
+          "density": 0.2,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "3d-life",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "3d_life",
+          "survive": [
+            4,
+            5
+          ]
+        },
+        {
+          "birth": [
+            13,
+            14
+          ],
+          "density": 0.6,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "clouds",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "clouds",
+          "survive": [
+            13,
+            26
+          ]
+        },
+        {
+          "birth": [
+            1,
+            3
+          ],
+          "density": 0.1,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "crystal",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "crystal",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            5,
+            8
+          ],
+          "density": 0.5,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "diamoeba3d",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "diamoeba3d",
+          "survive": [
+            5,
+            8
+          ]
+        }
+      ],
+      "counts": {
+        "run_rows": 20,
+        "summary_rows": 4
+      },
+      "experiment": "alife_3d_survey",
+      "files": {
+        "runs_csv": "outputs/alife_2026/survey_3d/alife_3d_survey_runs.csv",
+        "summary_csv": "outputs/alife_2026/survey_3d/alife_3d_survey_summary.csv",
+        "summary_plot": "outputs/alife_2026/survey_3d/alife_3d_survey.png"
+      },
+      "manifest_path": "outputs/alife_2026/survey_3d/manifest.json",
+      "n_seeds": 5,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/survey_3d",
+      "resume": true,
+      "runtime_seconds": 162.55555295944214,
+      "search": {
+        "label": "default_3d",
+        "periods": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "shift_ranges": [
+          [
+            -2,
+            -1,
+            0,
+            1,
+            2
+          ],
+          [
+            -2,
+            -1,
+            0,
+            1,
+            2
+          ],
+          [
+            -2,
+            -1,
+            0,
+            1,
+            2
+          ]
+        ]
+      }
+    }
+  },
+  "output_root": "outputs/alife_2026",
+  "resume": true,
+  "runtime_seconds": 47678.16106009483
+}

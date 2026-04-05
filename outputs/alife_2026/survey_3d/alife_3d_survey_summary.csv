@@ -1,0 +1,5 @@
+rule,dimension,n_seeds,horizon,modal_period,modal_period_frequency,mean_margin_bits,mean_defect_rate,nonunique_fraction
+3d-life,3,5,80,1,1.0,8615.114691101433,0.0678863525390625,0.0
+clouds,3,5,80,1,1.0,10066.682065950099,0.1234942626953125,0.0
+crystal,3,5,80,2,1.0,11270.917409818916,0.21072937011718745,0.0
+diamoeba3d,3,5,80,1,1.0,7402.270779430692,0.29750183105468747,0.0
