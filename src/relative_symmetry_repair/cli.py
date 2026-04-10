@@ -103,16 +103,16 @@ def analyze(
         json.dump(safe_summary, f, indent=2, default=str)
 
     fig, _ = plot_spacetime(spacetime, title=f"Rule {rule} spacetime")
-    save_figure(fig, output_dir / f"rule_{rule}_spacetime.png")
+    save_figure(fig, output_dir / f"rule_{rule}_spacetime.png", close=True)
 
     fig, _ = plot_spectrum(frame, value="defect_rate", title=f"Rule {rule} defect-rate spectrum")
-    save_figure(fig, output_dir / f"rule_{rule}_defect_rate.png")
+    save_figure(fig, output_dir / f"rule_{rule}_defect_rate.png", close=True)
 
     fig, _ = plot_spectrum(frame, value="run_length_bits", title=f"Rule {rule} run-length repair spectrum")
-    save_figure(fig, output_dir / f"rule_{rule}_run_length_bits.png")
+    save_figure(fig, output_dir / f"rule_{rule}_run_length_bits.png", close=True)
 
     fig, _ = plot_decomposition(best_fit, source=spacetime, title_prefix=f"Rule {rule} ")
-    save_figure(fig, output_dir / f"rule_{rule}_decomposition.png")
+    save_figure(fig, output_dir / f"rule_{rule}_decomposition.png", close=True)
 
     typer.echo(f"Selected period: {result.selected.period} "
                f"(shift={result.selected.best_shift}, "
@@ -208,19 +208,19 @@ def analyze2d(
         json.dump(safe_summary, f, indent=2, default=str)
 
     fig, _ = plot_2d_slices(spacetime, title=f"2D CA '{rule}' time slices")
-    save_figure(fig, output_dir / f"{rule}_slices.png")
+    save_figure(fig, output_dir / f"{rule}_slices.png", close=True)
 
     fig, _ = plot_2d_kymograph(spacetime, axis=1, title=f"2D CA '{rule}' kymograph (avg over y)")
-    save_figure(fig, output_dir / f"{rule}_kymograph.png")
+    save_figure(fig, output_dir / f"{rule}_kymograph.png", close=True)
 
     fig, _ = plot_spectrum_nd(frame, value="defect_rate", title=f"2D CA '{rule}' defect-rate spectrum")
-    save_figure(fig, output_dir / f"{rule}_defect_rate.png")
+    save_figure(fig, output_dir / f"{rule}_defect_rate.png", close=True)
 
     fig, _ = plot_spectrum_nd(frame, value="run_length_bits", title=f"2D CA '{rule}' run-length spectrum")
-    save_figure(fig, output_dir / f"{rule}_run_length_bits.png")
+    save_figure(fig, output_dir / f"{rule}_run_length_bits.png", close=True)
 
     fig, _ = plot_2d_decomposition(best_fit, source=spacetime, title_prefix=f"'{rule}' ")
-    save_figure(fig, output_dir / f"{rule}_decomposition.png")
+    save_figure(fig, output_dir / f"{rule}_decomposition.png", close=True)
 
     typer.echo(f"Selected period: {result.selected.period} "
                f"(shift={result.selected.best_shift}, "
@@ -315,16 +315,16 @@ def analyze3d(
         json.dump(safe_summary, f, indent=2, default=str)
 
     fig, _ = plot_3d_slices(spacetime, title=f"3D CA '{rule}' time slices (z-midplane)")
-    save_figure(fig, output_dir / f"{rule}_slices.png")
+    save_figure(fig, output_dir / f"{rule}_slices.png", close=True)
 
     fig, _ = plot_spectrum_nd(frame, value="defect_rate", title=f"3D CA '{rule}' defect-rate spectrum")
-    save_figure(fig, output_dir / f"{rule}_defect_rate.png")
+    save_figure(fig, output_dir / f"{rule}_defect_rate.png", close=True)
 
     fig, _ = plot_spectrum_nd(frame, value="run_length_bits", title=f"3D CA '{rule}' run-length spectrum")
-    save_figure(fig, output_dir / f"{rule}_run_length_bits.png")
+    save_figure(fig, output_dir / f"{rule}_run_length_bits.png", close=True)
 
     fig, _ = plot_3d_decomposition(best_fit, source=spacetime, title_prefix=f"'{rule}' ")
-    save_figure(fig, output_dir / f"{rule}_decomposition.png")
+    save_figure(fig, output_dir / f"{rule}_decomposition.png", close=True)
 
     typer.echo(f"Selected period: {result.selected.period} "
                f"(shift={result.selected.best_shift}, "
