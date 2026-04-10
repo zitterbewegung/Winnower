@@ -12,7 +12,7 @@ from typing import Iterable, Sequence
 import numpy as np
 import pandas as pd
 
-from .coding import lz4_mask_bits, nml_score_bits, run_length_bits
+from .coding import lz4_mask_bits, nml_score_bits, resolve_nml_mode, run_length_bits
 from .repair import (
     RelativePeriodicFit,
     fit_relative_periodic_background,
@@ -29,8 +29,10 @@ from .repair_nd import (
 )
 from .selector_tools import (
     TIE_BREAK_RULE,
+    shift_columns,
     shift_handling_from_1d,
     shift_handling_from_nd,
+    sort_candidates,
 )
 
 
@@ -88,6 +90,11 @@ class SelectionResult:
     nml_mode: str = "hybrid"
     shift_handling: str = "joint_shift_optimization"
     tie_break_rule: str = TIE_BREAK_RULE
+    majority_tie_break: str = "ones"
+    candidate_margin_bits: float = float("inf")
+    candidate_runner_up_period: int | None = None
+    candidate_runner_up_shift: int | tuple[int, ...] | None = None
+    candidate_runner_up_nml_bits: float | None = None
 
 
 # ── Margin thresholds ─────────────────────────────────────────────────────────
@@ -119,7 +126,7 @@ def _group_by_period(
         return []
     scores = []
     for period, group in frame.groupby("period"):
-        best_row = group.loc[group["nml_bits"].idxmin()]
+        best_row = sort_candidates(group, "nml_bits").iloc[0]
         if nd:
             shift_cols = [c for c in group.columns if c.startswith("shift_")]
             best_shift = tuple(int(best_row[c]) for c in shift_cols)
@@ -138,6 +145,30 @@ def _group_by_period(
     return scores
 
 
+def _shift_from_row(frame: pd.DataFrame, row: pd.Series) -> int | tuple[int, ...]:
+    cols = shift_columns(frame)
+    if not cols:
+        raise KeyError("Candidate frame is missing shift columns")
+    if cols == ["shift"]:
+        return int(row["shift"])
+    return tuple(int(row[c]) for c in cols)
+
+
+def _candidate_margin_from_frame(
+    frame: pd.DataFrame,
+) -> tuple[float, int | None, int | tuple[int, ...] | None, float | None]:
+    ranked = sort_candidates(frame, "nml_bits")
+    if len(ranked) <= 1:
+        return float("inf"), None, None, None
+    runner_up = ranked.iloc[1]
+    return (
+        float(runner_up["nml_bits"] - ranked.iloc[0]["nml_bits"]),
+        int(runner_up["period"]),
+        _shift_from_row(ranked, runner_up),
+        float(runner_up["nml_bits"]),
+    )
+
+
 def select_period(
     spacetime: np.ndarray,
     shifts: Iterable[int],
@@ -146,6 +177,7 @@ def select_period(
     rule: int | None = None,
     min_component_size: int = 6,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = "ones",
 ) -> SelectionResult:
     """Period-first selection for 1D spacetimes.
 
@@ -163,6 +195,7 @@ def select_period(
         periods=period_list,
         rule=rule,
         nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
     return select_period_from_scan(
         frame,
@@ -170,6 +203,7 @@ def select_period(
         min_component_size=min_component_size,
         nml_mode=nml_mode,
         shift_handling=shift_handling_from_1d(shift_list),
+        majority_tie_break=majority_tie_break,
     )
 
 
@@ -180,6 +214,7 @@ def select_period_from_scan(
     min_component_size: int = 6,
     nml_mode: str = "hybrid",
     shift_handling: str = "joint_shift_optimization",
+    majority_tie_break: str = "ones",
 ) -> SelectionResult:
     """Build a period-first selection result from a precomputed 1D scan."""
     period_scores = _group_by_period(frame, fits, nd=False)
@@ -189,6 +224,12 @@ def select_period_from_scan(
     selected = period_scores[0]
     runner_up = period_scores[1] if len(period_scores) > 1 else None
     margin = (runner_up.nml_bits - selected.nml_bits) if runner_up else float("inf")
+    (
+        candidate_margin_bits,
+        candidate_runner_up_period,
+        candidate_runner_up_shift,
+        candidate_runner_up_nml_bits,
+    ) = _candidate_margin_from_frame(frame)
 
     # Retrieve the best fit object
     best_key = (selected.best_shift, selected.period)
@@ -198,6 +239,9 @@ def select_period_from_scan(
             f"Best-fit key {best_key!r} not found in fits dict "
             f"(available keys: {list(fits.keys())[:5]}...)"
         )
+    result_majority_tie_break = (
+        best_fit.majority_tie_break if best_fit is not None else majority_tie_break
+    )
 
     result = SelectionResult(
         selected=selected,
@@ -208,6 +252,11 @@ def select_period_from_scan(
         best_fit=best_fit,
         nml_mode=nml_mode,
         shift_handling=shift_handling,
+        majority_tie_break=result_majority_tie_break,
+        candidate_margin_bits=candidate_margin_bits,
+        candidate_runner_up_period=candidate_runner_up_period,
+        candidate_runner_up_shift=candidate_runner_up_shift,
+        candidate_runner_up_nml_bits=candidate_runner_up_nml_bits,
     )
 
     # Auto-populate residual diagnostics
@@ -225,6 +274,7 @@ def select_period_nd(
     rule_error_fn=None,
     min_component_size: int = 4,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = "ones",
 ) -> SelectionResult:
     """Period-first selection for N-dimensional spacetimes.
 
@@ -239,6 +289,7 @@ def select_period_nd(
         periods=period_list,
         rule_error_fn=rule_error_fn,
         nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
     return select_period_nd_from_scan(
         frame,
@@ -246,6 +297,7 @@ def select_period_nd(
         min_component_size=min_component_size,
         nml_mode=nml_mode,
         shift_handling=shift_handling_from_nd(shift_lists),
+        majority_tie_break=majority_tie_break,
     )
 
 
@@ -256,6 +308,7 @@ def select_period_nd_from_scan(
     min_component_size: int = 4,
     nml_mode: str = "hybrid",
     shift_handling: str = "joint_shift_optimization",
+    majority_tie_break: str = "ones",
 ) -> SelectionResult:
     """Build a period-first selection result from a precomputed N-D scan."""
     period_scores = _group_by_period(frame, fits, nd=True)
@@ -265,6 +318,12 @@ def select_period_nd_from_scan(
     selected = period_scores[0]
     runner_up = period_scores[1] if len(period_scores) > 1 else None
     margin = (runner_up.nml_bits - selected.nml_bits) if runner_up else float("inf")
+    (
+        candidate_margin_bits,
+        candidate_runner_up_period,
+        candidate_runner_up_shift,
+        candidate_runner_up_nml_bits,
+    ) = _candidate_margin_from_frame(frame)
 
     # Retrieve the best fit object
     best_key = (selected.best_shift, selected.period)
@@ -274,6 +333,9 @@ def select_period_nd_from_scan(
             f"Best-fit key {best_key!r} not found in fits dict "
             f"(available keys: {list(fits.keys())[:5]}...)"
         )
+    result_majority_tie_break = (
+        best_fit.majority_tie_break if best_fit is not None else majority_tie_break
+    )
 
     result = SelectionResult(
         selected=selected,
@@ -284,6 +346,11 @@ def select_period_nd_from_scan(
         best_fit=best_fit,
         nml_mode=nml_mode,
         shift_handling=shift_handling,
+        majority_tie_break=result_majority_tie_break,
+        candidate_margin_bits=candidate_margin_bits,
+        candidate_runner_up_period=candidate_runner_up_period,
+        candidate_runner_up_shift=candidate_runner_up_shift,
+        candidate_runner_up_nml_bits=candidate_runner_up_nml_bits,
     )
 
     if best_fit is not None:
@@ -362,16 +429,24 @@ def selection_summary(result: SelectionResult) -> dict:
         "selected_defect_rate": result.selected.defect_rate,
         "status": result.status.value,
         "margin_bits": result.margin,
+        "period_margin_bits": result.margin,
+        "candidate_margin_bits": result.candidate_margin_bits,
         "n_periods_scanned": len(result.all_periods),
         "selector_type": result.selector_type,
         "score_type": result.score_type,
         "nml_mode": result.nml_mode,
+        "resolved_nml_mode": resolve_nml_mode(mode=result.nml_mode),
         "shift_handling": result.shift_handling,
         "tie_break_rule": result.tie_break_rule,
+        "majority_tie_break": result.majority_tie_break,
     }
     if result.runner_up:
         d["runner_up_period"] = result.runner_up.period
         d["runner_up_nml_bits"] = result.runner_up.nml_bits
+    if result.candidate_runner_up_period is not None:
+        d["candidate_runner_up_period"] = result.candidate_runner_up_period
+        d["candidate_runner_up_shift"] = result.candidate_runner_up_shift
+        d["candidate_runner_up_nml_bits"] = result.candidate_runner_up_nml_bits
     if result.residual is not None:
         d["residual_rl_bits"] = result.residual.run_length_bits
         d["residual_lz4_bits"] = result.residual.lz4_bits

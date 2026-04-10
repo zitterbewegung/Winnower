@@ -265,7 +265,11 @@ class TestSelectionSummary:
         assert "selected_nml_bits" in summary
         assert "status" in summary
         assert "margin_bits" in summary
+        assert "period_margin_bits" in summary
+        assert "candidate_margin_bits" in summary
         assert "runner_up_period" in summary
+        assert "resolved_nml_mode" in summary
+        assert "majority_tie_break" in summary
         assert "residual_rl_bits" in summary
         assert "residual_n_components" in summary
 
@@ -279,6 +283,8 @@ class TestSelectionSummary:
         assert summary["selected_period"] == result.selected.period
         assert summary["status"] == result.status.value
         assert summary["margin_bits"] == result.margin
+        assert summary["period_margin_bits"] == result.margin
+        assert summary["candidate_margin_bits"] == result.candidate_margin_bits
 
 
 # ──────────────────────────────────────────────────────────────────────

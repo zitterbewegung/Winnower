@@ -29,3 +29,21 @@ def test_selection_summary_exposes_shift_handling_and_score_mode():
     assert summary["shift_handling"] == "shift_zero_only"
     assert summary["nml_mode"] == "asymptotic"
     assert summary["tie_break_rule"] == "score asc, period asc, shift lex asc"
+
+
+def test_selection_summary_exposes_paper_mode_candidate_margin_and_majority_tie_break():
+    spacetime = np.zeros((6, 4), dtype=np.uint8)
+    result = select_period(
+        spacetime,
+        shifts=[0],
+        periods=[1, 2],
+        nml_mode="paper",
+        majority_tie_break="zeros",
+    )
+    summary = selection_summary(result)
+    assert summary["nml_mode"] == "paper"
+    assert summary["resolved_nml_mode"] == "asymptotic"
+    assert summary["majority_tie_break"] == "zeros"
+    assert "candidate_margin_bits" in summary
+    assert "period_margin_bits" in summary
+    assert "candidate_runner_up_period" in summary

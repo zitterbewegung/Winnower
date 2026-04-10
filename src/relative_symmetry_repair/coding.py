@@ -18,11 +18,13 @@ EXACT_NML_CUTOFF = 200
 NML_MODE_EXACT = "exact"
 NML_MODE_HYBRID = "hybrid"
 NML_MODE_ASYMPTOTIC = "asymptotic"
+NML_MODE_PAPER = "paper"
 VALID_NML_MODES = frozenset(
     {
         NML_MODE_EXACT,
         NML_MODE_HYBRID,
         NML_MODE_ASYMPTOTIC,
+        NML_MODE_PAPER,
     }
 )
 
@@ -32,13 +34,19 @@ def resolve_nml_mode(
     mode: str | None = None,
     exact: bool | None = None,
 ) -> str:
-    """Resolve legacy ``exact=...`` calls to an explicit NML scoring mode."""
+    """Resolve legacy ``exact=...`` calls to an explicit NML scoring mode.
+
+    ``mode="paper"`` is a user-facing alias for the asymptotic Bernoulli NML
+    penalty stated in the manuscript.
+    """
     if mode is not None and exact is not None:
         raise ValueError("Pass either mode=... or exact=..., not both")
     if mode is None:
         if exact is None:
             return NML_MODE_HYBRID
         return NML_MODE_HYBRID if exact else NML_MODE_ASYMPTOTIC
+    if mode == NML_MODE_PAPER:
+        return NML_MODE_ASYMPTOTIC
     if mode not in VALID_NML_MODES:
         raise ValueError(
             f"Unknown NML mode {mode!r}. Expected one of {sorted(VALID_NML_MODES)}."

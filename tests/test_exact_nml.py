@@ -61,6 +61,22 @@ def test_exact_and_asymptotic_nml_agree_on_simple_large_exact_oscillator():
     assert asymptotic.selected.period == 2
 
 
+def test_paper_mode_alias_matches_asymptotic_selection():
+    row0 = np.array([0, 1, 0, 1], dtype=np.uint8)
+    row1 = np.array([1, 0, 1, 0], dtype=np.uint8)
+    spacetime = np.tile(np.vstack([row0, row1]), (20, 1))
+    paper = select_period(spacetime, shifts=[0], periods=[1, 2, 4], nml_mode="paper")
+    asymptotic = select_period(
+        spacetime,
+        shifts=[0],
+        periods=[1, 2, 4],
+        nml_mode="asymptotic",
+    )
+    assert paper.selected.period == asymptotic.selected.period
+    assert paper.selected.best_shift == asymptotic.selected.best_shift
+    assert paper.selected.nml_bits == asymptotic.selected.nml_bits
+
+
 def test_hybrid_mode_matches_legacy_exact_true_path_on_small_case():
     spacetime = np.array(
         [

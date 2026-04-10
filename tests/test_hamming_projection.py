@@ -50,6 +50,19 @@ def test_tie_break_is_deterministic_and_prefers_one():
     assert fit.defect_rate == 0.5
 
 
+def test_tie_break_can_prefer_zero_when_requested():
+    spacetime = np.array([[0], [1], [0], [1]], dtype=np.uint8)
+    fit = fit_relative_periodic_background(
+        spacetime,
+        shift=0,
+        period=1,
+        majority_tie_break="zeros",
+    )
+    assert np.array_equal(fit.background, np.zeros_like(spacetime))
+    assert fit.defect_sites == 2
+    assert fit.defect_rate == 0.5
+
+
 def test_defect_count_equals_sum_of_per_class_minorities_explicit_case():
     spacetime = np.array(
         [

@@ -48,6 +48,14 @@ def analyze(
     seed: int = typer.Option(11, help="Random seed."),
     shift_radius: int = typer.Option(6, help="Scan shifts from -shift_radius to +shift_radius."),
     max_period: int = typer.Option(10, help="Maximum period scanned."),
+    nml_mode: str = typer.Option(
+        "hybrid",
+        help="Scoring mode: exact, hybrid, asymptotic, or paper (alias for asymptotic).",
+    ),
+    majority_tie_break: str = typer.Option(
+        "ones",
+        help="Orbitwise tie break for exact 50/50 classes: ones or zeros.",
+    ),
     output_dir: Path = typer.Option(Path("outputs"), help="Directory for CSV and PNG artifacts."),
 ) -> None:
     output_dir = Path(output_dir)
@@ -62,6 +70,8 @@ def analyze(
         shifts=range(-shift_radius, shift_radius + 1),
         periods=range(1, max_period + 1),
         rule=rule,
+        nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
     best_fit = result.best_fit
     summary = selection_summary(result)
@@ -72,6 +82,8 @@ def analyze(
         shifts=range(-shift_radius, shift_radius + 1),
         periods=range(1, max_period + 1),
         rule=rule,
+        nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
 
     labels, _ = extract_components(best_fit.defect_mask, min_size=6)
@@ -126,6 +138,14 @@ def analyze2d(
     seed: int = typer.Option(11, help="Random seed."),
     shift_radius: int = typer.Option(3, help="Scan shifts from -r to +r in each spatial dim."),
     max_period: int = typer.Option(6, help="Maximum period scanned."),
+    nml_mode: str = typer.Option(
+        "hybrid",
+        help="Scoring mode: exact, hybrid, asymptotic, or paper (alias for asymptotic).",
+    ),
+    majority_tie_break: str = typer.Option(
+        "ones",
+        help="Orbitwise tie break for exact 50/50 classes: ones or zeros.",
+    ),
     output_dir: Path = typer.Option(Path("outputs"), help="Directory for CSV and PNG artifacts."),
 ) -> None:
     """Analyze a 2D cellular automaton with relative-periodic repair."""
@@ -156,6 +176,8 @@ def analyze2d(
         shift_ranges=[shift_range, shift_range],
         periods=range(1, max_period + 1),
         rule_error_fn=rule_error_fn,
+        nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
     best_fit = result.best_fit
     summary = selection_summary(result)
@@ -166,6 +188,8 @@ def analyze2d(
         shift_ranges=[shift_range, shift_range],
         periods=range(1, max_period + 1),
         rule_error_fn=rule_error_fn,
+        nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
 
     labels, _ = extract_components_nd(best_fit.defect_mask, min_size=4)
@@ -219,6 +243,14 @@ def analyze3d(
     seed: int = typer.Option(11, help="Random seed."),
     shift_radius: int = typer.Option(2, help="Scan shifts from -r to +r in each spatial dim."),
     max_period: int = typer.Option(4, help="Maximum period scanned."),
+    nml_mode: str = typer.Option(
+        "hybrid",
+        help="Scoring mode: exact, hybrid, asymptotic, or paper (alias for asymptotic).",
+    ),
+    majority_tie_break: str = typer.Option(
+        "ones",
+        help="Orbitwise tie break for exact 50/50 classes: ones or zeros.",
+    ),
     output_dir: Path = typer.Option(Path("outputs"), help="Directory for CSV and PNG artifacts."),
 ) -> None:
     """Analyze a 3D cellular automaton with relative-periodic repair."""
@@ -251,6 +283,8 @@ def analyze3d(
         shift_ranges=[shift_range, shift_range, shift_range],
         periods=range(1, max_period + 1),
         rule_error_fn=rule_error_fn,
+        nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
     best_fit = result.best_fit
     summary = selection_summary(result)
@@ -261,6 +295,8 @@ def analyze3d(
         shift_ranges=[shift_range, shift_range, shift_range],
         periods=range(1, max_period + 1),
         rule_error_fn=rule_error_fn,
+        nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
 
     labels, _ = extract_components_nd(best_fit.defect_mask, min_size=4)

@@ -8,9 +8,12 @@ import pandas as pd
 from scipy import ndimage
 
 from ._orbit_scoring import (
+    MAJORITY_TIE_BREAK_ONES,
     RelativePeriodicOrbitWorkspace,
     class_sizes_1d,
+    majority_bits_from_counts,
     reduce_binary_spacetime_by_orbits,
+    resolve_majority_tie_break,
 )
 from .coding import (
     combinatorial_repair_bits, lz4_mask_bits, nml_score_bits,
@@ -37,6 +40,7 @@ class RelativePeriodicFit:
     nml_complexity: float = 0.0 # Bernoulli NML complexity under the configured mode
     nml_bits: float = 0.0       # Bernoulli NML score under the configured mode
     nml_mode: str = "hybrid"
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES
     rule_error: float | None = None
 
     def to_record(self) -> dict[str, float | int | None]:
@@ -55,6 +59,7 @@ class RelativePeriodicFit:
             "nml_complexity": self.nml_complexity,
             "nml_bits": self.nml_bits,
             "nml_mode": self.nml_mode,
+            "majority_tie_break": self.majority_tie_break,
             "rule_error": self.rule_error,
         }
 
@@ -100,14 +105,24 @@ def component_labels(shape: tuple[int, int], shift: int, period: int) -> np.ndar
     return labels.astype(np.int32)
 
 
-def _majority_binary_by_labels(spacetime: np.ndarray, labels: np.ndarray, period: int) -> np.ndarray:
+def _majority_binary_by_labels(
+    spacetime: np.ndarray,
+    labels: np.ndarray,
+    period: int,
+    *,
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
+) -> np.ndarray:
     steps, width = spacetime.shape
     n_labels = int(period) * width
     flat_labels = labels.ravel()
     flat_values = spacetime.ravel().astype(np.int64)
     totals = np.bincount(flat_labels, minlength=n_labels)
     ones = np.bincount(flat_labels, weights=flat_values, minlength=n_labels)
-    majority_values = (2 * ones >= totals).astype(np.uint8)
+    majority_values = majority_bits_from_counts(
+        ones,
+        totals,
+        majority_tie_break=majority_tie_break,
+    )
     return majority_values[labels]
 
 
@@ -118,13 +133,16 @@ def _fit_relative_periodic_background_reference(
     *,
     rule: int | None = None,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
 ) -> RelativePeriodicFit:
     """Reference implementation retained for correctness tests and benchmarks."""
+    resolved_majority_tie_break = resolve_majority_tie_break(majority_tie_break)
     labels = component_labels(spacetime.shape, shift=shift, period=period)
     background = _majority_binary_by_labels(
         spacetime.astype(np.uint8),
         labels,
         int(period),
+        majority_tie_break=resolved_majority_tie_break,
     )
     defect_mask = spacetime.astype(np.uint8) != background
     defect_sites = int(defect_mask.sum())
@@ -161,6 +179,7 @@ def _fit_relative_periodic_background_reference(
         nml_complexity=nml_comp,
         nml_bits=nml_total,
         nml_mode=nml_mode,
+        majority_tie_break=resolved_majority_tie_break,
         rule_error=rule_error,
     )
 
@@ -173,9 +192,16 @@ def _fit_relative_periodic_background_from_workspace(
     *,
     rule: int | None = None,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
 ) -> RelativePeriodicFit:
     """Optimized grouped-reduction path for a single 1D candidate."""
-    reduction = workspace.evaluate_candidate((int(shift),), int(period), nml_mode=nml_mode)
+    resolved_majority_tie_break = resolve_majority_tie_break(majority_tie_break)
+    reduction = workspace.evaluate_candidate(
+        (int(shift),),
+        int(period),
+        nml_mode=nml_mode,
+        majority_tie_break=resolved_majority_tie_break,
+    )
     background = reduction.background_flat.reshape(spacetime.shape).copy()
     defect_mask = reduction.defect_flat.reshape(spacetime.shape).astype(bool, copy=True)
     total_sites = int(defect_mask.size)
@@ -204,6 +230,7 @@ def _fit_relative_periodic_background_from_workspace(
         nml_complexity=reduction.nml_complexity,
         nml_bits=reduction.nml_bits,
         nml_mode=nml_mode,
+        majority_tie_break=resolved_majority_tie_break,
         rule_error=rule_error,
     )
 
@@ -215,6 +242,7 @@ def fit_relative_periodic_background(
     *,
     rule: int | None = None,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
 ) -> RelativePeriodicFit:
     """Project a binary spacetime field onto the nearest relative-periodic background."""
     if spacetime.ndim != 2:
@@ -229,6 +257,7 @@ def fit_relative_periodic_background(
         period,
         rule=rule,
         nml_mode=nml_mode,
+        majority_tie_break=majority_tie_break,
     )
 
 
@@ -239,6 +268,7 @@ def _scan_relative_periodicity_reference(
     *,
     rule: int | None = None,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
 ) -> tuple[pd.DataFrame, dict[tuple[int, int], RelativePeriodicFit]]:
     """Reference candidate scan retained for benchmarks and regression tests."""
     fits: dict[tuple[int, int], RelativePeriodicFit] = {}
@@ -251,6 +281,7 @@ def _scan_relative_periodicity_reference(
                 period=period,
                 rule=rule,
                 nml_mode=nml_mode,
+                majority_tie_break=majority_tie_break,
             )
             fits[(int(shift), int(period))] = fit
             records.append(fit.to_record())
@@ -269,6 +300,7 @@ def scan_relative_periodicity(
     *,
     rule: int | None = None,
     nml_mode: str = "hybrid",
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
 ) -> tuple[pd.DataFrame, dict[tuple[int, int], RelativePeriodicFit]]:
     """Scan a spacetime field across a grid of relative-periodic background models."""
     if spacetime.ndim != 2:
@@ -289,6 +321,7 @@ def scan_relative_periodicity(
                 period=period,
                 rule=rule,
                 nml_mode=nml_mode,
+                majority_tie_break=majority_tie_break,
             )
             fits[(int(shift), int(period))] = fit
             records.append(fit.to_record())

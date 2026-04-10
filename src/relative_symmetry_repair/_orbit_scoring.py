@@ -7,6 +7,39 @@ import numpy as np
 
 from .coding import bernoulli_nml_complexity_single, resolve_nml_mode
 
+MAJORITY_TIE_BREAK_ONES = "ones"
+MAJORITY_TIE_BREAK_ZEROS = "zeros"
+VALID_MAJORITY_TIE_BREAKS = frozenset(
+    {
+        MAJORITY_TIE_BREAK_ONES,
+        MAJORITY_TIE_BREAK_ZEROS,
+    }
+)
+
+
+def resolve_majority_tie_break(majority_tie_break: str | None = None) -> str:
+    if majority_tie_break is None:
+        return MAJORITY_TIE_BREAK_ONES
+    if majority_tie_break not in VALID_MAJORITY_TIE_BREAKS:
+        raise ValueError(
+            "Unknown majority_tie_break "
+            f"{majority_tie_break!r}. Expected one of "
+            f"{sorted(VALID_MAJORITY_TIE_BREAKS)}."
+        )
+    return majority_tie_break
+
+
+def majority_bits_from_counts(
+    ones_per_class: np.ndarray,
+    class_sizes: np.ndarray,
+    *,
+    majority_tie_break: str,
+) -> np.ndarray:
+    tie_break = resolve_majority_tie_break(majority_tie_break)
+    if tie_break == MAJORITY_TIE_BREAK_ONES:
+        return (2.0 * ones_per_class >= class_sizes).astype(np.uint8)
+    return (2.0 * ones_per_class > class_sizes).astype(np.uint8)
+
 
 @dataclass(slots=True)
 class OrbitReduction:
@@ -93,6 +126,7 @@ def reduce_binary_spacetime_by_orbits(
     class_sizes: np.ndarray,
     *,
     nml_mode: str,
+    majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
     nml_complexity: float | None = None,
     background_out: np.ndarray | None = None,
     defect_out: np.ndarray | None = None,
@@ -104,7 +138,11 @@ def reduce_binary_spacetime_by_orbits(
         weights=binary_flat,
         minlength=int(class_sizes.size),
     )
-    majority_bits = (2.0 * ones_per_class >= class_sizes).astype(np.uint8)
+    majority_bits = majority_bits_from_counts(
+        ones_per_class,
+        class_sizes,
+        majority_tie_break=majority_tie_break,
+    )
 
     if background_out is None:
         background_flat = majority_bits[np.asarray(orbit_ids, dtype=np.int32)]
@@ -245,6 +283,7 @@ class RelativePeriodicOrbitWorkspace:
         period: int,
         *,
         nml_mode: str,
+        majority_tie_break: str = MAJORITY_TIE_BREAK_ONES,
     ) -> OrbitReduction:
         orbit_ids, cache = self.orbit_ids(shift, period)
         return reduce_binary_spacetime_by_orbits(
@@ -252,6 +291,7 @@ class RelativePeriodicOrbitWorkspace:
             orbit_ids,
             cache.class_sizes,
             nml_mode=nml_mode,
+            majority_tie_break=majority_tie_break,
             nml_complexity=cache.complexity(nml_mode),
             background_out=self._background_flat,
             defect_out=self._defect_flat,

@@ -46,6 +46,7 @@ def _assert_fit_equal(actual, expected) -> None:
     assert actual.nml_complexity == expected.nml_complexity
     assert actual.nml_bits == expected.nml_bits
     assert actual.nml_mode == expected.nml_mode
+    assert actual.majority_tie_break == expected.majority_tie_break
     assert actual.rule_error == expected.rule_error
 
 
@@ -84,6 +85,32 @@ def test_fast_reduction_matches_hand_checked_tie_case():
         ),
     )
     assert reduction.defect_sites == 4
+
+
+def test_fast_reduction_supports_zero_tie_break():
+    spacetime = np.array(
+        [
+            [0, 1],
+            [1, 0],
+            [0, 1],
+            [1, 0],
+        ],
+        dtype=np.uint8,
+    )
+    labels = component_labels(spacetime.shape, shift=0, period=1)
+    reduction = reduce_binary_spacetime_by_orbits(
+        spacetime.ravel(),
+        labels.ravel(),
+        class_sizes_1d(spacetime.shape, period=1),
+        nml_mode="exact",
+        majority_tie_break="zeros",
+    )
+
+    assert np.array_equal(reduction.majority_bits, np.array([0, 0], dtype=np.uint8))
+    assert np.array_equal(
+        reduction.background_flat.reshape(spacetime.shape),
+        np.zeros_like(spacetime),
+    )
 
 
 def test_class_size_helpers_match_public_label_bincounts():
