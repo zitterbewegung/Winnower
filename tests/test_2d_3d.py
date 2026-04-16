@@ -1,7 +1,16 @@
+import matplotlib
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 from relative_symmetry_repair.ca2d import random_initial_grid, simulate_2d, rule_consistency_mask_2d
 from relative_symmetry_repair.ca3d import random_initial_volume, simulate_3d
+from relative_symmetry_repair.plotting_nd import (
+    plot_3d_volume_decomposition,
+    plot_3d_volume_montage,
+)
 from relative_symmetry_repair.repair_nd import (
     component_labels_nd,
     fit_relative_periodic_background_nd,
@@ -78,3 +87,25 @@ def test_extract_components_nd_3d():
     mask[3, 3, 3] = 1
     labels, n = extract_components_nd(mask)
     assert n == 2  # two separate components
+
+
+def test_plot_3d_volume_decomposition_smoke():
+    vol = random_initial_volume(6, 6, 6, density=0.3, seed=3)
+    st = simulate_3d(vol, steps=6, rule="3d-life")
+    fit = fit_relative_periodic_background_nd(st, shift=(0, 0, 0), period=2)
+    fig, axes = plot_3d_volume_decomposition(fit, source=st, time_index=3)
+    assert len(axes) == 3
+    for ax in axes:
+        assert ax.name == "3d"
+    plt.close(fig)
+
+
+def test_plot_3d_volume_montage_smoke():
+    vol = random_initial_volume(6, 6, 6, density=0.3, seed=3)
+    st = simulate_3d(vol, steps=6, rule="3d-life")
+    fit = fit_relative_periodic_background_nd(st, shift=(0, 0, 0), period=2)
+    fig, axes = plot_3d_volume_montage(fit, source=st, n_panels=3)
+    assert len(axes) == 3
+    for ax in axes:
+        assert ax.name == "3d"
+    plt.close(fig)

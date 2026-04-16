@@ -1,0 +1,82 @@
+{
+  "horizon": 24,
+  "output_dir": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel",
+  "paper_figure": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/paper/figures/alife_3d_voxel_diagrams.png",
+  "per_rule_files": {
+    "3d_life": {
+      "decomposition": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/3d_life/3d_life_voxel_decomposition.png",
+      "montage": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/3d_life/3d_life_voxel_montage.png"
+    },
+    "clouds": {
+      "decomposition": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/clouds/clouds_voxel_decomposition.png",
+      "montage": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/clouds/clouds_voxel_montage.png"
+    },
+    "crystal": {
+      "decomposition": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/crystal/crystal_voxel_decomposition.png",
+      "montage": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/crystal/crystal_voxel_montage.png"
+    },
+    "diamoeba3d": {
+      "decomposition": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/diamoeba3d/diamoeba3d_voxel_decomposition.png",
+      "montage": "/Users/r2q2/Documents/Theorems/relative_symmetry_repair/outputs/alife_2026/rule_diagrams_3d_voxel/diamoeba3d/diamoeba3d_voxel_montage.png"
+    }
+  },
+  "rules": [
+    {
+      "defect_rate": 0.14178466796875,
+      "density": 0.2,
+      "margin_bits": 5267.886298438949,
+      "name": "3d-life",
+      "rule_label": "3D S4-5 / B5-5",
+      "selected_period": 1,
+      "selected_shift": "(0, 0, 0)",
+      "size": [
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "defect_rate": 0.02734375,
+      "density": 0.6,
+      "margin_bits": 7118.831632151941,
+      "name": "clouds",
+      "rule_label": "3D S13-26 / B13-14",
+      "selected_period": 1,
+      "selected_shift": "(0, 0, 0)",
+      "size": [
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "defect_rate": 0.204925537109375,
+      "density": 0.1,
+      "margin_bits": 3477.885383096829,
+      "name": "crystal",
+      "rule_label": "3D S1-1 / B1-3",
+      "selected_period": 2,
+      "selected_shift": "(0, 0, 0)",
+      "size": [
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "defect_rate": 0.23197428385416666,
+      "density": 0.5,
+      "margin_bits": 3952.900222378463,
+      "name": "diamoeba3d",
+      "rule_label": "3D S5-8 / B5-8",
+      "selected_period": 1,
+      "selected_shift": "(0, 2, -2)",
+      "size": [
+        16,
+        16,
+        16
+      ]
+    }
+  ],
+  "seed": 42
+}

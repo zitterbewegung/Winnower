@@ -17,7 +17,12 @@ from .ca2d import parse_rulestring, random_initial_grid, simulate_2d, simulate_2
 from .ca3d import RULES_3D, RULES_3D_DENSITY, random_initial_volume, simulate_3d
 from .eca import random_initial_state, simulate_eca
 from .plotting import plot_decomposition, save_figure
-from .plotting_nd import plot_2d_decomposition, plot_3d_decomposition
+from .plotting_nd import (
+    plot_2d_decomposition,
+    plot_3d_decomposition,
+    plot_3d_volume_decomposition,
+    plot_3d_volume_montage,
+)
 from .repair import RelativePeriodicFit, scan_relative_periodicity
 from .repair_nd import RelativePeriodicFitND, scan_relative_periodicity_nd
 
