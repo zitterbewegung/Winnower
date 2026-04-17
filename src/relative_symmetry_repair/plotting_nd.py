@@ -13,6 +13,8 @@ from .alife_style import (
     BINARY_CMAP,
     DEFECT_CMAP,
     DEFECT_COLOR,
+    DEFECT_OFF_COLOR,
+    DEFECT_ON_COLOR,
     GRID_COLOR,
     LEGEND_EDGE_COLOR,
     ONE_COLOR,
@@ -253,20 +255,33 @@ def plot_3d_volume_decomposition(
     shift_str = ",".join(str(s) for s in fit.shift)
     axes[1].set_title(f"{title_prefix}background\ns=({shift_str}), p={fit.period}")
 
+    # Three-category overlay: correctly-predicted background, "surprise ON", "surprise OFF"
+    bg_only = bg_filled & ~defect_filled         # background=1, source=1 (correct)
+    defect_on = defect_filled & ~bg_filled       # background=0, source=1 ("surprise ON")
+    defect_off = defect_filled & bg_filled       # background=1, source=0 ("surprise OFF")
+
     bg_overlay_color = (0.30, 0.30, 0.30, background_alpha)
-    if bg_filled.any():
+    if bg_only.any():
         axes[2].voxels(
-            bg_filled,
+            bg_only,
             facecolors=bg_overlay_color,
             edgecolor=(0.30, 0.30, 0.30, 0.10),
             linewidth=0.15,
             shade=False,
         )
-    if defect_filled.any():
+    if defect_on.any():
         axes[2].voxels(
-            defect_filled,
-            facecolors=DEFECT_COLOR,
+            defect_on,
+            facecolors=DEFECT_ON_COLOR,
             edgecolor=(0.45, 0.05, 0.05, 0.80),
+            linewidth=0.30,
+            shade=True,
+        )
+    if defect_off.any():
+        axes[2].voxels(
+            defect_off,
+            facecolors=DEFECT_OFF_COLOR,
+            edgecolor=(0.10, 0.25, 0.45, 0.80),
             linewidth=0.30,
             shade=True,
         )
@@ -277,8 +292,9 @@ def plot_3d_volume_decomposition(
 
     legend_handles = [
         Patch(facecolor=ONE_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="live cell"),
-        Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="defect"),
-        Patch(facecolor=bg_overlay_color, edgecolor=LEGEND_EDGE_COLOR, label="background (overlay)"),
+        Patch(facecolor=bg_overlay_color, edgecolor=LEGEND_EDGE_COLOR, label="background (correct)"),
+        Patch(facecolor=DEFECT_ON_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="surprise ON (src=1, bg=0)"),
+        Patch(facecolor=DEFECT_OFF_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="surprise OFF (src=0, bg=1)"),
     ]
     axes[2].legend(
         handles=legend_handles,
@@ -359,19 +375,31 @@ def plot_3d_volume_montage(
             defect_filled = defect_filled & mask
             title_suffix = f"  (cutaway, density={density:.2f})"
 
-        if bg_filled.any():
+        bg_only = bg_filled & ~defect_filled
+        defect_on = defect_filled & ~bg_filled
+        defect_off = defect_filled & bg_filled
+
+        if bg_only.any():
             ax.voxels(
-                bg_filled,
+                bg_only,
                 facecolors=bg_overlay_color,
                 edgecolor=(0.30, 0.30, 0.30, 0.08),
                 linewidth=0.12,
                 shade=False,
             )
-        if defect_filled.any():
+        if defect_on.any():
             ax.voxels(
-                defect_filled,
-                facecolors=DEFECT_COLOR,
+                defect_on,
+                facecolors=DEFECT_ON_COLOR,
                 edgecolor=(0.45, 0.05, 0.05, 0.80),
+                linewidth=0.25,
+                shade=True,
+            )
+        if defect_off.any():
+            ax.voxels(
+                defect_off,
+                facecolors=DEFECT_OFF_COLOR,
+                edgecolor=(0.10, 0.25, 0.45, 0.80),
                 linewidth=0.25,
                 shade=True,
             )

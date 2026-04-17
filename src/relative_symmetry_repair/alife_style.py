@@ -17,6 +17,8 @@ LEGEND_EDGE_COLOR = "#444444"
 ZERO_COLOR = ACCENT_SOFT_COLOR
 ONE_COLOR = TEXT_COLOR
 DEFECT_COLOR = ACCENT_COLOR
+DEFECT_ON_COLOR = ACCENT_COLOR        # source=1, background=0 ("surprise ON")
+DEFECT_OFF_COLOR = "#2a6496"           # source=0, background=1 ("surprise OFF")
 
 BINARY_CMAP = ListedColormap([ZERO_COLOR, ONE_COLOR])
 DEFECT_CMAP = ListedColormap([ZERO_COLOR, DEFECT_COLOR])
