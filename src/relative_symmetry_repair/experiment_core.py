@@ -19,7 +19,14 @@ import numpy as np
 import pandas as pd
 
 from .ca2d import parse_rulestring, random_initial_grid, simulate_2d, simulate_2d_general
-from .ca3d import RULES_3D, RULES_3D_DENSITY, random_initial_volume, simulate_3d
+from .ca3d import (
+    RULES_3D,
+    RULES_3D_DENSITY,
+    parse_rulestring_3d,
+    random_initial_volume,
+    simulate_3d,
+    simulate_3d_general,
+)
 from .eca import random_initial_state, simulate_eca
 from .repair import RelativePeriodicFit, scan_relative_periodicity
 from .repair_nd import RelativePeriodicFitND, scan_relative_periodicity_nd
@@ -181,7 +188,7 @@ class ALifeCase:
     slug: str
     name: str
     dimension: int
-    family: Literal["eca", "life_range", "life_rulestring", "rule3d"]
+    family: Literal["eca", "life_range", "life_rulestring", "rule3d", "rule3d_general"]
     size: tuple[int, ...]
     density: float
     search: SearchConfig
@@ -287,6 +294,30 @@ def rule3d_case(
         horizons=tuple(int(value) for value in horizons),
         survive=(int(survive[0]), int(survive[1])),
         birth=(int(birth[0]), int(birth[1])),
+    )
+
+
+def rule3d_general_case(
+    name: str,
+    *,
+    rulestring: str,
+    size: int = 16,
+    density: float = 0.5,
+    horizons: Sequence[int] = DEFAULT_HORIZONS_3D,
+    search: SearchConfig = DEFAULT_SEARCH_3D,
+) -> ALifeCase:
+    """3D case with arbitrary birth/survive count sets, e.g. 'B5-7,9/S4,6-8'."""
+    parse_rulestring_3d(rulestring)  # validate eagerly
+    return ALifeCase(
+        slug=_slugify(name),
+        name=name,
+        dimension=3,
+        family="rule3d_general",
+        size=(int(size), int(size), int(size)),
+        density=float(density),
+        search=search,
+        horizons=tuple(int(value) for value in horizons),
+        rulestring=rulestring,
     )
 
 
@@ -539,6 +570,22 @@ def simulate_case(case: ALifeCase, *, steps: int, seed: int) -> np.ndarray:
             rule="custom",
             survive=case.survive,
             birth=case.birth,
+        )
+
+    if case.family == "rule3d_general":
+        birth_counts, survive_counts = parse_rulestring_3d(str(case.rulestring))
+        initial = random_initial_volume(
+            sx=case.size[0],
+            sy=case.size[1],
+            sz=case.size[2],
+            density=case.density,
+            seed=seed,
+        )
+        return simulate_3d_general(
+            initial,
+            steps=int(steps),
+            birth=birth_counts,
+            survive=survive_counts,
         )
 
     raise ValueError(f"Unsupported family: {case.family}")

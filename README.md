@@ -45,8 +45,9 @@ tables, and reproduction steps.
 The hosted version additionally includes a **live in-browser reproduction**
 (`reproduce.html`): WebAssembly Python (Pyodide) runs the actual
 `relative_symmetry_repair` pipeline — simulate → scan candidates →
-Bernoulli-NML selection — for any ECA rule, any 2D B/S rulestring, custom 3D
-survive/birth ranges, or the paper's representative 2D/3D rules, and compares
+Bernoulli-NML selection — for any ECA rule, any 2D B/S rulestring, arbitrary
+3D birth/survive count sets (e.g. `B5-7,9/S4,6-8`, non-contiguous allowed),
+or the paper's representative 2D/3D rules, and compares
 the result against the committed row of `eca_atlas_runs.csv` /
 `seed_stability_runs.csv`, column by column. Results are inspectable
 interactively: full spacetime diagrams in 1D, frame scrubbing plus a

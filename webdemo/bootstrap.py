@@ -157,6 +157,7 @@ _eca_mod._simulate_eca_numba = _simulate_eca_vec
 _ca2d_mod._simulate_life_numba = _simulate_range_vec
 _ca2d_mod._simulate_life_general_numba = _simulate_life_general_vec
 _ca3d_mod._simulate_3d_numba = _simulate_range_vec
+_ca3d_mod._simulate_3d_general_numba = _simulate_life_general_vec  # ndim-generic LUT kernel
 
 
 from relative_symmetry_repair.ca2d import parse_rulestring  # noqa: E402
@@ -169,6 +170,7 @@ from relative_symmetry_repair.experiment_core import (  # noqa: E402
     life_rulestring_case,
     period_first_selection_from_frame,
     rule3d_case,
+    rule3d_general_case,
     simulate_case,
 )
 from relative_symmetry_repair.repair import scan_relative_periodicity  # noqa: E402
@@ -207,8 +209,11 @@ def build_case(family: str, rule):
         "eca"    -> rule is an ECA number 0..255
         "named"  -> rule is one of the paper's representative 2D/3D case names
         "life2d" -> rule is an arbitrary B/S rulestring, e.g. "B36/S23"
-        "rule3d" -> rule is a JSON spec {"survive": [lo, hi], "birth": [lo, hi],
-                    "density": 0.5} with neighbor counts in 0..26
+        "rule3d" -> rule is a JSON spec, either
+                    {"rulestring": "B5-7,9/S4,6-8", "density": 0.5} for
+                    arbitrary birth/survive count sets (counts 0..26), or the
+                    legacy {"survive": [lo, hi], "birth": [lo, hi],
+                    "density": 0.5} contiguous-range form
     """
     if family == "eca":
         return eca_case(int(rule))
@@ -220,13 +225,18 @@ def build_case(family: str, rule):
         return life_rulestring_case(rulestring, rulestring=rulestring)
     if family == "rule3d":
         spec = json.loads(rule) if isinstance(rule, str) else dict(rule)
+        density = float(spec.get("density", 0.5))
+        if "rulestring" in spec:
+            rulestring = str(spec["rulestring"]).strip()
+            name = f"3D {rulestring}"
+            return rule3d_general_case(name, rulestring=rulestring, density=density)
         survive = (int(spec["survive"][0]), int(spec["survive"][1]))
         birth = (int(spec["birth"][0]), int(spec["birth"][1]))
         for lo, hi in (survive, birth):
             if not (0 <= lo <= hi <= 26):
                 raise ValueError("3D neighbor count ranges must satisfy 0 <= lo <= hi <= 26")
         name = f"3D S{survive[0]}-{survive[1]}/B{birth[0]}-{birth[1]}"
-        return rule3d_case(name, survive=survive, birth=birth, density=float(spec.get("density", 0.5)))
+        return rule3d_case(name, survive=survive, birth=birth, density=density)
     raise ValueError(f"Unknown family: {family!r}")
 
 

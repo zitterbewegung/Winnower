@@ -41,6 +41,7 @@ SMOKE_CONFIGS = [
     ("named", "crystal", 11, 10),
     ("life2d", "B36/S23", 11, 50),                                      # arbitrary rulestring (HighLife)
     ("rule3d", '{"survive": [4, 5], "birth": [5, 5], "density": 0.5}', 11, 10),  # custom 3D ranges
+    ("rule3d", '{"rulestring": "B5,7,9/S4,6", "density": 0.4}', 11, 10),         # non-contiguous 3D sets
 ]
 
 

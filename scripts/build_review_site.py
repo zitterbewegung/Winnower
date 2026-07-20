@@ -573,8 +573,9 @@ def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf", live_demo
         "your browser via WebAssembly Python and checks the result against the "
         "committed CSV row for the same rule, seed, and horizon — no install "
         "required. It accepts arbitrary rules (any ECA number, any 2D B/S "
-        "rulestring, custom 3D survive/birth ranges) and renders 2D/3D results "
-        "as rotatable voxel views with time scrubbing.</div>"
+        "rulestring, arbitrary 3D birth/survive count sets like "
+        "<code>B5-7,9/S4,6-8</code>) and renders 2D/3D results as rotatable "
+        "voxel views with time scrubbing.</div>"
         if live_demo else
         "<p>The hosted version of this page also offers an in-browser live "
         "reproduction (see <code>webdemo/</code> and the GitHub Pages site).</p>"

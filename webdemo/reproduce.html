@@ -128,13 +128,8 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
     <label id="rulestring-label" style="display:none">Rulestring (B…/S…)
       <input id="rulestring" value="B36/S23" placeholder="B36/S23" spellcheck="false">
     </label>
-    <label id="s3lo-label" style="display:none">Survive lo–hi
-      <span><input id="s3lo" class="narrow" type="number" min="0" max="26" value="4">
-      –<input id="s3hi" class="narrow" type="number" min="0" max="26" value="5"></span>
-    </label>
-    <label id="b3lo-label" style="display:none">Birth lo–hi
-      <span><input id="b3lo" class="narrow" type="number" min="0" max="26" value="5">
-      –<input id="b3hi" class="narrow" type="number" min="0" max="26" value="5"></span>
+    <label id="rulestring3d-label" style="display:none">3D rule (counts 0–26)
+      <input id="rulestring3d" value="B5-7,9/S4,6-8" placeholder="B5-7,9/S4,6-8" spellcheck="false">
     </label>
     <label id="dens3-label" style="display:none">Density
       <input id="dens3" class="narrow" type="number" min="0.05" max="0.95" step="0.05" value="0.5">
@@ -226,7 +221,7 @@ const H3D = [10, 20, 40, 60, 80];
 const CASES = {
   "eca":            { label: "1D elementary CA (any rule)", dim: 1, horizons: H2D, def: 200, custom: "eca" },
   "custom2d":       { label: "2D — custom rulestring…", dim: 2, horizons: H2D, def: 100, custom: "rulestring" },
-  "custom3d":       { label: "3D — custom S/B ranges…", dim: 3, horizons: H3D, def: 40, custom: "ranges3d" },
+  "custom3d":       { label: "3D — custom rule…", dim: 3, horizons: H3D, def: 40, custom: "rule3d" },
   "Diamoeba":       { label: "Diamoeba (2D, B35678/S5678)", dim: 2, horizons: H2D, def: 100 },
   "Maze with Mice": { label: "Maze with Mice (2D, B37/S12345)", dim: 2, horizons: H2D, def: 100 },
   "S24/B11":        { label: "S24/B11 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
@@ -319,8 +314,8 @@ function refreshControls() {
   const custom = meta.custom || "";
   $("rule-label").style.display = custom === "eca" ? "" : "none";
   $("rulestring-label").style.display = custom === "rulestring" ? "" : "none";
-  for (const id of ["s3lo-label", "b3lo-label", "dens3-label"]) {
-    $(id).style.display = custom === "ranges3d" ? "" : "none";
+  for (const id of ["rulestring3d-label", "dens3-label"]) {
+    $(id).style.display = custom === "rule3d" ? "" : "none";
   }
   const horizonSelect = $("horizon");
   horizonSelect.innerHTML = "";
@@ -364,16 +359,15 @@ $("run").addEventListener("click", () => {
     rule = $("rulestring").value.trim();
     if (!/^[Bb]\d*\s*\/\s*[Ss]\d*$/.test(rule)) { showError("Rulestring must look like B36/S23 (digits 0–8)."); return; }
   } else if (key === "custom3d") {
-    const slo = parseInt($("s3lo").value, 10), shi = parseInt($("s3hi").value, 10);
-    const blo = parseInt($("b3lo").value, 10), bhi = parseInt($("b3hi").value, 10);
-    const density = parseFloat($("dens3").value);
-    for (const [lo, hi] of [[slo, shi], [blo, bhi]]) {
-      if (isNaN(lo) || isNaN(hi) || lo < 0 || hi > 26 || lo > hi) {
-        showError("3D ranges need 0 ≤ lo ≤ hi ≤ 26."); return;
-      }
+    const rs = $("rulestring3d").value.trim();
+    if (!/^[Bb][\d,\-\s]*\/\s*[Ss][\d,\-\s]*$/.test(rs)) {
+      showError("3D rule must look like B5-7,9/S4,6-8 — comma-separated counts or lo-hi ranges, each 0–26."); return;
     }
+    const counts = (rs.match(/\d+/g) || []).map(Number);
+    if (counts.some((n) => n > 26)) { showError("3D neighbor counts must be 0–26."); return; }
+    const density = parseFloat($("dens3").value);
     family = "rule3d";
-    rule = JSON.stringify({ survive: [slo, shi], birth: [blo, bhi], density: isNaN(density) ? 0.5 : density });
+    rule = JSON.stringify({ rulestring: rs, density: isNaN(density) ? 0.5 : density });
   } else {
     family = "named";
     rule = key;

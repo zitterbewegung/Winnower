@@ -1,6 +1,8 @@
 """3D cellular automaton simulation (totalistic rules on a 3-torus)."""
 from __future__ import annotations
 
+import re
+
 import numpy as np
 from numba import njit
 
@@ -49,6 +51,124 @@ def _simulate_3d_numba(
                     else:
                         cur[z, y, x] = 1 if birth_lo <= total <= birth_hi else 0
     return spacetime
+
+
+@njit(cache=True)
+def _simulate_3d_general_numba(
+    initial: np.ndarray,
+    steps: int,
+    birth_lut: np.ndarray,
+    survive_lut: np.ndarray,
+) -> np.ndarray:
+    """Simulate an arbitrary 3D totalistic CA using lookup tables on a 3-torus.
+
+    birth_lut[n] = 1 if a dead cell with n live neighbors is born.
+    survive_lut[n] = 1 if a live cell with n live neighbors survives.
+    Both are length-27 arrays (26-neighbor Moore counts 0..26).
+    """
+    Sz, Sy, Sx = initial.shape
+    spacetime = np.empty((steps, Sz, Sy, Sx), dtype=np.uint8)
+    spacetime[0] = initial
+    for t in range(1, steps):
+        prev = spacetime[t - 1]
+        cur = spacetime[t]
+        for z in range(Sz):
+            for y in range(Sy):
+                for x in range(Sx):
+                    total = 0
+                    for dz in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            for dx in (-1, 0, 1):
+                                if dz == 0 and dy == 0 and dx == 0:
+                                    continue
+                                total += prev[(z + dz) % Sz, (y + dy) % Sy, (x + dx) % Sx]
+                    alive = prev[z, y, x]
+                    if alive:
+                        cur[z, y, x] = survive_lut[total]
+                    else:
+                        cur[z, y, x] = birth_lut[total]
+    return spacetime
+
+
+def parse_rulestring_3d(rulestring: str) -> tuple[list[int], list[int]]:
+    """Parse a 3D rulestring like 'B5-7,9/S4,6-8' into (birth, survive) counts.
+
+    Because 26-neighbor counts are multi-digit, terms are comma-separated
+    integers or lo-hi ranges (unlike the 2D digit-string format). Returns
+    sorted lists of neighbor counts, each in 0..26. Either part may be empty
+    (e.g. 'B5/S' births on exactly 5 and never survives).
+    """
+    m = re.fullmatch(r"\s*[Bb]([\d,\-\s]*)/\s*[Ss]([\d,\-\s]*)\s*", rulestring)
+    if not m:
+        raise ValueError(
+            f"Cannot parse 3D rulestring: {rulestring!r}. "
+            "Expected format: B<terms>/S<terms> with comma-separated counts or lo-hi ranges."
+        )
+
+    def parse_terms(text: str) -> list[int]:
+        counts: set[int] = set()
+        for term in text.split(","):
+            term = term.strip()
+            if not term:
+                continue
+            if "-" in term:
+                lo_str, hi_str = term.split("-", 1)
+                lo, hi = int(lo_str), int(hi_str)
+                if lo > hi:
+                    raise ValueError(f"Empty range {term!r} in 3D rulestring")
+                counts.update(range(lo, hi + 1))
+            else:
+                counts.add(int(term))
+        for n in counts:
+            if not (0 <= n <= 26):
+                raise ValueError(f"3D neighbor count must be 0-26, got {n}")
+        return sorted(counts)
+
+    return parse_terms(m.group(1)), parse_terms(m.group(2))
+
+
+def _make_luts_3d(birth: list[int], survive: list[int]) -> tuple[np.ndarray, np.ndarray]:
+    """Build length-27 lookup tables from birth/survive neighbor count lists."""
+    birth_lut = np.zeros(27, dtype=np.uint8)
+    survive_lut = np.zeros(27, dtype=np.uint8)
+    for n in birth:
+        birth_lut[n] = 1
+    for n in survive:
+        survive_lut[n] = 1
+    return birth_lut, survive_lut
+
+
+def simulate_3d_general(
+    initial: np.ndarray,
+    steps: int,
+    birth: list[int],
+    survive: list[int],
+) -> np.ndarray:
+    """Simulate an arbitrary 3D totalistic CA (any birth/survive count sets).
+
+    Parameters
+    ----------
+    initial : 3D uint8 array (Sz, Sy, Sx)
+    steps : number of time steps (including initial)
+    birth/survive : neighbor count lists (each count in 0..26), e.g. from
+        parse_rulestring_3d("B5-7,9/S4,6-8")
+
+    Returns
+    -------
+    spacetime : 4D uint8 array (steps, Sz, Sy, Sx)
+    """
+    if initial.ndim != 3:
+        raise ValueError("initial must be a 3D binary array")
+    if steps < 1:
+        raise ValueError("steps must be >= 1")
+    if np.any((initial != 0) & (initial != 1)):
+        raise ValueError("initial must be binary")
+    for n in list(birth) + list(survive):
+        if not (0 <= int(n) <= 26):
+            raise ValueError(f"3D neighbor count must be 0-26, got {n}")
+
+    birth_lut, survive_lut = _make_luts_3d(list(birth), list(survive))
+    return _simulate_3d_general_numba(initial.astype(np.uint8), int(steps), birth_lut, survive_lut)
 
 
 # Predefined 3D rules as (survive_lo, survive_hi, birth_lo, birth_hi)

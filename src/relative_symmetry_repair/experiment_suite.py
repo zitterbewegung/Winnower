@@ -47,6 +47,7 @@ from .experiment_core import (
     life_range_case,
     life_rulestring_case,
     rule3d_case,
+    rule3d_general_case,
     REPRESENTATIVE_CASES_1D,
     REPRESENTATIVE_CASES_2D,
     REPRESENTATIVE_CASES_3D,
