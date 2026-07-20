@@ -36,6 +36,24 @@ pytest tests/
 
 See [REPRODUCING.md](REPRODUCING.md) for the full reproduction pipeline.
 
+## Reviewer / evaluation interface
+
+A self-contained web page for evaluating the paper — abstract, claim-by-claim
+audit ledger, all figures with their generating scripts, sortable result
+tables, and reproduction steps:
+
+```bash
+# Just open the committed page (no server, no dependencies needed):
+open review_site/index.html          # macOS
+xdg-open review_site/index.html      # Linux
+
+# Rebuild it from the current outputs:
+make review
+
+# Build a portable single-file version (figures embedded, ~14 MB):
+python scripts/build_review_site.py --embed-images
+```
+
 ## Project structure
 
 ```

@@ -1,4 +1,4 @@
-.PHONY: all data figures tikz paper test clean
+.PHONY: all data figures tikz paper review test clean
 
 all: data figures paper
 
@@ -26,6 +26,9 @@ paper:
 
 poster:
 	cd poster && pdflatex alife_2026_poster.tex
+
+review:
+	python scripts/build_review_site.py
 
 test:
 	PYTHONPATH=src pytest tests/ -q
