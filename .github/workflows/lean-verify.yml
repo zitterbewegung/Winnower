@@ -28,3 +28,9 @@ jobs:
 
       - name: Build verified targets
         run: lake build
+
+      - name: Check built targets are placeholder-free
+        run: |
+          # The default build covers Verify/Basic.lean, Verify/Theorem3.lean,
+          # Main.lean. Fail if any of them contains a proof placeholder.
+          ! grep -nE "sorry|admit|exact\?" Verify/Basic.lean Verify/Theorem3.lean Main.lean Verify.lean
