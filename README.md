@@ -40,7 +40,20 @@ See [REPRODUCING.md](REPRODUCING.md) for the full reproduction pipeline.
 
 A self-contained web page for evaluating the paper — abstract, claim-by-claim
 audit ledger, all figures with their generating scripts, sortable result
-tables, and reproduction steps:
+tables, and reproduction steps.
+
+The hosted version additionally includes a **live in-browser reproduction**
+(`reproduce.html`): WebAssembly Python (Pyodide) runs the actual
+`relative_symmetry_repair` pipeline — simulate → scan candidates →
+Bernoulli-NML selection — for any ECA rule (plus the representative 2D/3D
+rules) and compares the result against the committed row of
+`eca_atlas_runs.csv` / `seed_stability_runs.csv`, column by column. The
+browser code path (numba stubbed, vectorized simulator kernels) is verified
+bit-identical to the committed CSVs by:
+
+```bash
+make verify-webdemo    # or: python scripts/verify_webdemo_bootstrap.py --block-numba
+```
 
 ```bash
 # Just open the committed page (no server, no dependencies needed):

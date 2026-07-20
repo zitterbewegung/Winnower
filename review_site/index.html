@@ -36,6 +36,8 @@ nav a { padding: .45rem .8rem; border-radius: 6px; text-decoration: none;
   color: var(--fg); font-size: .92rem; }
 nav a:hover { background: var(--accent-soft); }
 nav a.active { background: var(--accent); color: #fff; }
+nav a.demo-link { border: 1.5px solid var(--accent); color: var(--accent);
+  font-weight: 600; }
 section { display: none; padding: 2rem 0 3rem; }
 section.active { display: block; }
 h2 { font-size: 1.35rem; border-bottom: 2px solid var(--accent);
@@ -117,6 +119,7 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   <a href="#results" onclick="return show('results')">Results &amp; robustness</a>
   <a href="#reproduce" onclick="return show('reproduce')">Reproduce</a>
   <a href="#repo" onclick="return show('repo')">Repository map</a>
+  
 </div></nav>
 <main class="wrap">
 
@@ -125,6 +128,7 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   <div class="abstract"><strong>Abstract.</strong> Cellular automata often form broad periodic domains together with interfaces, defects, and particle-like activity. We introduce a fast global front end for that setting: scan relative-periodic templates, fit each template by majority vote on orbit classes, and return both a selected background scaffold and the residual mask that the scaffold does not explain. The Bernoulli normalized maximum likelihood (NML) score makes the comparison complexity-aware, preventing the period inflation that occurs with raw defect minimization and Bernoulli likelihood alone. Across 1D, 2D, and 3D examples, the selected scaffold usually stabilizes quickly, while 2D surveys show that most Life-like rules stay at low period and only a small number reveal longer periodic organization at larger horizons. The same decomposition isolates structured residuals in named rules such as Diamoeba, Maze with Mice, and S37/B11, where the residual mask is sparse but visibly organized rather than featureless noise. The supporting theory explains why higher-period templates overfit along refinement chains and why candidates with worse asymptotic fit are eventually excluded. The result is a scalable way to generate domain hypotheses and defect masks for downstream ALIFE analysis.</div>
   <div class="links">
     <a href="../paper/paper_alife2026.pdf" target="_blank" rel="noopener">Open the paper (PDF)</a>
+    
     <a href="#reproduce" class="secondary" onclick="return show('reproduce')">Reproduce the results</a>
     <a href="#claims" class="secondary" onclick="return show('claims')">Audit the claims</a>
   </div>
@@ -312,6 +316,7 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
 
 <section id="reproduce">
   <h2>Reproduce</h2>
+  <p>The hosted version of this page also offers an in-browser live reproduction (see <code>webdemo/</code> and the GitHub Pages site).</p>
   <p>The full pipeline is deterministic: every experiment records its parameters in a
   <code>manifest.json</code>, and the suite runs from base seed <strong>11</strong>.
   Experiments included: generate paper markdown, 3d survey, candidate range robustness, counterexample stress, eca atlas, lifewiki horizon sweep, null controls, seed stability.</p>
@@ -324,7 +329,7 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   <h2>Repository map</h2>
   <div class="tbl-wrap"><table>
     <thead><tr><th>Path</th><th>What it is</th></tr></thead>
-    <tbody><tr><td><code>paper/paper_alife2026.pdf</code></td><td>The submission PDF.</td></tr><tr><td><code>paper/paper_alife2026.tex</code></td><td>LaTeX source; figures pulled from outputs/.</td></tr><tr><td><code>docs/CLAIM_LEDGER.md</code></td><td>Claim-by-claim audit: status, caveats, what remains.</td></tr><tr><td><code>docs/THEORY_NOTE.md</code></td><td>Extended theory notes.</td></tr><tr><td><code>src/relative_symmetry_repair/</code></td><td>Core library: simulators (eca.py, ca2d.py, ca3d.py), fitting (repair.py, repair_nd.py), NML scoring (coding.py), selection (selection.py), CLI.</td></tr><tr><td><code>scripts/alife/alife_run_all.py</code></td><td>One-shot driver for every experiment in the paper.</td></tr><tr><td><code>outputs/alife_2026/</code></td><td>Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters.</td></tr><tr><td><code>proofs/</code></td><td>Lean 4 formalization of Theorem A (machine-checked).</td></tr><tr><td><code>tests/</code></td><td>333-test suite.</td></tr><tr><td><code>REPRODUCING.md</code></td><td>Full reproduction pipeline, step by step.</td></tr></tbody>
+    <tbody><tr><td><code>paper/paper_alife2026.pdf</code></td><td>The submission PDF.</td></tr><tr><td><code>paper/paper_alife2026.tex</code></td><td>LaTeX source; figures pulled from outputs/.</td></tr><tr><td><code>docs/CLAIM_LEDGER.md</code></td><td>Claim-by-claim audit: status, caveats, what remains.</td></tr><tr><td><code>docs/THEORY_NOTE.md</code></td><td>Extended theory notes.</td></tr><tr><td><code>src/relative_symmetry_repair/</code></td><td>Core library: simulators (eca.py, ca2d.py, ca3d.py), fitting (repair.py, repair_nd.py), NML scoring (coding.py), selection (selection.py), CLI.</td></tr><tr><td><code>scripts/alife/alife_run_all.py</code></td><td>One-shot driver for every experiment in the paper.</td></tr><tr><td><code>outputs/alife_2026/</code></td><td>Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters.</td></tr><tr><td><code>webdemo/</code></td><td>In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py.</td></tr><tr><td><code>proofs/</code></td><td>Lean 4 formalization of Theorem A (machine-checked).</td></tr><tr><td><code>tests/</code></td><td>333-test suite.</td></tr><tr><td><code>REPRODUCING.md</code></td><td>Full reproduction pipeline, step by step.</td></tr></tbody>
   </table></div>
 </section>
 

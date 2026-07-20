@@ -30,6 +30,9 @@ poster:
 review:
 	python scripts/build_review_site.py
 
+verify-webdemo:
+	PYTHONPATH=src python scripts/verify_webdemo_bootstrap.py --block-numba
+
 test:
 	PYTHONPATH=src pytest tests/ -q
 

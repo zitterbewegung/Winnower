@@ -20,6 +20,7 @@ import html
 import json
 import re
 import shutil
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -249,6 +250,7 @@ REPO_MAP = [
     ("src/relative_symmetry_repair/", "Core library: simulators (eca.py, ca2d.py, ca3d.py), fitting (repair.py, repair_nd.py), NML scoring (coding.py), selection (selection.py), CLI."),
     ("scripts/alife/alife_run_all.py", "One-shot driver for every experiment in the paper."),
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
+    ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
     ("proofs/", "Lean 4 formalization of Theorem A (machine-checked)."),
     ("tests/", "333-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
@@ -432,7 +434,40 @@ def stress_stats() -> list[tuple[str, str]]:
 # --------------------------------------------------------------------------
 
 
-def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf") -> str:
+def _demo_expected_rows() -> dict:
+    """Committed run-level rows the in-browser demo compares against."""
+    rows: dict[str, dict] = {}
+    for rel in (
+        "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
+        "outputs/alife_2026/seed_stability/seed_stability_runs.csv",
+    ):
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        with path.open(newline="") as fh:
+            for row in csv.DictReader(fh):
+                key = f"{row['rule']}|{int(row['seed'])}|{int(row['horizon'])}"
+                rows[key] = row
+    return rows
+
+
+def write_demo_assets(site: Path) -> None:
+    """Copy the interactive reproduction demo into a --pages site dir."""
+    webdemo = ROOT / "webdemo"
+    for name in ("reproduce.html", "repro_worker.js"):
+        shutil.copy2(webdemo / name, site / name)
+
+    zip_path = site / "winnower_src.zip"
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(webdemo / "bootstrap.py", "bootstrap.py")
+        pkg = ROOT / "src" / "relative_symmetry_repair"
+        for py in sorted(pkg.glob("*.py")):
+            zf.write(py, f"relative_symmetry_repair/{py.name}")
+
+    (site / "expected_runs.json").write_text(json.dumps(_demo_expected_rows()))
+
+
+def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf", live_demo: bool = False) -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
     title = extract_tex_field(tex, "title") or "Winnower — ALIFE 2026 submission"
     abstract = extract_abstract(tex)
@@ -523,6 +558,26 @@ def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf") -> str:
     flags = manifest.get("flags", {})
     flags_note = ", ".join(k.replace("run_", "").replace("_", " ") for k, v in flags.items() if v)
 
+    demo_nav = (
+        '<a href="reproduce.html" class="demo-link">▶ Live reproduction</a>'
+        if live_demo else ""
+    )
+    demo_overview = (
+        '<a href="reproduce.html">Run the pipeline in your browser</a>'
+        if live_demo else ""
+    )
+    demo_repro_note = (
+        '<div class="card"><strong>Interactive:</strong> the '
+        '<a href="reproduce.html">live reproduction page</a> runs the actual '
+        "pipeline (simulation → candidate scan → Bernoulli-NML selection) in "
+        "your browser via WebAssembly Python and checks the result against the "
+        "committed CSV row for the same rule, seed, and horizon — no install "
+        "required.</div>"
+        if live_demo else
+        "<p>The hosted version of this page also offers an in-browser live "
+        "reproduction (see <code>webdemo/</code> and the GitHub Pages site).</p>"
+    )
+
     pdf_note = ""
     if embed and pdf_href.startswith("../"):
         pdf_note = (
@@ -568,6 +623,8 @@ nav a {{ padding: .45rem .8rem; border-radius: 6px; text-decoration: none;
   color: var(--fg); font-size: .92rem; }}
 nav a:hover {{ background: var(--accent-soft); }}
 nav a.active {{ background: var(--accent); color: #fff; }}
+nav a.demo-link {{ border: 1.5px solid var(--accent); color: var(--accent);
+  font-weight: 600; }}
 section {{ display: none; padding: 2rem 0 3rem; }}
 section.active {{ display: block; }}
 h2 {{ font-size: 1.35rem; border-bottom: 2px solid var(--accent);
@@ -649,6 +706,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <a href="#results" onclick="return show('results')">Results &amp; robustness</a>
   <a href="#reproduce" onclick="return show('reproduce')">Reproduce</a>
   <a href="#repo" onclick="return show('repo')">Repository map</a>
+  {demo_nav}
 </div></nav>
 <main class="wrap">
 
@@ -657,6 +715,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <div class="abstract"><strong>Abstract.</strong> {esc(abstract)}</div>
   <div class="links">
     <a href="{pdf_href}" target="_blank" rel="noopener">Open the paper (PDF)</a>
+    {demo_overview}
     <a href="#reproduce" class="secondary" onclick="return show('reproduce')">Reproduce the results</a>
     <a href="#claims" class="secondary" onclick="return show('claims')">Audit the claims</a>
   </div>
@@ -706,6 +765,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 
 <section id="reproduce">
   <h2>Reproduce</h2>
+  {demo_repro_note}
   <p>The full pipeline is deterministic: every experiment records its parameters in a
   <code>manifest.json</code>, and the suite runs from base seed <strong>{esc(seed)}</strong>.
   Experiments included: {esc(flags_note or 'see results_manifest.json')}.</p>
@@ -789,8 +849,9 @@ def main() -> None:
         pdf = ROOT / "paper" / "paper_alife2026.pdf"
         if pdf.exists():
             shutil.copy2(pdf, site / pdf.name)
+        write_demo_assets(site)
         out = site / "index.html"
-        out.write_text(build(embed=True, pdf_href=pdf.name))
+        out.write_text(build(embed=True, pdf_href=pdf.name, live_demo=True))
     else:
         OUT_DIR.mkdir(exist_ok=True)
         out = OUT_DIR / ("index_portable.html" if args.embed_images else "index.html")

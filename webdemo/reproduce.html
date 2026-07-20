@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live reproduction — Winnower</title>
+<style>
+:root {
+  --bg: #f7f7f5; --fg: #1a1a1a; --muted: #5a5a55; --card: #ffffff;
+  --line: #e0dfda; --accent: #305c7a; --accent-soft: #e7eef3;
+  --ok: #1c7a45; --ok-bg: #e2f3e8; --warn: #8a6100; --warn-bg: #fdf1d7;
+  --err: #a02020; --err-bg: #fbe4e4; --code-bg: #efeeea;
+  --cell-zero: #fcdeb9; --cell-one: #3b3b3b; --cell-defect: #b00300;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181b; --fg: #e6e4df; --muted: #a3a29b; --card: #1e2126;
+    --line: #33363c; --accent: #7fb0d0; --accent-soft: #22303a;
+    --ok: #6fce96; --ok-bg: #1c3327; --warn: #e5c069; --warn-bg: #38301a;
+    --err: #e08585; --err-bg: #3a2020; --code-bg: #262a30;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 Georgia, 'Times New Roman', serif; }
+header { background: var(--card); border-bottom: 1px solid var(--line);
+  padding: 1.6rem 1.5rem 1.1rem; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+header .wrap { padding: 0; }
+h1 { font-size: 1.5rem; margin: 0 0 .3rem; }
+h2 { font-size: 1.2rem; border-bottom: 2px solid var(--accent);
+  padding-bottom: .25rem; margin: 2rem 0 .8rem; }
+.subtitle { color: var(--muted); margin: 0; }
+.subtitle a { color: var(--accent); }
+main { padding-bottom: 4rem; }
+code { background: var(--code-bg); padding: .08em .35em; border-radius: 4px;
+  font-size: .86em; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+.card { background: var(--card); border: 1px solid var(--line);
+  border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;
+  font-family: system-ui, sans-serif; font-size: .92rem; }
+.controls label { display: flex; flex-direction: column; gap: .25rem;
+  color: var(--muted); }
+.controls select, .controls input { font: inherit; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: .45rem .6rem; min-width: 7.5rem; }
+button#run { font: inherit; font-weight: 600; color: #fff; background: var(--accent);
+  border: 0; border-radius: 8px; padding: .6rem 1.4rem; cursor: pointer; }
+button#run:disabled { opacity: .5; cursor: wait; }
+.hint { font-family: system-ui, sans-serif; font-size: .85rem; color: var(--muted);
+  margin: .5rem 0 0; }
+.statusline { display: flex; align-items: center; gap: .8rem;
+  font-family: system-ui, sans-serif; font-size: .9rem; }
+.bar { flex: 1; height: 10px; background: var(--code-bg); border-radius: 999px;
+  overflow: hidden; }
+.bar > div { height: 100%; width: 0%; background: var(--accent);
+  transition: width .2s; }
+.badge { font-family: system-ui, sans-serif; font-size: .78rem; font-weight: 700;
+  padding: .2em .7em; border-radius: 999px; }
+.badge.ok { color: var(--ok); background: var(--ok-bg); }
+.badge.warn { color: var(--warn); background: var(--warn-bg); }
+.badge.err { color: var(--err); background: var(--err-bg); }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem;
+  font-family: system-ui, sans-serif; }
+th, td { padding: .4rem .6rem; border-bottom: 1px solid var(--line);
+  text-align: left; white-space: nowrap; }
+th { background: var(--accent-soft); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.match { color: var(--ok); font-weight: 700; }
+td.mismatch { color: var(--err); font-weight: 700; }
+.canvases { display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.canvases figure { margin: 0; }
+.canvases canvas { width: 100%; border: 1px solid var(--line); border-radius: 6px;
+  image-rendering: pixelated; background: var(--cell-zero); }
+.canvases figcaption { font-family: system-ui, sans-serif; font-size: .85rem;
+  color: var(--muted); margin-top: .3rem; }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: .8rem; font-family: system-ui, sans-serif; }
+.kv > div { background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: .6rem .8rem; }
+.kv .k { font-size: .78rem; color: var(--muted); }
+.kv .v { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.note { font-family: system-ui, sans-serif; font-size: .85rem; color: var(--muted); }
+#error { display: none; }
+#error.visible { display: block; border-left: 4px solid var(--err); }
+#spark { width: 100%; height: 90px; border: 1px solid var(--line);
+  border-radius: 6px; background: var(--card); }
+.envline { font-family: system-ui, sans-serif; font-size: .82rem;
+  color: var(--muted); }
+footer { border-top: 1px solid var(--line); color: var(--muted);
+  font-size: .85rem; padding: 1.5rem 0 3rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Live reproduction: run the pipeline in your browser</h1>
+    <p class="subtitle">
+      This page runs the actual <code>relative_symmetry_repair</code> code
+      (WebAssembly Python) on a spacetime it simulates from your chosen rule,
+      seed, and horizon — then compares the result against the committed row in
+      the paper's result CSVs. &larr; <a href="index.html">Back to the reviewer guide</a>
+    </p>
+  </div>
+</header>
+<main class="wrap">
+
+<div class="card">
+  <div class="controls">
+    <label>System
+      <select id="case"></select>
+    </label>
+    <label id="rule-label">ECA rule (0–255)
+      <input id="rule" type="number" min="0" max="255" value="110">
+    </label>
+    <label>Seed
+      <input id="seed" type="number" min="0" value="11">
+    </label>
+    <label>Horizon T
+      <select id="horizon"></select>
+    </label>
+    <button id="run" disabled>Run</button>
+  </div>
+  <p class="hint" id="estimate"></p>
+  <p class="hint">Committed comparison rows exist for all 256 ECA rules
+    (seeds 11–15, T &isin; {50, 100, 200, 400, 800}), ECA 30/54/110 (seeds 11–20,
+    plus T = 600), and Diamoeba (seeds 11–15). Other configurations run in
+    exploration mode. The candidate search grid is the paper's default
+    (periods and shift ranges per dimension).</p>
+</div>
+
+<div class="card">
+  <div class="statusline">
+    <span id="status">Starting Python runtime…</span>
+    <div class="bar"><div id="bar-fill"></div></div>
+  </div>
+  <p class="envline" id="env"></p>
+</div>
+
+<div class="card" id="error"><strong>Something went wrong.</strong>
+  <span id="error-text"></span>
+  <p class="note">This page needs to be served over HTTP(S) with internet access
+  (it fetches the Python runtime from jsDelivr). If you are viewing a local
+  checkout, run <code>python scripts/build_review_site.py --pages _site</code>
+  and serve it with <code>python -m http.server -d _site</code>.</p>
+</div>
+
+<div id="results" style="display:none">
+  <h2>Verdict</h2>
+  <div class="card" id="verdict-card">
+    <p id="verdict-line"></p>
+    <div class="tbl-wrap" id="compare-wrap"><table id="compare"></table></div>
+  </div>
+
+  <h2>Selected decomposition</h2>
+  <div class="card">
+    <div class="kv" id="selection-kv"></div>
+    <p class="note" id="run-meta"></p>
+  </div>
+  <div class="canvases" id="canvases"></div>
+
+  <h2>Residual defects over time</h2>
+  <div class="card">
+    <canvas id="spark" width="1000" height="90"></canvas>
+    <p class="note">Defect sites per time step under the selected background —
+    persistent structured residuals show up as a non-vanishing tail.</p>
+  </div>
+
+  <h2>Period ranking (Bernoulli NML)</h2>
+  <div class="card">
+    <div class="tbl-wrap"><table id="periods"></table></div>
+    <p class="note">Best candidate per period, ranked by NML bits (fit + complexity).
+    The winner is the rank-1 row; the margin to rank 2 is the selection confidence.</p>
+  </div>
+</div>
+
+</main>
+<footer><div class="wrap">
+  Same code, same parameters, your hardware: simulation and model selection run
+  entirely in this tab via Pyodide. Verified against the committed CSVs by
+  <code>scripts/verify_webdemo_bootstrap.py</code>.
+</div></footer>
+
+<script>
+"use strict";
+
+const CASES = {
+  "eca":          { label: "1D elementary CA (any rule)", dim: 1, horizons: [50, 100, 200, 400, 600, 800], def: 200 },
+  "Diamoeba":     { label: "Diamoeba (2D, B35678/S5678)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
+  "Maze with Mice": { label: "Maze with Mice (2D, B37/S12345)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
+  "S24/B11":      { label: "S24/B11 (2D range rule)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
+  "S11/B37":      { label: "S11/B37 (2D range rule)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
+  "S37/B11":      { label: "S37/B11 (2D range rule)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
+  "3d-life":      { label: "3d-life (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
+  "clouds":       { label: "clouds (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
+  "crystal":      { label: "crystal (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
+  "diamoeba3d":   { label: "diamoeba3d (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
+};
+
+// Rough in-browser runtime estimates (seconds) by dimension and horizon.
+function estimateSeconds(dim, horizon) {
+  if (dim === 1) return Math.max(2, Math.round(horizon / 100));
+  if (dim === 2) return Math.max(10, Math.round(horizon * 0.4));
+  return Math.max(5, Math.round(horizon * 1.2));
+}
+
+const COMPARE_COLUMNS = [
+  ["selected_period", "int"], ["selected_shift_str", "str"],
+  ["selected_nml_bits", "float"], ["selected_nll_bits", "float"],
+  ["selected_complexity", "float"], ["selected_defect_rate", "float"],
+  ["runner_up_period", "int"], ["runner_up_nml_bits", "float"],
+  ["margin_bits", "float"], ["status", "str"],
+  ["period_tie_count", "int"], ["selected_shift_tie_count", "int"],
+];
+const REL_TOL = 1e-9, ABS_TOL = 1e-9;
+
+const $ = (id) => document.getElementById(id);
+let expectedRows = null;
+let workerReady = false;
+
+const worker = new Worker("repro_worker.js");
+worker.postMessage({ type: "init" });
+
+worker.onmessage = (event) => {
+  const { type, payload } = event.data;
+  if (type === "status") setStatus(payload, null);
+  else if (type === "progress") setStatus(payload.text, payload.frac);
+  else if (type === "env") {
+    $("env").textContent =
+      `Environment: Pyodide ${payload.pyodide} · Python ${payload.python} · ` +
+      `numpy ${payload.numpy} · scipy ${payload.scipy} · pandas ${payload.pandas}` +
+      (payload.lz4 ? "" : " · lz4 unavailable (zlib shim; cosmetic column only)");
+  }
+  else if (type === "ready") {
+    workerReady = true;
+    setStatus("Ready — pick a configuration and press Run.", 0);
+    $("run").disabled = false;
+  }
+  else if (type === "result") {
+    $("run").disabled = false;
+    setStatus(`Done in ${payload.runtime_s}s (${payload.n_candidates} candidates scanned).`, 1);
+    render(payload);
+  }
+  else if (type === "error") {
+    $("run").disabled = false;
+    showError(payload);
+  }
+};
+worker.onerror = (event) => showError(event.message || "worker failed to load");
+
+function setStatus(text, frac) {
+  $("status").textContent = text;
+  if (frac !== null && frac !== undefined) {
+    $("bar-fill").style.width = `${Math.round(frac * 100)}%`;
+  }
+}
+function showError(text) {
+  $("error").classList.add("visible");
+  $("error-text").textContent = " " + text;
+  setStatus("Failed.", 0);
+}
+
+// ---- controls ----
+const caseSelect = $("case");
+for (const [key, meta] of Object.entries(CASES)) {
+  const opt = document.createElement("option");
+  opt.value = key;
+  opt.textContent = meta.label;
+  caseSelect.appendChild(opt);
+}
+function refreshControls() {
+  const meta = CASES[caseSelect.value];
+  $("rule-label").style.display = caseSelect.value === "eca" ? "" : "none";
+  const horizonSelect = $("horizon");
+  horizonSelect.innerHTML = "";
+  for (const h of meta.horizons) {
+    const opt = document.createElement("option");
+    opt.value = h;
+    opt.textContent = h;
+    if (h === meta.def) opt.selected = true;
+    horizonSelect.appendChild(opt);
+  }
+  refreshEstimate();
+}
+function refreshEstimate() {
+  const meta = CASES[caseSelect.value];
+  const horizon = parseInt($("horizon").value, 10);
+  const secs = estimateSeconds(meta.dim, horizon);
+  $("estimate").textContent =
+    `Estimated runtime in this browser: ~${secs < 60 ? secs + " s" : Math.round(secs / 60) + " min"}` +
+    (secs > 90 ? " — consider a smaller horizon first." : "");
+}
+caseSelect.addEventListener("change", refreshControls);
+$("horizon").addEventListener("change", refreshEstimate);
+refreshControls();
+
+fetch("expected_runs.json")
+  .then((r) => (r.ok ? r.json() : null))
+  .then((data) => { expectedRows = data; })
+  .catch(() => { expectedRows = null; });
+
+$("run").addEventListener("click", () => {
+  if (!workerReady) return;
+  const family = caseSelect.value === "eca" ? "eca" : "named";
+  const rule = caseSelect.value === "eca" ? parseInt($("rule").value, 10) : caseSelect.value;
+  if (family === "eca" && (isNaN(rule) || rule < 0 || rule > 255)) {
+    showError("ECA rule must be between 0 and 255.");
+    return;
+  }
+  $("error").classList.remove("visible");
+  $("run").disabled = true;
+  setStatus("Running…", 0);
+  worker.postMessage({
+    type: "run", family, rule,
+    seed: parseInt($("seed").value, 10),
+    horizon: parseInt($("horizon").value, 10),
+  });
+});
+
+// ---- comparison ----
+function compareValue(kind, expectedRaw, actual) {
+  if (expectedRaw === "" || expectedRaw === "nan" || expectedRaw === null || expectedRaw === undefined) {
+    return { ok: actual === null || actual === undefined, diff: "" };
+  }
+  if (kind === "str") return { ok: String(actual) === String(expectedRaw), diff: "" };
+  const exp = Number(expectedRaw), act = Number(actual);
+  if (kind === "int") return { ok: exp === act, diff: exp === act ? "" : String(act - exp) };
+  if (exp === act) return { ok: true, diff: "0" };
+  const denom = Math.max(Math.abs(exp), Math.abs(act));
+  const rel = denom ? Math.abs(exp - act) / denom : 0;
+  return { ok: Math.abs(exp - act) <= ABS_TOL || rel <= REL_TOL, diff: rel.toExponential(1) };
+}
+
+function fmt(value) {
+  if (value === null || value === undefined) return "—";
+  const num = Number(value);
+  if (!isNaN(num) && String(value).indexOf(".") >= 0) return num.toFixed(6);
+  return String(value);
+}
+
+function render(res) {
+  $("results").style.display = "";
+  const rec = res.record;
+
+  // verdict + comparison
+  const key = `${rec.rule}|${rec.seed}|${rec.horizon}`;
+  const expected = expectedRows ? expectedRows[key] : null;
+  const table = $("compare");
+  table.innerHTML = "";
+  if (expected) {
+    let allOk = true;
+    let head = "<tr><th>Column</th><th class='num'>Committed (paper)</th><th class='num'>Your browser</th><th class='num'>Rel. diff</th><th>Match</th></tr>";
+    let body = "";
+    for (const [column, kind] of COMPARE_COLUMNS) {
+      const { ok, diff } = compareValue(kind, expected[column], rec[column]);
+      allOk = allOk && ok;
+      body += `<tr><td><code>${column}</code></td>` +
+        `<td class="num">${fmt(expected[column])}</td>` +
+        `<td class="num">${fmt(rec[column])}</td>` +
+        `<td class="num">${diff || "—"}</td>` +
+        `<td class="${ok ? "match" : "mismatch"}">${ok ? "✓" : "✗"}</td></tr>`;
+    }
+    table.innerHTML = head + body;
+    $("compare-wrap").style.display = "";
+    $("verdict-line").innerHTML = allOk
+      ? `<span class="badge ok">REPRODUCED</span> Your browser regenerated the committed row for
+         <strong>${rec.rule}</strong>, seed ${rec.seed}, T=${rec.horizon} — every selection column matches
+         (floats to 1e-9 relative tolerance).`
+      : `<span class="badge err">MISMATCH</span> One or more columns differ from the committed row —
+         see the table below. (This would be a genuine reproducibility finding; please report it.)`;
+  } else {
+    $("compare-wrap").style.display = "none";
+    $("verdict-line").innerHTML =
+      `<span class="badge warn">EXPLORATION</span> No committed row exists for
+       <strong>${rec.rule}</strong>, seed ${rec.seed}, T=${rec.horizon}, so there is nothing to
+       compare against — the result below is a fresh run of the same pipeline.`;
+  }
+
+  // selection summary
+  const shiftLabel = res.dimension === 1 ? "shift s" : "shift vector";
+  const kv = [
+    ["Selected period p", rec.selected_period],
+    [shiftLabel, rec.selected_shift_str],
+    ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
+    ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
+    ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
+    ["Status", rec.status],
+  ];
+  $("selection-kv").innerHTML = kv
+    .map(([k, v]) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`)
+    .join("");
+  $("run-meta").textContent =
+    `${res.case_name} · search grid "${res.search_label}" · ${res.n_candidates} candidates · ` +
+    `${res.runtime_s}s in-browser` + (res.lz4_shimmed ? " · lz4 shimmed (cosmetic)" : "");
+
+  // canvases
+  const captions = res.dimension === 1
+    ? ["Observed spacetime U (time ↓)", "Selected background B*", "Defect mask M = U ⊕ B*"]
+    : res.dimension === 2
+      ? [`Final frame (t=${rec.horizon - 1}) of U`, "Final frame of B*", "Final frame of M"]
+      : [`Mid-depth slice of final frame of U`, "Same slice of B*", "Same slice of M"];
+  const holder = $("canvases");
+  holder.innerHTML = "";
+  ["spacetime", "background", "defect"].forEach((name, i) => {
+    const img = res.images[name];
+    const fig = document.createElement("figure");
+    const canvas = document.createElement("canvas");
+    drawBinary(canvas, img, name === "defect");
+    const cap = document.createElement("figcaption");
+    cap.textContent = captions[i];
+    fig.appendChild(canvas);
+    fig.appendChild(cap);
+    holder.appendChild(fig);
+  });
+
+  drawSpark($("spark"), res.defects_per_frame);
+
+  // period ranking table
+  let html = "<tr><th class='num'>Rank</th><th class='num'>Period</th><th>Best shift</th>" +
+    "<th class='num'>NML bits</th><th class='num'>NLL bits</th><th class='num'>Complexity</th>" +
+    "<th class='num'>Defect rate</th></tr>";
+  for (const row of res.period_summary) {
+    html += `<tr><td class="num">${row.period_rank}</td><td class="num">${row.period}</td>` +
+      `<td>${row.best_shift_str}</td>` +
+      `<td class="num">${Number(row.nml_bits).toFixed(2)}</td>` +
+      `<td class="num">${Number(row.nll_bits).toFixed(2)}</td>` +
+      `<td class="num">${Number(row.nml_complexity).toFixed(2)}</td>` +
+      `<td class="num">${(Number(row.defect_rate) * 100).toFixed(3)}%</td></tr>`;
+  }
+  $("periods").innerHTML = html;
+}
+
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function cssColor(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function hexToRgb(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+}
+
+function drawBinary(canvas, img, isDefect) {
+  const [h, w] = img.shape;
+  const bytes = b64ToBytes(img.data);
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.createImageData(w, h);
+  const zero = hexToRgb(cssColor("--cell-zero"));
+  const onColor = hexToRgb(cssColor(isDefect ? "--cell-defect" : "--cell-one"));
+  for (let i = 0; i < bytes.length; i++) {
+    const c = bytes[i] ? onColor : zero;
+    imageData.data[i * 4] = c[0];
+    imageData.data[i * 4 + 1] = c[1];
+    imageData.data[i * 4 + 2] = c[2];
+    imageData.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+  // keep tall 1D spacetimes readable
+  canvas.style.aspectRatio = `${w} / ${h}`;
+}
+
+function drawSpark(canvas, series) {
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height, pad = 6;
+  ctx.clearRect(0, 0, W, H);
+  if (!series || series.length < 2) return;
+  const maxV = Math.max(1, ...series);
+  ctx.strokeStyle = cssColor("--cell-defect");
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  series.forEach((v, i) => {
+    const x = pad + (i / (series.length - 1)) * (W - 2 * pad);
+    const y = H - pad - (v / maxV) * (H - 2 * pad);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.fillStyle = cssColor("--fg");
+  ctx.font = "11px system-ui";
+  ctx.fillText(`max ${maxV} defects/frame · final ${series[series.length - 1]}`, pad + 2, 12);
+}
+
+</script>
+</body>
+</html>
