@@ -8,6 +8,7 @@ submission. Uses only the Python standard library.
 Usage:
     python scripts/build_review_site.py                # relative image paths
     python scripts/build_review_site.py --embed-images # portable single file
+    python scripts/build_review_site.py --pages _site  # deployable site dir
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ import csv
 import html
 import json
 import re
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -430,7 +432,7 @@ def stress_stats() -> list[tuple[str, str]]:
 # --------------------------------------------------------------------------
 
 
-def build(embed: bool) -> str:
+def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf") -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
     title = extract_tex_field(tex, "title") or "Winnower — ALIFE 2026 submission"
     abstract = extract_abstract(tex)
@@ -521,11 +523,12 @@ def build(embed: bool) -> str:
     flags = manifest.get("flags", {})
     flags_note = ", ".join(k.replace("run_", "").replace("_", " ") for k, v in flags.items() if v)
 
-    pdf_href = "../paper/paper_alife2026.pdf"
-    pdf_note = "" if not embed else (
-        '<p class="tbl-meta">This is the portable single-file build: the PDF link works '
-        "only when the page sits inside the repository at <code>review_site/</code>.</p>"
-    )
+    pdf_note = ""
+    if embed and pdf_href.startswith("../"):
+        pdf_note = (
+            '<p class="tbl-meta">This is the portable single-file build: the PDF link works '
+            "only when the page sits inside the repository at <code>review_site/</code>.</p>"
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -771,13 +774,29 @@ def main() -> None:
         help="Base64-embed figures for a portable single-file page "
              "(written to review_site/index_portable.html).",
     )
+    parser.add_argument(
+        "--pages", metavar="DIR",
+        help="Build a standalone deployable site (e.g. for GitHub Pages) into "
+             "DIR: index.html with embedded figures plus the paper PDF.",
+    )
     args = parser.parse_args()
 
-    OUT_DIR.mkdir(exist_ok=True)
-    out = OUT_DIR / ("index_portable.html" if args.embed_images else "index.html")
-    out.write_text(build(embed=args.embed_images))
+    if args.pages:
+        site = Path(args.pages)
+        if not site.is_absolute():
+            site = ROOT / site
+        site.mkdir(parents=True, exist_ok=True)
+        pdf = ROOT / "paper" / "paper_alife2026.pdf"
+        if pdf.exists():
+            shutil.copy2(pdf, site / pdf.name)
+        out = site / "index.html"
+        out.write_text(build(embed=True, pdf_href=pdf.name))
+    else:
+        OUT_DIR.mkdir(exist_ok=True)
+        out = OUT_DIR / ("index_portable.html" if args.embed_images else "index.html")
+        out.write_text(build(embed=args.embed_images))
     size_kb = out.stat().st_size / 1024
-    print(f"Wrote {out.relative_to(ROOT)} ({size_kb:,.0f} KB)")
+    print(f"Wrote {out} ({size_kb:,.0f} KB)")
 
 
 if __name__ == "__main__":
