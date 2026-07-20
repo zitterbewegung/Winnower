@@ -38,7 +38,9 @@ artifacts ship in the repo — so until the root-level CI workflow
 (`.github/workflows/lean-verify.yml`, which rebuilds the `verify`
 package and greps the built targets for placeholders) has a public green
 run on `main`, the v4.28.0 compilability of `Theorem3.lean` is asserted,
-not demonstrated. The workflow exists precisely to close that gap.
+not demonstrated. That gap is now closed: the workflow's first run on
+`main` completed green (build + placeholder check) — see the repository's
+Actions tab, workflow "Lean proof check", run of commit `85803b0`.
 
 The top-level `proofs/` package (`rsr`) is a minimal shell with no
 Mathlib dependency; it exists to host the standalone Aristotle output
