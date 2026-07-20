@@ -44,14 +44,15 @@ and picks between them with a complexity-aware score (Bernoulli
 normalized maximum likelihood, NML) so that bigger candidates do not win
 just by having more parameters. On planted ground truth the selector
 recovers the true period and drift essentially always at realistic noise
-levels, and on shuffled and random controls it never reports periodic
-structure. Across 1D, 2D, and 3D rules the resulting residual masks
+levels, and on shuffled and random controls of a representative rule panel it
+never reports periodic structure. Across 1D, 2D, and 3D rules the resulting residual masks
 isolate particle-like activity --- for example in Diamoeba, Maze with
 Mice, and S37/B11 --- cheaply enough for whole-catalog surveys. Every
 number and figure in this paper regenerates from a deterministic public
-pipeline, and an in-browser demo re-runs the identical code on any rule,
-seed, and horizon and checks the output against the committed results,
-column by column.
+pipeline, and an in-browser demo re-runs the identical code on any rule
+in the supported families, at any seed and horizon, checking the output
+against the committed results column by column wherever a committed row
+exists.
 \end{abstract}
 
 %======================================================================
@@ -94,9 +95,11 @@ observation disagrees with its background. Candidates are then ranked by
 a score that adds a complexity penalty to the raw disagreement, and the
 winner is reported together with its margin over the runner-up. Each
 candidate costs one linear pass over the data, which is what makes
-whole-catalog surveys practical: scanning 130 candidates on a
-$192 \times 800$ ECA spacetime takes about one second on a laptop, and
-the same pipeline handles 2D and 3D volumes unchanged.
+whole-catalog surveys practical: scanning the default 130-candidate 1D
+grid on an $800 \times 192$ ($T \times \text{space}$) ECA spacetime
+takes a few seconds single-threaded, and about half a second at
+$T{=}200$ --- per-run timings ship in the released benchmark CSVs ---
+while the same pipeline handles 2D and 3D volumes unchanged.
 
 This paper contributes, in order of importance: (i) the tool itself,
 open source with a deterministic experiment pipeline and an in-browser
@@ -144,15 +147,16 @@ For a binary spacetime $U \in \{0,1\}^{T \times D_1 \times \cdots \times
 D_n}$, a candidate $(p, \bs)$ with $p \geq 1$ and $\bs \in \mathbb{Z}^n$
 describes the set of fields $B$ satisfying
 \[
-B[t+p,\, \bx+\bs \bmod \bD] = B[t,\bx].
+B[t+p,\, \bx+\bs \bmod \bD] = B[t,\bx]
 \]
-Iterating this relation partitions the cells of $U$ into orbit classes
+(a field satisfying this relation is called \emph{relative-periodic}).
+Iterating the relation partitions the cells of $U$ into orbit classes
 $\{O_j\}_{j=1}^{k}$ with $k = p \prod_i D_i$: two cells are in the same
 class exactly when any $B$ obeying the candidate must give them the same
 value. Fitting a candidate therefore means choosing one bit per orbit
 class.
 
-\begin{proposition}[Majority vote is optimal, and linear-time]
+\begin{proposition}[Majority vote is optimal]
 \label{prop:projection}
 For a fixed candidate $(p,\bs)$, the background that minimizes the
 number of residual cells is obtained by taking a majority vote within
@@ -163,7 +167,8 @@ $\sum_j \min(n_j^{(0)}, n_j^{(1)})$.
 
 This is the computational core of the tool: the disagreement objective
 decomposes over orbit classes, each class is an independent one-bit
-choice, and the whole fit is one pass over the data.
+choice, and the whole fit is one linear pass over the data. (Proof in
+the repository's theory notes.)
 
 \paragraph{Scoring candidates.}
 Raw disagreement cannot be used to pick \emph{between} candidates,
@@ -182,7 +187,9 @@ $C(n)$ by the exact Shtarkov sum for classes with $n \leq 200$ and by
 the asymptotic expansion $C(n) \approx \tfrac{1}{2}\log_2(\pi n / 2)$
 above that cutoff (the \texttt{hybrid} mode); this is the score used in
 every experiment below, and at survey horizons most orbit classes fall
-in the exact regime. The selector is \emph{period-first}: it takes the
+in the exact regime. The default search grids are: 1D, periods 1--10
+and shifts $-6..6$ (130 candidates); 2D, periods 1--8 and shifts
+$\pm 2$ per axis; 3D, periods 1--4 and shifts $\pm 2$ per axis. The selector is \emph{period-first}: it takes the
 best-scoring shift at each period, ranks periods by that best score,
 and reports the winning period, its shift, and the \emph{margin} ---
 the score gap in bits to the runner-up period. All ties are broken
@@ -242,8 +249,8 @@ rate $\varepsilon$ and ask the shipped selector (default search grids,
 no tuning) to recover the truth.
 Table~\ref{tab:groundtruth} summarizes the result: the selector recovers
 the planted period \emph{and} shift in all 642 runs --- every dimension,
-every planted $(p,\bs)$ in the scanned grid, and every noise level up to
-$\varepsilon = 0.2$. Noise does not cause errors at these levels; it
+every planted $(p,\bs)$ in the scanned grid, and every tested noise level
+(up to $\varepsilon = 0.2$ in 1D, $\varepsilon = 0.1$ in 2D and 3D). Noise does not cause errors at these levels; it
 shows up as a shrinking decision margin (in 1D, from a mean of
 14{,}889 bits at $\varepsilon{=}0$ down to 4{,}021 bits at
 $\varepsilon{=}0.2$), which is exactly the behavior a calibrated
@@ -289,9 +296,10 @@ in noise.
   \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{alife_representative_rules.png}
   \caption{Representative decompositions across 1D, 2D, and 3D: observed
   spacetime $U$, selected background $B^*$, and residual mask $M$ for
-  each rule. Each panel's sidebar reports the winning candidate (best
-  $p$, best $\bs$), its margin over the runner-up in bits, and the
-  residual rate (the fraction of cells in $M$). In the focal 2D
+  each rule; in 1D panels time runs downward and space is horizontal.
+  Each panel's sidebar reports the winning candidate (best $p$, best
+  $\bs$), its margin over the runner-up in bits, and the residual rate
+  (the fraction of cells in $M$). In the focal 2D
   cases the residual stays sparse but visibly organized rather than
   collapsing to featureless noise.}
   \label{fig:representative}
@@ -306,7 +314,11 @@ low-period backgrounds with concentrated residual masks, while S37/B11
 retains a visibly organized residual population after background
 removal. (Named LifeWiki rules use B/S rulestring notation; rules such
 as S37/B11 come from a separate range-rule scan and are named
-S$\langle$survive range$\rangle$/B$\langle$birth range$\rangle$.)
+S$\langle$survive range$\rangle$/B$\langle$birth range$\rangle$.) The
+Diamoeba panel shows a run on the period-2 side of a near-boundary
+selection; across seeds its modal period is 1
+(Section~\ref{sec:accuracy} tables and the released per-seed data make
+such boundary cases explicit).
 
 In 1D the tool's choices can be checked against fifty years of ECA
 analysis. Rule~54, whose regular background and particle interactions
@@ -318,7 +330,7 @@ more ambiguous and the tool reports that ambiguity rather than hiding
 it: at $T=800$, five of ten seeds select a period-7, zero-shift
 candidate --- recovering the temporal period of the Rule~110 ether
 \citep{cook2004} --- while four select a period-4, shift~$-2$
-alternative with smaller margins than Rule~54 exhibits. Rule~30, as
+alternative. Rule~30, as
 expected for an effectively aperiodic rule, stays at period~1 with
 near-arbitrary shift. A direct quantitative comparison against local
 causal-state domain filters on shared examples is natural future work.
@@ -367,8 +379,9 @@ running five seeds per rule at horizons $T \in \{100, 200, 400, 800\}$
 and reporting each rule's modal (across-seed majority) period.
 Table~\ref{tab:lifewiki} shows the distribution: the large majority of
 rules stay at period~1 at every horizon, and the set of rules with
-periodic organization grows slowly with observation time --- from 8
-rules at $T=100$ to 13 at $T=800$. Eight rules change modal period
+periodic organization grows slowly and non-monotonically with
+observation time --- from 8 rules at $T=100$ to 13 at $T=800$, dipping
+to 7 at $T=200$ as a transient-period rule drops out. Eight rules change modal period
 across horizons: B017/S01 climbs from period~2 to period~4; Serviettes
 (B234/S) drops from 2 to 1 as an initial transient dies out; and six
 rules (Bacteria, Invertamaze, LowLife, Maze with Mice, Mazectric with
@@ -419,8 +432,8 @@ $T=800$; Rule~30 stays at period~1. \\
 2D Life-like survey & At $T=800$, 93 of 106 named rules keep modal
 period~1; 13 show periodic organization (11 at $p{=}2$, one each at
 $p{=}4$ and $p{=}8$). \\
-2D focal persistent-residual rules & S24/B11 and S37/B11 move to
-period~2, S11/B37 moves to period~4, and all retain organized residual
+2D focal persistent-residual rules & By $T{=}800$, S24/B11 and S37/B11
+move to period~2 and S11/B37 to period~4; all retain organized residual
 structure after subtraction. \\
 3D diamoeba3d & A short small-sample transient favors period~6; the
 selector stabilizes to period~1 by $T=40$. \\
@@ -436,7 +449,7 @@ particles, interfaces, and other coherent departures live. In Diamoeba
 and Maze with Mice the residual is sparse and clearly localized. The
 focal range rules (S24/B11, S11/B37, S37/B11) were themselves
 \emph{found by} an earlier screening pass of this decomposition over
-$\sim$700 totalistic rules --- the tool surfacing its own best examples
+773 totalistic range rules --- the tool surfacing its own best examples
 is precisely the intended survey workflow, and we state it plainly so
 the reader does not mistake them for an independent sample. What the
 follow-up runs then establish is robustness: S37/B11's residual
@@ -463,7 +476,7 @@ pipeline:
   re-runs the full experiment suite from base seed 11 (null controls,
   seed stability, ground truth, surveys, stress tests); \texttt{make
   figures} regenerates every figure; \texttt{make test} runs the
-  363-test suite. Each experiment writes a manifest recording its exact
+  364-test suite. Each experiment writes a manifest recording its exact
   parameters.
 \item \textbf{Reviewer site:}
   \url{https://zitterbewegung.github.io/Winnower/} presents the claim
@@ -519,7 +532,8 @@ Winnower turns a simple observation --- relative-periodic fitting
 reduces to independent majority votes --- into a practical survey
 instrument: linear-time background fitting, a complexity-aware selector
 that resists the period inflation raw fit criteria demonstrably suffer
-(and provably resists it when the background is exactly periodic),
+(with a prose proof, audited in the repository's claim ledger, that it
+resists it whenever the background is exactly periodic),
 calibration on planted truth and null controls, and a residual mask
 that isolates particle-like structure across 1D, 2D, and 3D. The tool, the data, the
 proofs, and an in-browser reproduction of every reported number are

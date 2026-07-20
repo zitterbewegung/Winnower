@@ -87,8 +87,8 @@ TEXT_COLOR = ALIFE_TEXT_COLOR
 RULE_NOTES = {
     "ECA-30": "Chaotic texture with little large-scale repetition; the selector still prefers a simple background.",
     "ECA-54": "Alternating domains and clearer phase locking make the periodic background easier to see.",
-    "ECA-110": "Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.",
-    "Diamoeba": "Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.",
+    "ECA-110": "Drifting multi-phase lanes; this seed's best fit absorbs them into a period-7, zero-shift background (other seeds prefer a drifting period-4 fit).",
+    "Diamoeba": "Large breathing blobs; this run sits on the period-2 side of a near-boundary selection (the across-seed modal period is 1).",
     "Maze with Mice": "Maze-like corridors remain coherent while local fluctuations ride on top of them.",
     "S24/B11": "Sparse patches form and dissolve, so the background captures only the broadest cadence.",
     "S11/B37": "Explosive local birth competes with fast die-out, producing noisy but still structured slices.",

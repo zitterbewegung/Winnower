@@ -7,6 +7,7 @@ import Verify.Theorem3
 --   Verify/Corollary.lean
 --   Verify/Theorem1.lean
 --   Verify/Theorem2.lean
+--   Verify/Theorem5.lean
 --
 -- They are not imported here yet because they are generated drafts that still
 -- need Mathlib/project setup and proof cleanup before being part of the

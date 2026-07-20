@@ -15,7 +15,7 @@ completeness* — the table below is the honest inventory.
 | `aristotle_submissions/verify/Verify/Theorem3.lean` | Stabilization core: pairwise eventual ordering, elimination, and lock-in to a unique rate minimizer, **assuming** the NML expansion `NML = λN + (k/2)log₂T + o(N)` as a hypothesis | **Complete**: no `sorry`/`admit`/`axiom`/`exact?`; part of the default `lake build` |
 | `55d8f9ef-…-output.lean` (proofs root) | Refinement ⇒ total NLL non-increasing, plus converse (the NLL half of the "penalty is necessary" property, at the abstract-partition level) | Proof text complete but contains one `exact?` placeholder and `import Mathlib` in a package with no Mathlib dependency — **not buildable in-repo as shipped** |
 | `aristotle_submissions/verify/Verify/Theorem1.lean` | Majority vote optimal (Hamming projection) | **Draft**: 5 `exact?` placeholders; excluded from build |
-| `aristotle_submissions/verify/Verify/Theorem2.lean` | Six-way equivalence / refinement monotonicity | **Draft**: 16 `exact?` placeholders, one direction of the equivalence not established; excluded from build |
+| `aristotle_submissions/verify/Verify/Theorem2.lean` | Six-way equivalence / refinement monotonicity | **Draft**: 17 `exact?` placeholders — all implications are declared and combined, but several rest on placeholder holes; excluded from build |
 | `aristotle_submissions/verify/Verify/Theorem5.lean` | Identifiability for eventually exactly periodic backgrounds | **Draft**: 6 `exact?` placeholders; excluded from build |
 | `aristotle_submissions/verify/Verify/Corollary.lean` | NLL convergence support (Corollary D.3) | **Draft**: 5 `exact?` placeholders; excluded from build |
 
@@ -32,11 +32,13 @@ lake build           # builds Verify/Basic.lean, Verify/Theorem3.lean, Main.lean
 ```
 
 The `verify` package pins its toolchain (`lean-toolchain`) and Mathlib
-(`v4.28.0` in `lakefile.toml`). The Aristotle outputs were originally
-generated against Lean `v4.24.0`; a CI workflow at the repository root
-(`.github/workflows/lean-verify.yml`) rebuilds the `verify` package so
-the completeness claim for `Theorem3.lean` is machine-checked in public
-rather than asserted.
+(`v4.28.0` in `lakefile.toml`). Two caveats, stated plainly: the
+Aristotle outputs were generated against Lean `v4.24.0`, and no build
+artifacts ship in the repo — so until the root-level CI workflow
+(`.github/workflows/lean-verify.yml`, which rebuilds the `verify`
+package and greps the built targets for placeholders) has a public green
+run on `main`, the v4.28.0 compilability of `Theorem3.lean` is asserted,
+not demonstrated. The workflow exists precisely to close that gap.
 
 The top-level `proofs/` package (`rsr`) is a minimal shell with no
 Mathlib dependency; it exists to host the standalone Aristotle output
