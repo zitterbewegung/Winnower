@@ -39,6 +39,8 @@ VERIFY_CONFIGS = [
 SMOKE_CONFIGS = [
     ("named", "S37/B11", 11, 50),
     ("named", "crystal", 11, 10),
+    ("life2d", "B36/S23", 11, 50),                                      # arbitrary rulestring (HighLife)
+    ("rule3d", '{"survive": [4, 5], "birth": [5, 5], "density": 0.5}', 11, 10),  # custom 3D ranges
 ]
 
 

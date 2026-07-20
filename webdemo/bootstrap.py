@@ -22,6 +22,7 @@ This module must be imported *before* any ``relative_symmetry_repair`` module.
 
 from __future__ import annotations
 
+import json
 import sys
 import time
 import types
@@ -158,13 +159,16 @@ _ca2d_mod._simulate_life_general_numba = _simulate_life_general_vec
 _ca3d_mod._simulate_3d_numba = _simulate_range_vec
 
 
+from relative_symmetry_repair.ca2d import parse_rulestring  # noqa: E402
 from relative_symmetry_repair.experiment_core import (  # noqa: E402
     REPRESENTATIVE_CASES_2D,
     REPRESENTATIVE_CASES_3D,
     _add_selection_metrics,
     _record_base,
     eca_case,
+    life_rulestring_case,
     period_first_selection_from_frame,
+    rule3d_case,
     simulate_case,
 )
 from relative_symmetry_repair.repair import scan_relative_periodicity  # noqa: E402
@@ -186,15 +190,44 @@ def _py(value):
     return value
 
 
-def _image(array: np.ndarray) -> dict:
+def _field(array: np.ndarray) -> dict:
+    """Bit-pack a binary array for compact transfer to the page."""
     arr = np.ascontiguousarray(array.astype(np.uint8))
-    return {"shape": list(arr.shape), "data": arr.tobytes()}
+    return {
+        "shape": list(arr.shape),
+        "packed": True,
+        "data": np.packbits(arr.reshape(-1)).tobytes(),
+    }
 
 
 def build_case(family: str, rule):
+    """Resolve a demo case.
+
+    family:
+        "eca"    -> rule is an ECA number 0..255
+        "named"  -> rule is one of the paper's representative 2D/3D case names
+        "life2d" -> rule is an arbitrary B/S rulestring, e.g. "B36/S23"
+        "rule3d" -> rule is a JSON spec {"survive": [lo, hi], "birth": [lo, hi],
+                    "density": 0.5} with neighbor counts in 0..26
+    """
     if family == "eca":
         return eca_case(int(rule))
-    return NAMED_CASES[str(rule)]
+    if family == "named":
+        return NAMED_CASES[str(rule)]
+    if family == "life2d":
+        rulestring = str(rule).strip()
+        parse_rulestring(rulestring)  # validate before running anything
+        return life_rulestring_case(rulestring, rulestring=rulestring)
+    if family == "rule3d":
+        spec = json.loads(rule) if isinstance(rule, str) else dict(rule)
+        survive = (int(spec["survive"][0]), int(spec["survive"][1]))
+        birth = (int(spec["birth"][0]), int(spec["birth"][1]))
+        for lo, hi in (survive, birth):
+            if not (0 <= lo <= hi <= 26):
+                raise ValueError("3D neighbor count ranges must satisfy 0 <= lo <= hi <= 26")
+        name = f"3D S{survive[0]}-{survive[1]}/B{birth[0]}-{birth[1]}"
+        return rule3d_case(name, survive=survive, birth=birth, density=float(spec.get("density", 0.5)))
+    raise ValueError(f"Unknown family: {family!r}")
 
 
 def run_repro(family: str, rule, seed: int, horizon: int, progress=None) -> dict:
@@ -258,26 +291,15 @@ def run_repro(family: str, rule, seed: int, horizon: int, progress=None) -> dict
     record = _record_base(case, seed=seed, horizon=horizon)
     _add_selection_metrics(record, selection)
 
+    # Full arrays for every dimension: (T, W) for 1D, (T, H, W) volumes for 2D,
+    # (T, Sz, Sy, Sx) volumes for 3D. The page renders frames, scrubs time, and
+    # inspects volumes as rotatable voxels — no slicing happens here.
     defect = fit.defect_mask.astype(np.uint8)
-    if case.dimension == 1:
-        images = {
-            "spacetime": _image(spacetime),
-            "background": _image(fit.background),
-            "defect": _image(defect),
-        }
-    elif case.dimension == 2:
-        images = {
-            "spacetime": _image(spacetime[-1]),
-            "background": _image(fit.background[-1]),
-            "defect": _image(defect[-1]),
-        }
-    else:
-        mid = spacetime.shape[1] // 2
-        images = {
-            "spacetime": _image(spacetime[-1][mid]),
-            "background": _image(fit.background[-1][mid]),
-            "defect": _image(defect[-1][mid]),
-        }
+    fields = {
+        "spacetime": _field(spacetime),
+        "background": _field(fit.background),
+        "defect": _field(defect),
+    }
 
     period_summary = selection.period_summary[
         ["period_rank", "period", "best_shift_str", "nml_bits", "nll_bits", "nml_complexity", "defect_rate"]
@@ -287,7 +309,7 @@ def run_repro(family: str, rule, seed: int, horizon: int, progress=None) -> dict
         "record": _py(record),
         "period_summary": _py(period_summary),
         "defects_per_frame": [int(v) for v in defect.reshape(defect.shape[0], -1).sum(axis=1)],
-        "images": images,
+        "fields": fields,
         "dimension": case.dimension,
         "case_name": case.name,
         "search_label": case.search.label,

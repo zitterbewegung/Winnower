@@ -49,8 +49,8 @@ import base64, json
 
 def _run_encoded(family, rule, seed, horizon, progress):
     res = bootstrap.run_repro(family, rule, int(seed), int(horizon), progress=progress)
-    for img in res['images'].values():
-        img['data'] = base64.b64encode(img['data']).decode()
+    for field in res['fields'].values():
+        field['data'] = base64.b64encode(field['data']).decode()
     return json.dumps(res)
 `);
   post("env", {

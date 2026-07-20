@@ -11,6 +11,7 @@
   --ok: #1c7a45; --ok-bg: #e2f3e8; --warn: #8a6100; --warn-bg: #fdf1d7;
   --err: #a02020; --err-bg: #fbe4e4; --code-bg: #efeeea;
   --cell-zero: #fcdeb9; --cell-one: #3b3b3b; --cell-defect: #b00300;
+  --voxel-bg: #fdf6ec;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -18,6 +19,7 @@
     --line: #33363c; --accent: #7fb0d0; --accent-soft: #22303a;
     --ok: #6fce96; --ok-bg: #1c3327; --warn: #e5c069; --warn-bg: #38301a;
     --err: #e08585; --err-bg: #3a2020; --code-bg: #262a30;
+    --voxel-bg: #101215;
   }
 }
 * { box-sizing: border-box; }
@@ -43,7 +45,8 @@ code { background: var(--code-bg); padding: .08em .35em; border-radius: 4px;
   color: var(--muted); }
 .controls select, .controls input { font: inherit; color: var(--fg);
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
-  padding: .45rem .6rem; min-width: 7.5rem; }
+  padding: .45rem .6rem; min-width: 6rem; }
+.controls input.narrow { min-width: 4rem; width: 4.5rem; }
 button#run { font: inherit; font-weight: 600; color: #fff; background: var(--accent);
   border: 0; border-radius: 8px; padding: .6rem 1.4rem; cursor: pointer; }
 button#run:disabled { opacity: .5; cursor: wait; }
@@ -72,10 +75,17 @@ td.mismatch { color: var(--err); font-weight: 700; }
 .canvases { display: grid; gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .canvases figure { margin: 0; }
-.canvases canvas { width: 100%; border: 1px solid var(--line); border-radius: 6px;
-  image-rendering: pixelated; background: var(--cell-zero); }
+.canvases canvas.flat { width: 100%; border: 1px solid var(--line);
+  border-radius: 6px; image-rendering: pixelated; background: var(--cell-zero); }
+.canvases canvas.voxel { width: 100%; border: 1px solid var(--line);
+  border-radius: 6px; background: var(--voxel-bg); cursor: grab;
+  touch-action: none; }
+.canvases canvas.voxel:active { cursor: grabbing; }
 .canvases figcaption { font-family: system-ui, sans-serif; font-size: .85rem;
   color: var(--muted); margin-top: .3rem; }
+.slider-row { display: flex; align-items: center; gap: .8rem;
+  font-family: system-ui, sans-serif; font-size: .9rem; }
+.slider-row input[type=range] { flex: 1; }
 .kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: .8rem; font-family: system-ui, sans-serif; }
 .kv > div { background: var(--bg); border: 1px solid var(--line);
@@ -113,10 +123,24 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
       <select id="case"></select>
     </label>
     <label id="rule-label">ECA rule (0–255)
-      <input id="rule" type="number" min="0" max="255" value="110">
+      <input id="rule" class="narrow" type="number" min="0" max="255" value="110">
+    </label>
+    <label id="rulestring-label" style="display:none">Rulestring (B…/S…)
+      <input id="rulestring" value="B36/S23" placeholder="B36/S23" spellcheck="false">
+    </label>
+    <label id="s3lo-label" style="display:none">Survive lo–hi
+      <span><input id="s3lo" class="narrow" type="number" min="0" max="26" value="4">
+      –<input id="s3hi" class="narrow" type="number" min="0" max="26" value="5"></span>
+    </label>
+    <label id="b3lo-label" style="display:none">Birth lo–hi
+      <span><input id="b3lo" class="narrow" type="number" min="0" max="26" value="5">
+      –<input id="b3hi" class="narrow" type="number" min="0" max="26" value="5"></span>
+    </label>
+    <label id="dens3-label" style="display:none">Density
+      <input id="dens3" class="narrow" type="number" min="0.05" max="0.95" step="0.05" value="0.5">
     </label>
     <label>Seed
-      <input id="seed" type="number" min="0" value="11">
+      <input id="seed" class="narrow" type="number" min="0" value="11">
     </label>
     <label>Horizon T
       <select id="horizon"></select>
@@ -126,9 +150,9 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   <p class="hint" id="estimate"></p>
   <p class="hint">Committed comparison rows exist for all 256 ECA rules
     (seeds 11–15, T &isin; {50, 100, 200, 400, 800}), ECA 30/54/110 (seeds 11–20,
-    plus T = 600), and Diamoeba (seeds 11–15). Other configurations run in
-    exploration mode. The candidate search grid is the paper's default
-    (periods and shift ranges per dimension).</p>
+    plus T = 600), and Diamoeba (seeds 11–15). Custom rules and other
+    configurations run in exploration mode. The candidate search grid is the
+    paper's default for each dimension.</p>
 </div>
 
 <div class="card">
@@ -159,7 +183,18 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
     <div class="kv" id="selection-kv"></div>
     <p class="note" id="run-meta"></p>
   </div>
-  <div class="canvases" id="canvases"></div>
+
+  <div class="card" id="time-card" style="display:none">
+    <div class="slider-row">
+      <span>Time step <strong id="tval">0</strong></span>
+      <input id="tslider" type="range" min="0" max="0" value="0">
+      <span id="tmax" class="note"></span>
+    </div>
+  </div>
+
+  <div class="canvases" id="panels"></div>
+  <p class="note" id="voxel-help" style="display:none">Voxel views: drag to
+    rotate, scroll to zoom. The three views share one camera.</p>
 
   <h2>Residual defects over time</h2>
   <div class="card">
@@ -186,20 +221,23 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
 <script>
 "use strict";
 
+const H2D = [50, 100, 200, 400, 600, 800];
+const H3D = [10, 20, 40, 60, 80];
 const CASES = {
-  "eca":          { label: "1D elementary CA (any rule)", dim: 1, horizons: [50, 100, 200, 400, 600, 800], def: 200 },
-  "Diamoeba":     { label: "Diamoeba (2D, B35678/S5678)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
-  "Maze with Mice": { label: "Maze with Mice (2D, B37/S12345)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
-  "S24/B11":      { label: "S24/B11 (2D range rule)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
-  "S11/B37":      { label: "S11/B37 (2D range rule)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
-  "S37/B11":      { label: "S37/B11 (2D range rule)", dim: 2, horizons: [50, 100, 200, 400, 600, 800], def: 100 },
-  "3d-life":      { label: "3d-life (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
-  "clouds":       { label: "clouds (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
-  "crystal":      { label: "crystal (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
-  "diamoeba3d":   { label: "diamoeba3d (3D)", dim: 3, horizons: [10, 20, 40, 60, 80], def: 40 },
+  "eca":            { label: "1D elementary CA (any rule)", dim: 1, horizons: H2D, def: 200, custom: "eca" },
+  "custom2d":       { label: "2D — custom rulestring…", dim: 2, horizons: H2D, def: 100, custom: "rulestring" },
+  "custom3d":       { label: "3D — custom S/B ranges…", dim: 3, horizons: H3D, def: 40, custom: "ranges3d" },
+  "Diamoeba":       { label: "Diamoeba (2D, B35678/S5678)", dim: 2, horizons: H2D, def: 100 },
+  "Maze with Mice": { label: "Maze with Mice (2D, B37/S12345)", dim: 2, horizons: H2D, def: 100 },
+  "S24/B11":        { label: "S24/B11 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
+  "S11/B37":        { label: "S11/B37 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
+  "S37/B11":        { label: "S37/B11 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
+  "3d-life":        { label: "3d-life (3D)", dim: 3, horizons: H3D, def: 40 },
+  "clouds":         { label: "clouds (3D)", dim: 3, horizons: H3D, def: 40 },
+  "crystal":        { label: "crystal (3D)", dim: 3, horizons: H3D, def: 40 },
+  "diamoeba3d":     { label: "diamoeba3d (3D)", dim: 3, horizons: H3D, def: 40 },
 };
 
-// Rough in-browser runtime estimates (seconds) by dimension and horizon.
 function estimateSeconds(dim, horizon) {
   if (dim === 1) return Math.max(2, Math.round(horizon / 100));
   if (dim === 2) return Math.max(10, Math.round(horizon * 0.4));
@@ -215,11 +253,15 @@ const COMPARE_COLUMNS = [
   ["period_tie_count", "int"], ["selected_shift_tie_count", "int"],
 ];
 const REL_TOL = 1e-9, ABS_TOL = 1e-9;
+const MAX_WORLDTUBE_VOXELS = 30000;
 
 const $ = (id) => document.getElementById(id);
 let expectedRows = null;
 let workerReady = false;
 
+// ---------------------------------------------------------------------------
+// Worker plumbing
+// ---------------------------------------------------------------------------
 const worker = new Worker("repro_worker.js");
 worker.postMessage({ type: "init" });
 
@@ -262,7 +304,9 @@ function showError(text) {
   setStatus("Failed.", 0);
 }
 
-// ---- controls ----
+// ---------------------------------------------------------------------------
+// Controls
+// ---------------------------------------------------------------------------
 const caseSelect = $("case");
 for (const [key, meta] of Object.entries(CASES)) {
   const opt = document.createElement("option");
@@ -272,7 +316,12 @@ for (const [key, meta] of Object.entries(CASES)) {
 }
 function refreshControls() {
   const meta = CASES[caseSelect.value];
-  $("rule-label").style.display = caseSelect.value === "eca" ? "" : "none";
+  const custom = meta.custom || "";
+  $("rule-label").style.display = custom === "eca" ? "" : "none";
+  $("rulestring-label").style.display = custom === "rulestring" ? "" : "none";
+  for (const id of ["s3lo-label", "b3lo-label", "dens3-label"]) {
+    $(id).style.display = custom === "ranges3d" ? "" : "none";
+  }
   const horizonSelect = $("horizon");
   horizonSelect.innerHTML = "";
   for (const h of meta.horizons) {
@@ -303,11 +352,31 @@ fetch("expected_runs.json")
 
 $("run").addEventListener("click", () => {
   if (!workerReady) return;
-  const family = caseSelect.value === "eca" ? "eca" : "named";
-  const rule = caseSelect.value === "eca" ? parseInt($("rule").value, 10) : caseSelect.value;
-  if (family === "eca" && (isNaN(rule) || rule < 0 || rule > 255)) {
-    showError("ECA rule must be between 0 and 255.");
-    return;
+  const key = caseSelect.value;
+  const meta = CASES[key];
+  let family, rule;
+  if (key === "eca") {
+    family = "eca";
+    rule = parseInt($("rule").value, 10);
+    if (isNaN(rule) || rule < 0 || rule > 255) { showError("ECA rule must be between 0 and 255."); return; }
+  } else if (key === "custom2d") {
+    family = "life2d";
+    rule = $("rulestring").value.trim();
+    if (!/^[Bb]\d*\s*\/\s*[Ss]\d*$/.test(rule)) { showError("Rulestring must look like B36/S23 (digits 0–8)."); return; }
+  } else if (key === "custom3d") {
+    const slo = parseInt($("s3lo").value, 10), shi = parseInt($("s3hi").value, 10);
+    const blo = parseInt($("b3lo").value, 10), bhi = parseInt($("b3hi").value, 10);
+    const density = parseFloat($("dens3").value);
+    for (const [lo, hi] of [[slo, shi], [blo, bhi]]) {
+      if (isNaN(lo) || isNaN(hi) || lo < 0 || hi > 26 || lo > hi) {
+        showError("3D ranges need 0 ≤ lo ≤ hi ≤ 26."); return;
+      }
+    }
+    family = "rule3d";
+    rule = JSON.stringify({ survive: [slo, shi], birth: [blo, bhi], density: isNaN(density) ? 0.5 : density });
+  } else {
+    family = "named";
+    rule = key;
   }
   $("error").classList.remove("visible");
   $("run").disabled = true;
@@ -319,7 +388,250 @@ $("run").addEventListener("click", () => {
   });
 });
 
-// ---- comparison ----
+// ---------------------------------------------------------------------------
+// Field decoding
+// ---------------------------------------------------------------------------
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function decodeField(field) {
+  const raw = b64ToBytes(field.data);
+  const n = field.shape.reduce((a, b) => a * b, 1);
+  if (!field.packed) return { shape: field.shape, data: raw.subarray(0, n) };
+  const out = new Uint8Array(n);
+  for (let i = 0; i < n; i++) out[i] = (raw[i >> 3] >> (7 - (i & 7))) & 1;
+  return { shape: field.shape, data: out };
+}
+
+function cssColor(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function hexToRgb(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+}
+
+// ---------------------------------------------------------------------------
+// Flat (2D image) rendering
+// ---------------------------------------------------------------------------
+function drawFlat(canvas, data, offset, h, w, isDefect) {
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.createImageData(w, h);
+  const zero = hexToRgb(cssColor("--cell-zero"));
+  const onColor = hexToRgb(cssColor(isDefect ? "--cell-defect" : "--cell-one"));
+  const n = h * w;
+  for (let i = 0; i < n; i++) {
+    const c = data[offset + i] ? onColor : zero;
+    imageData.data[i * 4] = c[0];
+    imageData.data[i * 4 + 1] = c[1];
+    imageData.data[i * 4 + 2] = c[2];
+    imageData.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+  canvas.style.aspectRatio = `${w} / ${h}`;
+}
+
+// ---------------------------------------------------------------------------
+// Voxel inspector: dependency-free canvas renderer.
+// Orthographic projection, painter's sort, surface-face culling.
+// Volume convention: dims [D0, D1, D2] with D0 drawn as the vertical axis.
+// ---------------------------------------------------------------------------
+const FACE_DIRS = [
+  { n: [0, 0, 1] }, { n: [0, 0, -1] },   // ±vertical (D0)
+  { n: [0, 1, 0] }, { n: [0, -1, 0] },   // ±depth (D1)
+  { n: [1, 0, 0] }, { n: [-1, 0, 0] },   // ±horizontal (D2)
+];
+// Corner offsets for the face with normal n: the face's 4 corners around the
+// voxel center, in world axes (x = D2, y = D1, z = D0 pointing up).
+function faceCorners(n) {
+  const [nx, ny, nz] = n;
+  const c = [];
+  // pick the two axes orthogonal to the normal
+  const axes = [[1, 0, 0], [0, 1, 0], [0, 0, 1]].filter(
+    (a) => a[0] * nx + a[1] * ny + a[2] * nz === 0
+  );
+  const [u, v] = axes;
+  for (const [su, sv] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    c.push([
+      0.5 * (nx + su * u[0] + sv * v[0]),
+      0.5 * (ny + su * u[1] + sv * v[1]),
+      0.5 * (nz + su * u[2] + sv * v[2]),
+    ]);
+  }
+  return c;
+}
+const FACE_GEOMS = FACE_DIRS.map((f) => ({ n: f.n, corners: faceCorners(f.n) }));
+
+class VoxelViewer {
+  constructor(canvas, { color, camera, heightPx }) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.color = color;                    // [r, g, b]
+    this.camera = camera;                  // shared {yaw, pitch, zoom, viewers[]}
+    this.heightPx = heightPx || 300;
+    this.faces = [];
+    this.dims = [1, 1, 1];
+    this.note = "";
+    camera.viewers.push(this);
+    this.attachEvents();
+  }
+
+  // get(i0, i1, i2) -> 0|1 over dims [D0, D1, D2]
+  setVolume(dims, get) {
+    this.dims = dims;
+    const [D0, D1, D2] = dims;
+    const cz = (D0 - 1) / 2, cy = (D1 - 1) / 2, cx = (D2 - 1) / 2;
+    const faces = [];
+    const filled = (i0, i1, i2) =>
+      i0 >= 0 && i0 < D0 && i1 >= 0 && i1 < D1 && i2 >= 0 && i2 < D2 && get(i0, i1, i2);
+    let count = 0;
+    for (let i0 = 0; i0 < D0; i0++) {
+      for (let i1 = 0; i1 < D1; i1++) {
+        for (let i2 = 0; i2 < D2; i2++) {
+          if (!get(i0, i1, i2)) continue;
+          count++;
+          const x = i2 - cx, y = i1 - cy, z = i0 - cz;
+          for (const geom of FACE_GEOMS) {
+            const [nx, ny, nz] = geom.n;
+            if (filled(i0 + nz, i1 + ny, i2 + nx)) continue; // internal face
+            faces.push({ x, y, z, geom });
+          }
+        }
+      }
+    }
+    this.faces = faces;
+    this.voxelCount = count;
+    this.radius = 0.5 * Math.sqrt(D0 * D0 + D1 * D1 + D2 * D2);
+    this.render();
+  }
+
+  attachEvents() {
+    const cam = this.camera;
+    let dragging = false, lastX = 0, lastY = 0;
+    this.canvas.addEventListener("pointerdown", (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      this.canvas.setPointerCapture(e.pointerId);
+    });
+    this.canvas.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      cam.yaw += (e.clientX - lastX) * 0.01;
+      cam.pitch = Math.max(-1.5, Math.min(1.5, cam.pitch + (e.clientY - lastY) * 0.01));
+      lastX = e.clientX; lastY = e.clientY;
+      cam.requestRender();
+    });
+    const stop = (e) => { dragging = false; };
+    this.canvas.addEventListener("pointerup", stop);
+    this.canvas.addEventListener("pointercancel", stop);
+    this.canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      cam.zoom *= Math.exp(-e.deltaY * 0.001);
+      cam.zoom = Math.max(0.2, Math.min(8, cam.zoom));
+      cam.requestRender();
+    }, { passive: false });
+  }
+
+  render() {
+    const canvas = this.canvas;
+    const cssWidth = canvas.clientWidth || 320;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = Math.round(cssWidth * dpr), H = Math.round(this.heightPx * dpr);
+    if (canvas.width !== W) canvas.width = W;
+    if (canvas.height !== H) canvas.height = H;
+    canvas.style.height = `${this.heightPx}px`;
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, W, H);
+
+    if (!this.faces.length) {
+      ctx.fillStyle = cssColor("--muted");
+      ctx.font = `${13 * dpr}px system-ui`;
+      ctx.textAlign = "center";
+      ctx.fillText("no filled sites", W / 2, H / 2);
+      return;
+    }
+
+    const { yaw, pitch, zoom } = this.camera;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const scale = zoom * 0.44 * Math.min(W, H) / this.radius;
+    const cxs = W / 2, cys = H / 2;
+    // rotate: yaw about z (up), then pitch about x; view looks along +y
+    const project = (x, y, z) => {
+      const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
+      const y2 = y1 * cp - z * sp, z2 = y1 * sp + z * cp;
+      return [cxs + x1 * scale, cys - z2 * scale, y2];
+    };
+    const light = [-0.35, -0.75, 0.55]; // view-space light direction
+    const drawList = [];
+    for (const f of this.faces) {
+      const [nx, ny, nz] = f.geom.n;
+      // rotated normal
+      const rnx = nx * cy - ny * sy, rny1 = nx * sy + ny * cy;
+      const rny = rny1 * cp - nz * sp, rnz = rny1 * sp + nz * cp;
+      if (rny >= 0) continue; // backface (pointing away from viewer)
+      const [px, py, depth] = project(f.x, f.y, f.z);
+      const lam = Math.max(0, -(rnx * light[0] + rny * light[1] + rnz * light[2]));
+      drawList.push({ f, depth, shade: 0.55 + 0.45 * lam });
+    }
+    drawList.sort((a, b) => b.depth - a.depth); // far to near
+    const [r, g, b] = this.color;
+    for (const item of drawList) {
+      const { f, shade } = item;
+      ctx.beginPath();
+      let first = true;
+      for (const [ox, oy, oz] of f.geom.corners) {
+        const [px, py] = project(f.x + ox, f.y + oy, f.z + oz);
+        if (first) { ctx.moveTo(px, py); first = false; }
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgb(${Math.round(r * shade)},${Math.round(g * shade)},${Math.round(b * shade)})`;
+      ctx.fill();
+    }
+    if (this.note) {
+      ctx.fillStyle = cssColor("--muted");
+      ctx.font = `${11 * dpr}px system-ui`;
+      ctx.textAlign = "left";
+      ctx.fillText(this.note, 8 * dpr, H - 8 * dpr);
+    }
+  }
+}
+
+function makeCamera() {
+  const cam = { yaw: -0.7, pitch: 0.45, zoom: 1, viewers: [], pending: false };
+  cam.requestRender = () => {
+    if (cam.pending) return;
+    cam.pending = true;
+    requestAnimationFrame(() => {
+      cam.pending = false;
+      for (const v of cam.viewers) v.render();
+    });
+  };
+  return cam;
+}
+
+// ---------------------------------------------------------------------------
+// Result rendering
+// ---------------------------------------------------------------------------
+const FIELD_ORDER = ["spacetime", "background", "defect"];
+let view = null; // current decoded fields + per-dim state
+
+function panelFigure(parent, caption, kind) {
+  const fig = document.createElement("figure");
+  const canvas = document.createElement("canvas");
+  canvas.className = kind;
+  const cap = document.createElement("figcaption");
+  cap.textContent = caption;
+  fig.appendChild(canvas);
+  fig.appendChild(cap);
+  parent.appendChild(fig);
+  return canvas;
+}
+
 function compareValue(kind, expectedRaw, actual) {
   if (expectedRaw === "" || expectedRaw === "nan" || expectedRaw === null || expectedRaw === undefined) {
     return { ok: actual === null || actual === undefined, diff: "" };
@@ -332,7 +644,6 @@ function compareValue(kind, expectedRaw, actual) {
   const rel = denom ? Math.abs(exp - act) / denom : 0;
   return { ok: Math.abs(exp - act) <= ABS_TOL || rel <= REL_TOL, diff: rel.toExponential(1) };
 }
-
 function fmt(value) {
   if (value === null || value === undefined) return "—";
   const num = Number(value);
@@ -340,29 +651,24 @@ function fmt(value) {
   return String(value);
 }
 
-function render(res) {
-  $("results").style.display = "";
-  const rec = res.record;
-
-  // verdict + comparison
+function renderVerdict(rec) {
   const key = `${rec.rule}|${rec.seed}|${rec.horizon}`;
   const expected = expectedRows ? expectedRows[key] : null;
   const table = $("compare");
   table.innerHTML = "";
   if (expected) {
     let allOk = true;
-    let head = "<tr><th>Column</th><th class='num'>Committed (paper)</th><th class='num'>Your browser</th><th class='num'>Rel. diff</th><th>Match</th></tr>";
-    let body = "";
+    let html = "<tr><th>Column</th><th class='num'>Committed (paper)</th><th class='num'>Your browser</th><th class='num'>Rel. diff</th><th>Match</th></tr>";
     for (const [column, kind] of COMPARE_COLUMNS) {
       const { ok, diff } = compareValue(kind, expected[column], rec[column]);
       allOk = allOk && ok;
-      body += `<tr><td><code>${column}</code></td>` +
+      html += `<tr><td><code>${column}</code></td>` +
         `<td class="num">${fmt(expected[column])}</td>` +
         `<td class="num">${fmt(rec[column])}</td>` +
         `<td class="num">${diff || "—"}</td>` +
         `<td class="${ok ? "match" : "mismatch"}">${ok ? "✓" : "✗"}</td></tr>`;
     }
-    table.innerHTML = head + body;
+    table.innerHTML = html;
     $("compare-wrap").style.display = "";
     $("verdict-line").innerHTML = allOk
       ? `<span class="badge ok">REPRODUCED</span> Your browser regenerated the committed row for
@@ -377,96 +683,95 @@ function render(res) {
        <strong>${rec.rule}</strong>, seed ${rec.seed}, T=${rec.horizon}, so there is nothing to
        compare against — the result below is a fresh run of the same pipeline.`;
   }
+}
 
-  // selection summary
-  const shiftLabel = res.dimension === 1 ? "shift s" : "shift vector";
-  const kv = [
-    ["Selected period p", rec.selected_period],
-    [shiftLabel, rec.selected_shift_str],
-    ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
-    ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
-    ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
-    ["Status", rec.status],
-  ];
-  $("selection-kv").innerHTML = kv
-    .map(([k, v]) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`)
-    .join("");
-  $("run-meta").textContent =
-    `${res.case_name} · search grid "${res.search_label}" · ${res.n_candidates} candidates · ` +
-    `${res.runtime_s}s in-browser` + (res.lz4_shimmed ? " · lz4 shimmed (cosmetic)" : "");
+function renderPanels(res) {
+  const panels = $("panels");
+  panels.innerHTML = "";
+  $("voxel-help").style.display = "none";
+  $("time-card").style.display = "none";
+  const dim = res.dimension;
+  const fields = view.fields;
+  const T = fields.spacetime.shape[0];
 
-  // canvases
-  const captions = res.dimension === 1
-    ? ["Observed spacetime U (time ↓)", "Selected background B*", "Defect mask M = U ⊕ B*"]
-    : res.dimension === 2
-      ? [`Final frame (t=${rec.horizon - 1}) of U`, "Final frame of B*", "Final frame of M"]
-      : [`Mid-depth slice of final frame of U`, "Same slice of B*", "Same slice of M"];
-  const holder = $("canvases");
-  holder.innerHTML = "";
-  ["spacetime", "background", "defect"].forEach((name, i) => {
-    const img = res.images[name];
-    const fig = document.createElement("figure");
-    const canvas = document.createElement("canvas");
-    drawBinary(canvas, img, name === "defect");
-    const cap = document.createElement("figcaption");
-    cap.textContent = captions[i];
-    fig.appendChild(canvas);
-    fig.appendChild(cap);
-    holder.appendChild(fig);
+  if (dim === 1) {
+    // Full spacetime diagrams — nothing sliced away in 1D.
+    const captions = ["Observed spacetime U (time ↓)", "Selected background B*", "Defect mask M = U ⊕ B*"];
+    FIELD_ORDER.forEach((name, i) => {
+      const f = fields[name];
+      const canvas = panelFigure(panels, captions[i], "flat");
+      drawFlat(canvas, f.data, 0, f.shape[0], f.shape[1], name === "defect");
+    });
+    return;
+  }
+
+  // dims 2 and 3 get a time slider
+  $("time-card").style.display = "";
+  const slider = $("tslider");
+  slider.max = T - 1;
+  slider.value = T - 1;
+  $("tmax").textContent = `of ${T - 1}`;
+  $("tval").textContent = T - 1;
+
+  if (dim === 2) {
+    const [_, Hh, Ww] = fields.spacetime.shape;
+    const captions = ["Frame of U", "Frame of B*", "Frame of M"];
+    const flatCanvases = FIELD_ORDER.map((name, i) => panelFigure(panels, captions[i], "flat"));
+    view.drawFrame = (t) => {
+      FIELD_ORDER.forEach((name, i) => {
+        drawFlat(flatCanvases[i], fields[name].data, t * Hh * Ww, Hh, Ww, name === "defect");
+      });
+    };
+    view.drawFrame(T - 1);
+
+    // 3D world-tube inspection of the defect mask: time increases upward.
+    $("voxel-help").style.display = "";
+    const cam = makeCamera();
+    view.camera = cam;
+    const canvas = panelFigure(panels, "Defect world-tubes M — time increases upward; drag to rotate", "voxel");
+    const viewer = new VoxelViewer(canvas, {
+      color: hexToRgb(cssColor("--cell-defect")), camera: cam, heightPx: 420,
+    });
+    const d = fields.defect;
+    let stride = 1;
+    const totalDefects = res.defects_per_frame.reduce((a, b) => a + b, 0);
+    while (totalDefects / stride > MAX_WORLDTUBE_VOXELS) stride++;
+    const Ts = Math.floor((T + stride - 1) / stride);
+    viewer.note = stride > 1 ? `time downsampled ×${stride} to stay interactive` : "";
+    viewer.setVolume([Ts, Hh, Ww], (i0, i1, i2) => d.data[(i0 * stride) * Hh * Ww + i1 * Ww + i2]);
+    return;
+  }
+
+  // dim === 3: fully rotatable voxel views of U, B*, and M at the chosen t.
+  $("voxel-help").style.display = "";
+  const [__, Sz, Sy, Sx] = fields.spacetime.shape;
+  const frameSize = Sz * Sy * Sx;
+  const cam = makeCamera();
+  view.camera = cam;
+  const captions = ["Observed U at t", "Background B* at t", "Defect mask M at t"];
+  const one = hexToRgb(cssColor("--cell-one"));
+  const red = hexToRgb(cssColor("--cell-defect"));
+  const viewers = FIELD_ORDER.map((name, i) => {
+    const canvas = panelFigure(panels, captions[i], "voxel");
+    return new VoxelViewer(canvas, {
+      color: name === "defect" ? red : one, camera: cam, heightPx: 300,
+    });
   });
-
-  drawSpark($("spark"), res.defects_per_frame);
-
-  // period ranking table
-  let html = "<tr><th class='num'>Rank</th><th class='num'>Period</th><th>Best shift</th>" +
-    "<th class='num'>NML bits</th><th class='num'>NLL bits</th><th class='num'>Complexity</th>" +
-    "<th class='num'>Defect rate</th></tr>";
-  for (const row of res.period_summary) {
-    html += `<tr><td class="num">${row.period_rank}</td><td class="num">${row.period}</td>` +
-      `<td>${row.best_shift_str}</td>` +
-      `<td class="num">${Number(row.nml_bits).toFixed(2)}</td>` +
-      `<td class="num">${Number(row.nll_bits).toFixed(2)}</td>` +
-      `<td class="num">${Number(row.nml_complexity).toFixed(2)}</td>` +
-      `<td class="num">${(Number(row.defect_rate) * 100).toFixed(3)}%</td></tr>`;
-  }
-  $("periods").innerHTML = html;
+  view.drawFrame = (t) => {
+    FIELD_ORDER.forEach((name, i) => {
+      const f = fields[name];
+      const base = t * frameSize;
+      viewers[i].setVolume([Sz, Sy, Sx], (i0, i1, i2) => f.data[base + i0 * Sy * Sx + i1 * Sx + i2]);
+    });
+  };
+  view.drawFrame(T - 1);
 }
 
-function b64ToBytes(b64) {
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes;
-}
-
-function cssColor(name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-function hexToRgb(hex) {
-  const v = parseInt(hex.slice(1), 16);
-  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
-}
-
-function drawBinary(canvas, img, isDefect) {
-  const [h, w] = img.shape;
-  const bytes = b64ToBytes(img.data);
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  const imageData = ctx.createImageData(w, h);
-  const zero = hexToRgb(cssColor("--cell-zero"));
-  const onColor = hexToRgb(cssColor(isDefect ? "--cell-defect" : "--cell-one"));
-  for (let i = 0; i < bytes.length; i++) {
-    const c = bytes[i] ? onColor : zero;
-    imageData.data[i * 4] = c[0];
-    imageData.data[i * 4 + 1] = c[1];
-    imageData.data[i * 4 + 2] = c[2];
-    imageData.data[i * 4 + 3] = 255;
-  }
-  ctx.putImageData(imageData, 0, 0);
-  // keep tall 1D spacetimes readable
-  canvas.style.aspectRatio = `${w} / ${h}`;
-}
+$("tslider").addEventListener("input", () => {
+  const t = parseInt($("tslider").value, 10);
+  $("tval").textContent = t;
+  if (view && view.drawFrame) view.drawFrame(t);
+});
 
 function drawSpark(canvas, series) {
   const ctx = canvas.getContext("2d");
@@ -488,6 +793,50 @@ function drawSpark(canvas, series) {
   ctx.fillText(`max ${maxV} defects/frame · final ${series[series.length - 1]}`, pad + 2, 12);
 }
 
+function render(res) {
+  $("results").style.display = "";
+  const rec = res.record;
+  view = { fields: {} };
+  for (const name of FIELD_ORDER) view.fields[name] = decodeField(res.fields[name]);
+
+  renderVerdict(rec);
+
+  const shiftLabel = res.dimension === 1 ? "shift s" : "shift vector";
+  const kv = [
+    ["Selected period p", rec.selected_period],
+    [shiftLabel, rec.selected_shift_str],
+    ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
+    ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
+    ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
+    ["Status", rec.status],
+  ];
+  $("selection-kv").innerHTML = kv
+    .map(([k, v]) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`)
+    .join("");
+  $("run-meta").textContent =
+    `${res.case_name} · search grid "${res.search_label}" · ${res.n_candidates} candidates · ` +
+    `${res.runtime_s}s in-browser` + (res.lz4_shimmed ? " · lz4 shimmed (cosmetic)" : "");
+
+  renderPanels(res);
+  drawSpark($("spark"), res.defects_per_frame);
+
+  let html = "<tr><th class='num'>Rank</th><th class='num'>Period</th><th>Best shift</th>" +
+    "<th class='num'>NML bits</th><th class='num'>NLL bits</th><th class='num'>Complexity</th>" +
+    "<th class='num'>Defect rate</th></tr>";
+  for (const row of res.period_summary) {
+    html += `<tr><td class="num">${row.period_rank}</td><td class="num">${row.period}</td>` +
+      `<td>${row.best_shift_str}</td>` +
+      `<td class="num">${Number(row.nml_bits).toFixed(2)}</td>` +
+      `<td class="num">${Number(row.nll_bits).toFixed(2)}</td>` +
+      `<td class="num">${Number(row.nml_complexity).toFixed(2)}</td>` +
+      `<td class="num">${(Number(row.defect_rate) * 100).toFixed(3)}%</td></tr>`;
+  }
+  $("periods").innerHTML = html;
+}
+
+// Test hook: lets automated checks feed a synthetic result through the full
+// rendering path (no Pyodide needed).
+window.__testRender = render;
 </script>
 </body>
 </html>
