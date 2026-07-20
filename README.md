@@ -56,11 +56,13 @@ python scripts/build_review_site.py --embed-images
 
 ### Hosting
 
-Pushes to `main` that touch the paper, outputs, or the site generator trigger
+The site is published via GitHub Pages from the `gh-pages` branch at
+`https://<owner>.github.io/Winnower/`. Pushes to `main` that touch the paper,
+outputs, or the site generator trigger
 `.github/workflows/deploy-review-site.yml`, which builds a standalone copy
-(figures embedded, paper PDF included) and publishes it to GitHub Pages at
-`https://<owner>.github.io/Winnower/`. To host elsewhere, build the same
-folder locally and upload it to any static host (Netlify, Vercel, S3, …):
+(figures embedded, paper PDF included) and force-pushes it to `gh-pages`.
+To host elsewhere, build the same folder locally and upload it to any static
+host (Netlify, Vercel, S3, …):
 
 ```bash
 python scripts/build_review_site.py --pages _site
