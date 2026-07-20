@@ -148,7 +148,7 @@ def plot_decomposition(fit: RelativePeriodicFit, *, source: np.ndarray, title_pr
         caption="Red cells disagree with the fitted background. Look for compact world-tubes and clean boundaries instead of diffuse pepper noise.",
         legend_handles=[
             *_binary_legend_handles(),
-            Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="defect = red"),
+            Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="residual = red"),
         ],
     )
     return fig, axes

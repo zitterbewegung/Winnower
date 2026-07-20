@@ -191,6 +191,20 @@ This is the corrected and strengthened version of Theorem 3.
 
 ### Version E.1 (Bernoulli NML score — recommended)
 
+> **Status note (audit, post-review).** As stated below, full stabilization
+> overclaims: from assumption (E1) alone the NLL remainder is o(N), which can
+> swamp the (k_c/2)·log2 T complexity gap, so log-term tie-breaking between
+> equal-rate candidates is NOT established here — and equal-rate candidates
+> with the *same* period but different shifts have identical complexity, so
+> no tie-break exists for them at all. The defensible content of E.1 is
+> pairwise eventual ordering and elimination of rate-dominated candidates,
+> plus stabilization when the rate minimizer is unique — exactly the form in
+> `docs/CLAIM_LEDGER.md` (Theorem 3) and the Lean-checked core
+> (`proofs/aristotle_submissions/verify/Verify/Theorem3.lean`). Complexity
+> tie-breaking among equal-rate velocity-matched multiples is proved
+> separately under the eventually-exactly-periodic hypothesis (Theorem 5 in
+> the ledger), where the NLL gap is O(1).
+
 **Theorem E.1 (Bernoulli-NML Stabilization).** Let C = {c_1, ..., c_m} be a
 finite set of candidate models, each specifying a period p_c and shift s_c.
 For each candidate c with k_c = p_c * prod_i D_i orbit classes, define:
@@ -407,7 +421,16 @@ checkable from a single deterministic CA run.
 
 1. **"MDL converges to the true background period."** False in general (Theorem D).
 2. **"Higher periods always achieve lower defect rates."** False without the velocity-matching condition (Theorem C.2 counterexample).
-3. **"The score uses exact NML."** The asymptotic approximation (1/2) log n omits the constant (1/2) log(pi/2) per class. This is acceptable for model selection but is not "exact NML."
+3. **"The score uses exact NML."** Partially outdated: the shipped default
+   (`nml_mode="hybrid"` in `coding.py`) computes the *exact* Shtarkov
+   normalizer for classes with n ≤ 200 and the asymptotic
+   (1/2) log2(π·n/2) — π/2 constant *included* — above that cutoff. So the
+   implemented score is exact for most survey-scale classes and
+   asymptotic-with-constant otherwise; it is still not exact NML for all
+   class sizes. Since exact regret = (1/2)log2(π·n/2) + o(1), the hybrid
+   score differs from the asymptotic score analyzed in E.1 by O(k_c)
+   per candidate — constant in T — so the asymptotic theorems (E.1's
+   elimination parts, Theorem 5) apply verbatim to the hybrid score.
 4. **"Run-length codelength converges per-site under (A2)."** The original paper's assumption (A2) is insufficient. However, for finite deterministic CA, convergence IS provable under the no-exact-ties assumption (Theorem G.2). For the NML score, convergence is unconditional (Corollary G.3).
 5. **"Defects" in the computational-mechanics sense.** The projection residuals are geometric artifacts of the Hamming projection, not necessarily physical defects, domain walls, or particles.
 

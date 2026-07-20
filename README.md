@@ -49,12 +49,13 @@ Bernoulli-NML selection — for any ECA rule, any 2D B/S rulestring, arbitrary
 3D birth/survive count sets (e.g. `B5-7,9/S4,6-8`, non-contiguous allowed),
 or the paper's representative 2D/3D rules, and compares
 the result against the committed row of `eca_atlas_runs.csv` /
-`seed_stability_runs.csv`, column by column. Results are inspectable
-interactively: full spacetime diagrams in 1D, frame scrubbing plus a
-rotatable 3D world-tube view of the defect mask in 2D, and fully rotatable
-linked voxel views of spacetime, background, and defects in 3D. The
-browser code path (numba stubbed, vectorized simulator kernels) is verified
-bit-identical to the committed CSVs by:
+`seed_stability_runs.csv`, column by column (integers and strings exactly,
+floats at 1e-9 relative tolerance; max observed deviation 9×10⁻¹³). Results
+are inspectable interactively: full spacetime diagrams in 1D, frame
+scrubbing plus a rotatable 3D world-tube view of the residual mask in 2D,
+and fully rotatable linked voxel views of spacetime, background, and
+residual in 3D. The browser code path (numba stubbed, vectorized simulator
+kernels) is verified against the committed CSVs by:
 
 ```bash
 make verify-webdemo    # or: python scripts/verify_webdemo_bootstrap.py --block-numba

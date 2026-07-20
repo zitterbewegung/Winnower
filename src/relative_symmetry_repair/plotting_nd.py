@@ -271,7 +271,7 @@ def plot_3d_volume_decomposition(
             shade=True,
         )
     axes[2].set_title(
-        f"{title_prefix}defects (overlay)\n"
+        f"{title_prefix}residual (overlay)\n"
         f"rate={fit.defect_rate:.3f}  ({fit.defect_sites}/{fit.total_sites} cells)"
     )
 

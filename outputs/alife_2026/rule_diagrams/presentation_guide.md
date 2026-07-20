@@ -30,7 +30,7 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - What the observed panel means: the raw CA state before any decomposition.
 - What the background panel means: the periodic scaffold chosen by the selector.
 - What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
-- Why this rule is in the presentation set: Alternating domains and clearer phase locking make the periodic scaffold easier to see.
+- Why this rule is in the presentation set: Alternating domains and clearer phase locking make the periodic background easier to see.
 
 ### ECA-110
 

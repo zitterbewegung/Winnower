@@ -1,0 +1,30 @@
+name: Lean proof check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "proofs/**"
+      - ".github/workflows/lean-verify.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: proofs/aristotle_submissions/verify
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+
+      - name: Build verified targets
+        run: lake build

@@ -65,7 +65,7 @@ PAPER_OVERVIEW_CAPTION = (
     "and the final residual mask. "
     "(C) Representative 3D rules show midplane slices through the observed spacetime, selected background, "
     "and residual mask. "
-    "Across dimensions, the same selector extracts a global scaffold and isolates the structured residuals that remain."
+    "Across dimensions, the same selector extracts a global background and isolates the structured residuals that remain."
 )
 
 PAPER_MECHANISMS_CAPTION = (
@@ -86,7 +86,7 @@ TEXT_COLOR = ALIFE_TEXT_COLOR
 
 RULE_NOTES = {
     "ECA-30": "Chaotic texture with little large-scale repetition; the selector still prefers a simple background.",
-    "ECA-54": "Alternating domains and clearer phase locking make the periodic scaffold easier to see.",
+    "ECA-54": "Alternating domains and clearer phase locking make the periodic background easier to see.",
     "ECA-110": "Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.",
     "Diamoeba": "Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.",
     "Maze with Mice": "Maze-like corridors remain coherent while local fluctuations ride on top of them.",
@@ -185,7 +185,7 @@ def _text_block(payload: DiagramPayload) -> str:
             f"best p = {payload.selected_period}",
             f"best s = {payload.selected_shift}",
             f"margin = {payload.winner_margin_bits:.1f} bits",
-            f"defect = {payload.defect_rate:.3f}",
+            f"residual = {payload.defect_rate:.3f}",
             "",
             "What to notice:",
             note,
@@ -238,8 +238,8 @@ def _crop_image(image: np.ndarray, bbox: tuple[int, int, int, int]) -> np.ndarra
 def _presentation_panel_meaning() -> str:
     return (
         "The observed panel shows the raw CA state. "
-        "The background panel shows the selected relative-periodic scaffold. "
-        "The defect panel shows the cells that the scaffold cannot explain."
+        "The background panel shows the selected relative-periodic background. "
+        "The residual panel shows the cells that the background cannot explain."
     )
 
 
@@ -297,7 +297,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Rule", "Observed spacetime", "Selected background", "Defect mask"]
+        headers = ["Rule", "Observed spacetime", "Selected background", "Residual mask"]
         for col, header in enumerate(headers):
             if col == 0:
                 axes[0, col].set_title(header, fontsize=11)
@@ -338,7 +338,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
         fig.text(
             0.5,
             0.012,
-            "Use these as reading panels: first see the raw texture, then the fitted scaffold, then the residual structure in red.",
+            "Use these as reading panels: first see the raw texture, then the fitted background, then the residual structure in red.",
             ha="center",
             va="bottom",
             fontsize=9,
@@ -396,7 +396,7 @@ def _plot_nd_overview(payloads: list[DiagramPayload], *, title: str, caption: st
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Rule", "t = 0", "t = mid", "t = last", "Background at last", "Defect at last"]
+        headers = ["Rule", "t = 0", "t = mid", "t = last", "Background at last", "Residual at last"]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=11)
 
@@ -466,7 +466,7 @@ def _plot_presentation_1d(payloads: list[DiagramPayload], path: Path) -> None:
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Rule", "Observed\n(raw spacetime)", "Background\n(selected scaffold)", "Defect\n(what the fit misses)"]
+        headers = ["Rule", "Observed\n(raw spacetime)", "Background\n(selected fit)", "Residual\n(what the fit misses)"]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=12)
 
@@ -531,7 +531,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
             "Observed t = mid",
             "Observed t = last",
             "Background at last",
-            "Defect at last",
+            "Residual at last",
         ]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=12)
@@ -607,7 +607,7 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
             "Observed projection t = mid",
             "Observed projection t = last",
             "Background projection at last",
-            "Defect projection at last",
+            "Residual projection at last",
         ]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=12)
@@ -692,7 +692,7 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Case", "Observed t = mid", "Observed t = last", "Background at last", "Defect at last"]
+        headers = ["Case", "Observed t = mid", "Observed t = last", "Background at last", "Residual at last"]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=18.0, color=TEXT_COLOR)
 
@@ -736,7 +736,7 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
 def _plot_poster_focus_3d(payload: DiagramPayload, path: Path) -> None:
     with plt.rc_context({**POSTER_DIAGRAM_RC, "axes.titlepad": 10}):
         fig, axes = plt.subplots(1, 4, figsize=(12.4, 3.1))
-        headers = ["Observed t = mid", "Observed t = last", "Background", "Defect"]
+        headers = ["Observed t = mid", "Observed t = last", "Background", "Residual"]
         for ax, header in zip(axes, headers):
             ax.set_title(header, fontsize=13.8, color=TEXT_COLOR)
 
@@ -1241,15 +1241,18 @@ def _compose_paper_figure(
 
         for index, (ax, panel_path, panel_title, panel_label) in enumerate(zip(axes, panel_paths, panel_titles, panel_labels)):
             image = plt.imread(panel_path)
+            # crop the panel's own suptitle strip; the composite draws its
+            # own panel title card, and the two otherwise overlap
+            image = image[int(image.shape[0] * 0.035):]
             ax.imshow(image)
             ax.axis("off")
             ax.text(
                 0.01,
-                0.98,
+                1.002,
                 panel_label,
                 transform=ax.transAxes,
                 ha="left",
-                va="top",
+                va="bottom",
                 fontsize=13,
                 fontweight="bold",
                 color=TEXT_COLOR,
@@ -1261,12 +1264,12 @@ def _compose_paper_figure(
                 },
             )
             ax.text(
-                0.11,
-                0.98,
+                0.06,
+                1.002,
                 panel_title,
                 transform=ax.transAxes,
                 ha="left",
-                va="top",
+                va="bottom",
                 fontsize=10,
                 color=TEXT_COLOR,
                 bbox={

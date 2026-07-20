@@ -1,6 +1,34 @@
 # Claim Ledger
 
-Current status of major claims in `paper/paper_v8.md`.
+Status of every formal claim in the project's long-form theory notes (the
+internal `paper_v8`/`paper_v15` lineage, preserved under `_archive/paper_drafts/`
+and `proofs/aristotle_submissions/shared_context/`). Section numbers below
+refer to those notes, not to the conference manuscript.
+
+**How this maps to the current manuscript** (`paper/paper_alife2026.tex`):
+the manuscript deliberately keeps formal machinery out of the main text and
+states only three things — a proposition that majority vote is the optimal
+orbit-class fit, and two informal properties ("why the penalty is necessary"
+and "why selections stabilize"). Their formal counterparts here are:
+
+| Manuscript statement | Ledger entry |
+|---|---|
+| Proposition (majority vote is optimal) | Theorem 1 (Optimal Hamming Projection) |
+| Property: penalty necessary (velocity-matched refinement only improves fit) | Theorem 2 (Monotonicity under Velocity-Matched Refinement) + Corollary (Overcapacity) |
+| Property: selections stabilize | Theorem 3 (Rate-Based Elimination and Stabilization) |
+
+Everything else in this ledger (Theorems 4–5, Proposition 1 on run-length
+codelength, Appendix D) supports the longer-form notes only and is **not
+claimed in the manuscript**. The manuscript's experimental claims rest on the
+reproducible pipeline, not on these theorems.
+
+**Score-definition note.** Definition 4 below states the complexity term as
+the asymptotic Σ (1/2)·log2 n_j. The shipped implementation
+(`nml_mode="hybrid"`) computes the exact Shtarkov complexity for classes with
+n ≤ 200 and (1/2)·log2(π·n/2) above. Exact regret = (1/2)·log2(π·n/2) + o(1),
+so hybrid and asymptotic scores differ by O(k_c) per candidate — constant in
+T — and every asymptotic conclusion in this ledger transfers to the hybrid
+score unchanged.
 
 ---
 

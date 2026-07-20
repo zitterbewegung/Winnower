@@ -37,9 +37,9 @@ FIGURES = [
         title="Algorithm overview",
         caption=(
             "A candidate (period, shift) pair induces an orbit partition of the "
-            "spacetime. Majority vote on each orbit gives the nearest "
-            "relative-periodic background B*; the residual mask M = U ⊕ B* is "
-            "what the scaffold cannot explain. Candidates are compared with a "
+            "spacetime. Majority vote on each orbit class gives the best-fitting "
+            "background B*; the residual mask M = U ⊕ B* marks every cell the "
+            "background cannot explain. Candidates are compared with a "
             "Bernoulli NML score (fit + complexity)."
         ),
         source="scripts/alife/alife_algorithm_figure.py",
@@ -48,7 +48,7 @@ FIGURES = [
         path=ALIFE / "rule_diagrams" / "representative_rules_1d.png",
         title="Representative 1D rules (ECA 30 / 54 / 110)",
         caption=(
-            "Spacetime, fitted background, and residual mask for the three focus "
+            "Spacetime, selected background B*, and residual mask M for the three focus "
             "elementary CA. Rule 54 decomposes cleanly into a periodic background "
             "plus particle-like residuals; Rule 30 stays diffuse."
         ),
@@ -74,9 +74,9 @@ FIGURES = [
         path=ALIFE / "editable_figures" / "stabilization_summary.png",
         title="Period stabilization",
         caption=(
-            "Selected period vs. horizon for representative rules: the selector "
-            "locks onto a period and the NML margin grows after locking "
-            "(empirical counterpart of Theorem 3)."
+            "Selected period vs. horizon T for representative rules: the selector "
+            "locks onto a period and the NML margin (bits between winner and "
+            "runner-up) grows after locking."
         ),
         source="scripts/alife/alife_stabilization_summary.py",
     ),
@@ -92,8 +92,8 @@ FIGURES = [
     ),
     dict(
         path=ALIFE / "null_controls" / "null_controls_defect_rate.png",
-        title="Null controls — defect rate",
-        caption="Defect (residual) rates for the same control panel.",
+        title="Null controls — residual rate",
+        caption="Residual (defect) rates for the same control panel.",
         source="scripts/alife/alife_run_all.py (null_controls)",
     ),
     dict(
@@ -145,18 +145,29 @@ FIGURES = [
     dict(
         path=ALIFE / "rule_diagrams_3d_voxel" / "diamoeba3d" / "diamoeba3d_voxel_decomposition.png",
         title="3D voxel decomposition — diamoeba3d",
-        caption="Voxel view of spacetime, fitted background, and residual for a 3D rule.",
+        caption="Voxel view of spacetime U, selected background B*, and residual mask M for a 3D rule.",
         source="scripts/alife/alife_rule_diagrams.py",
     ),
 ]
 
 TABLES = [
     dict(
+        path=ALIFE / "ground_truth" / "ground_truth_summary.csv",
+        title="Ground-truth recovery (planted periodicity)",
+        caption=(
+            "Spacetimes constructed to be exactly relative-periodic with a known "
+            "(period, shift), corrupted by bit flips at rate flip_rate, then run "
+            "through the shipped selector. Accuracy = fraction of runs recovering "
+            "the planted value."
+        ),
+        claim="Selector recovers known ground truth",
+    ),
+    dict(
         path=ALIFE / "null_controls" / "null_controls_summary.csv",
         title="Null controls (summary)",
         caption=(
             "Original spacetimes vs. shuffled/Bernoulli controls, same selector. "
-            "Large margins and low defect rates for originals — and not for "
+            "Large margins and low residual rates for originals — and not for "
             "controls — indicate the method detects real structure. "
             "No null-control false positives were observed."
         ),
@@ -167,7 +178,7 @@ TABLES = [
         title="Seed stability (summary)",
         caption=(
             "Per-rule agreement of the final selected period across 10 seeds, "
-            "with transition counts and defect-rate coefficient of variation."
+            "with transition counts and residual-rate coefficient of variation."
         ),
         claim="Selection is stable across random initial conditions",
     ),
@@ -190,7 +201,7 @@ TABLES = [
         path=ALIFE / "eca_atlas" / "eca_atlas_summary.csv",
         title="ECA atlas (all 256 rules)",
         caption=(
-            "Final modal period, stability, margins, and defect rate for every "
+            "Final modal period, stability, margins, and residual rate for every "
             "elementary CA rule. Use the filter box to find a rule."
         ),
         claim="Full 1D coverage, not cherry-picked examples",
@@ -211,22 +222,22 @@ TABLES = [
 ]
 
 CONTRIBUTIONS = [
-    ("Relative-periodic model family + O(|U|) orbit-class fitting",
-     "A global front end: fit background scaffolds by majority vote on orbit classes, for arbitrary period and shift vectors in 1D/2D/3D."),
+    ("The Winnower tool",
+     "An open-source, deterministic pipeline that splits a CA spacetime into a periodic background B* and a residual mask M, with an in-browser reproduction of every reported number."),
+    ("Calibrated accuracy",
+     "Recovers planted ground-truth periodicity at realistic noise levels, and selects no periodic structure on time-shuffled, space-shuffled, or Bernoulli null controls — zero false positives."),
+    ("Linear-time background fitting",
+     "Majority vote on orbit classes: one pass over the data per candidate (period, shift), which is what makes whole-catalog 1D/2D/3D surveys practical."),
     ("Complexity-aware selection via Bernoulli NML",
-     "Prevents the period inflation that raw defect minimization provably suffers along refinement chains (Theorems 2, 4, 5)."),
-    ("Codelength of the residual mask as a structure metric",
-     "Two masks with identical Hamming weight can differ by an Ω(log n) factor in run-length codelength — geometry, not just count (Proposition 1)."),
-    ("Systematic 2D/3D surveys",
-     "LifeWiki catalog + totalistic range scans identify rules with near-perfect periodic backgrounds and rules with persistent, particle-like residuals (2D analogues of Rule 54 particles)."),
+     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested); supporting math lives in the repo's theory notes, with Lean artifacts at documented completeness."),
 ]
 
 LIMITATIONS = [
-    "No interaction analysis of residual particles (collision rules are out of scope).",
-    "Scaling claims (e.g. S37/B11 extensive scaling) rest on limited seeds/sizes.",
-    "The run-length metric is raster-order dependent.",
-    "Theorem D.2 (RL-rate convergence) is sketched, not fully proved; empirical claims are labeled as such in the claim ledger.",
-    "Stabilization is demonstrated over tested horizons (T ≤ 800); Theorem 3 covers the asymptotic regime under stated hypotheses.",
+    "The selector returns the best-compressing global explanation, which need not match a physicist's preferred background when the residual itself carries periodic structure.",
+    "At period 1 the reported shift is arbitrary (a tie), so shift values for aperiodic rules carry no information.",
+    "Periodicity outside the scanned candidate grid is invisible; the candidate-range robustness runs quantify this.",
+    "The residual mask says where structure is, not how it interacts — no particle interaction analysis.",
+    "Scaling observations (e.g. S37/B11) rest on limited seeds and sizes; the run-length diagnostic is raster-order dependent.",
 ]
 
 REPRO_STEPS = [
@@ -251,7 +262,7 @@ REPO_MAP = [
     ("scripts/alife/alife_run_all.py", "One-shot driver for every experiment in the paper."),
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
     ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
-    ("proofs/", "Lean 4 formalization of Theorem A (machine-checked)."),
+    ("proofs/", "Lean 4 artifacts (Aristotle-generated) at documented completeness: one machine-checked stabilization core in the default build; the rest labeled drafts — see proofs/README.md."),
     ("tests/", "333-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
 ]
@@ -699,7 +710,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 <header>
   <div class="wrap">
     <h1>{esc(title)}</h1>
-    <p class="subtitle">Reviewer guide · ALIFE 2026 submission · project codename <em>Winnower</em></p>
+    <p class="subtitle">Reviewer guide · the <em>Winnower</em> tool and paper artifact</p>
   </div>
 </header>
 <nav><div class="wrap">
@@ -737,7 +748,8 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <ol>
     <li>Read the abstract above, then skim the <a href="#figures" onclick="return show('figures')">algorithm figure and representative-rule panels</a> to see what the decomposition produces.</li>
     <li>Check the <a href="#results" onclick="return show('results')">null controls</a> — the central sanity check that the selector does not find structure in shuffled data.</li>
-    <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, which states exactly which claims are theorem-level, which were weakened during review, and which are empirical only.</li>
+    <li>Check the <a href="#results" onclick="return show('results')">ground-truth recovery table</a> — calibration showing the selector finds planted periodicity and reports nothing on noise.</li>
+    <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, the project's own audit of every mathematical statement. The supporting math is deliberately secondary to the tool, and the ledger says exactly how strong each statement is.</li>
     <li>Optionally run <code>make test</code> and one <code>analyze</code> command from the <a href="#reproduce" onclick="return show('reproduce')">reproduce tab</a>.</li>
   </ol>
 </section>
@@ -747,7 +759,12 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <p>This is the project's own claim-by-claim audit (<code>docs/CLAIM_LEDGER.md</code>),
   rendered verbatim. It records, for every theorem and empirical claim, its current
   status, why it holds, what was weakened relative to earlier drafts, and what remains
-  open. Theorem A additionally has a Lean 4 formalization under <code>proofs/</code>.</p>
+  open. The supporting properties additionally have Lean 4 artifacts under
+  <code>proofs/</code> at documented levels of completeness — one machine-checked
+  core lemma in the default build, the rest clearly-labeled drafts (see
+  <code>proofs/README.md</code> for the per-file inventory). The math is supporting
+  material for the tool; the paper's claims rest on the experiments and the
+  reproducible pipeline.</p>
   {ledger_html}
 </section>
 

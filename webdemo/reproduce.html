@@ -191,10 +191,10 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   <p class="note" id="voxel-help" style="display:none">Voxel views: drag to
     rotate, scroll to zoom. The three views share one camera.</p>
 
-  <h2>Residual defects over time</h2>
+  <h2>Residual sites over time</h2>
   <div class="card">
     <canvas id="spark" width="1000" height="90"></canvas>
-    <p class="note">Defect sites per time step under the selected background —
+    <p class="note">Residual sites per time step under the selected background B* —
     persistent structured residuals show up as a non-vanishing tail.</p>
   </div>
 
@@ -690,7 +690,7 @@ function renderPanels(res) {
 
   if (dim === 1) {
     // Full spacetime diagrams — nothing sliced away in 1D.
-    const captions = ["Observed spacetime U (time ↓)", "Selected background B*", "Defect mask M = U ⊕ B*"];
+    const captions = ["Observed spacetime U (time ↓)", "Selected background B*", "Residual mask M = U ⊕ B*"];
     FIELD_ORDER.forEach((name, i) => {
       const f = fields[name];
       const canvas = panelFigure(panels, captions[i], "flat");
@@ -709,7 +709,7 @@ function renderPanels(res) {
 
   if (dim === 2) {
     const [_, Hh, Ww] = fields.spacetime.shape;
-    const captions = ["Frame of U", "Frame of B*", "Frame of M"];
+    const captions = ["Frame of spacetime U", "Frame of background B*", "Frame of residual mask M"];
     const flatCanvases = FIELD_ORDER.map((name, i) => panelFigure(panels, captions[i], "flat"));
     view.drawFrame = (t) => {
       FIELD_ORDER.forEach((name, i) => {
@@ -722,7 +722,7 @@ function renderPanels(res) {
     $("voxel-help").style.display = "";
     const cam = makeCamera();
     view.camera = cam;
-    const canvas = panelFigure(panels, "Defect world-tubes M — time increases upward; drag to rotate", "voxel");
+    const canvas = panelFigure(panels, "Residual world-tubes M — time increases upward; drag to rotate", "voxel");
     const viewer = new VoxelViewer(canvas, {
       color: hexToRgb(cssColor("--cell-defect")), camera: cam, heightPx: 420,
     });
@@ -742,7 +742,7 @@ function renderPanels(res) {
   const frameSize = Sz * Sy * Sx;
   const cam = makeCamera();
   view.camera = cam;
-  const captions = ["Observed U at t", "Background B* at t", "Defect mask M at t"];
+  const captions = ["Observed U at t", "Background B* at t", "Residual mask M at t"];
   const one = hexToRgb(cssColor("--cell-one"));
   const red = hexToRgb(cssColor("--cell-defect"));
   const viewers = FIELD_ORDER.map((name, i) => {
@@ -784,7 +784,7 @@ function drawSpark(canvas, series) {
   ctx.stroke();
   ctx.fillStyle = cssColor("--fg");
   ctx.font = "11px system-ui";
-  ctx.fillText(`max ${maxV} defects/frame · final ${series[series.length - 1]}`, pad + 2, 12);
+  ctx.fillText(`max ${maxV} residual sites/frame · final ${series[series.length - 1]}`, pad + 2, 12);
 }
 
 function render(res) {
@@ -800,7 +800,7 @@ function render(res) {
     ["Selected period p", rec.selected_period],
     [shiftLabel, rec.selected_shift_str],
     ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
-    ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
+    ["Residual rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
     ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
     ["Status", rec.status],
   ];
@@ -816,7 +816,7 @@ function render(res) {
 
   let html = "<tr><th class='num'>Rank</th><th class='num'>Period</th><th>Best shift</th>" +
     "<th class='num'>NML bits</th><th class='num'>NLL bits</th><th class='num'>Complexity</th>" +
-    "<th class='num'>Defect rate</th></tr>";
+    "<th class='num'>Residual rate</th></tr>";
   for (const row of res.period_summary) {
     html += `<tr><td class="num">${row.period_rank}</td><td class="num">${row.period}</td>` +
       `<td>${row.best_shift_str}</td>` +

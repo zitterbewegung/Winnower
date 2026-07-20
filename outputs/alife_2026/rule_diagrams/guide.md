@@ -34,7 +34,7 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 ## Representative 1D rules
 
 - `ECA-30`: best `(p, s) = (1, -2)`, margin `153.4` bits, defect rate `0.471`. Chaotic texture with little large-scale repetition; the selector still prefers a simple background.
-- `ECA-54`: best `(p, s) = (4, 0)`, margin `1484.9` bits, defect rate `0.179`. Alternating domains and clearer phase locking make the periodic scaffold easier to see.
+- `ECA-54`: best `(p, s) = (4, 0)`, margin `1484.9` bits, defect rate `0.179`. Alternating domains and clearer phase locking make the periodic background easier to see.
 - `ECA-110`: best `(p, s) = (7, 0)`, margin `857.0` bits, defect rate `0.314`. Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.
 
 ## Representative 2D rules
