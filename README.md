@@ -1,10 +1,10 @@
 # Winnower: Relative-Periodic Decomposition for Cellular Automata
 
-[![Tests](https://img.shields.io/badge/tests-333%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-363%20passing-brightgreen)]()
 
-Fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured defect masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
+Fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured residual masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
 
-**Paper:** *Structure Discovery in Cellular Automata via Relative-Periodic Decomposition* — submitted to ALIFE 2026.
+**Paper:** *Winnower: A Fast Tool for Splitting Cellular Automaton Spacetimes into a Periodic Background and a Residual Mask* — see `paper/paper_alife2026.pdf` and the [reviewer site](https://zitterbewegung.github.io/Winnower/).
 
 ## Quick start
 
@@ -107,10 +107,10 @@ scripts/                        Experiment and survey scripts
   surveys/                      Rule surveys (LifeWiki, ECA atlas, 2D range)
   analysis/                     Convergence, baselines, stabilization
 
-paper/                          ALIFE 2026 submission (LaTeX)
+paper/                          Paper (LaTeX + compiled PDF)
 poster/                         Conference poster
-proofs/                         Lean 4 verification of Theorem A
-tests/                          Test suite (333 tests)
+proofs/                         Lean 4 artifacts (see proofs/README.md for per-file status)
+tests/                          Test suite (363 tests)
 notebooks/                      Demo and paper companion notebooks
 outputs/                        Generated CSVs, figures, survey results
 docs/                           Theory notes and claim audit trail
@@ -126,7 +126,7 @@ For a binary spacetime `U[t, x]` and a candidate `(shift s, period p)`, the algo
 3. **Scores** the fit with Bernoulli NML = data-fit (NLL) + model complexity
 4. **Selects** the smallest period whose NML score beats alternatives
 
-The defect mask `D = U ⊕ B` captures what the periodic scaffold cannot explain — gliders, domain walls, and other structured residuals.
+The residual mask `M = U ⊕ B*` captures what the periodic background cannot explain — gliders, domain walls, and other structured residuals.
 
 ## Key dependencies
 
@@ -140,11 +140,12 @@ The defect mask `D = U ⊕ B` captures what the periodic scaffold cannot explain
 ## Citation
 
 ```bibtex
-@inproceedings{winnower2026,
-  title={Structure Discovery in Cellular Automata via Relative-Periodic Decomposition},
-  author={...},
-  booktitle={ALIFE 2026},
-  year={2026}
+@misc{winnower2026,
+  title={Winnower: A Fast Tool for Splitting Cellular Automaton Spacetimes
+         into a Periodic Background and a Residual Mask},
+  author={Herman, Joshua},
+  year={2026},
+  howpublished={\url{https://github.com/zitterbewegung/Winnower}}
 }
 ```
 

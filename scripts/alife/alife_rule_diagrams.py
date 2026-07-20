@@ -60,7 +60,7 @@ PRESENTATION_GUIDE_NAME = "presentation_guide.md"
 PAPER_OVERVIEW_CAPTION = (
     "Representative rules across 1D, 2D, and 3D. "
     "(A) Elementary cellular automata show the raw spacetime, the selected relative-periodic background, "
-    "and the residual defect mask. "
+    "and the residual mask. "
     "(B) Representative 2D rules show early, middle, and late slices together with the selected background "
     "and the final residual mask. "
     "(C) Representative 3D rules show midplane slices through the observed spacetime, selected background, "
@@ -92,7 +92,7 @@ RULE_NOTES = {
     "Maze with Mice": "Maze-like corridors remain coherent while local fluctuations ride on top of them.",
     "S24/B11": "Sparse patches form and dissolve, so the background captures only the broadest cadence.",
     "S11/B37": "Explosive local birth competes with fast die-out, producing noisy but still structured slices.",
-    "S37/B11": "Persistent residual structure remains after fitting, making the defect mask especially informative.",
+    "S37/B11": "Persistent residual structure remains after fitting, making the residual mask especially informative.",
     "3d-life": "Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.",
     "clouds": "High-count thresholds create bulky, cloud-like regions instead of thin fronts.",
     "crystal": "Low-count thresholds favor sparse growth and faceted, crystal-like fronts.",
@@ -443,11 +443,11 @@ def _presentation_text_block(payload: DiagramPayload) -> str:
             payload.case.name,
             _rule_label(payload.case),
             f"The selected winner is ({payload.selected_period}, {payload.selected_shift}).",
-            f"The margin is {payload.winner_margin_bits:.1f} bits, and the defect rate is {payload.defect_rate:.3f}.",
+            f"The margin is {payload.winner_margin_bits:.1f} bits, and the residual rate is {payload.defect_rate:.3f}.",
             "",
             "The observed panel shows the raw state.",
-            "The background panel shows the fitted scaffold.",
-            "The defect panel shows the residual cells.",
+            "The background panel shows the fitted background.",
+            "The residual panel shows the residual cells.",
             "",
             "Why this rule matters:",
             note,
@@ -1135,7 +1135,7 @@ def _write_rule_diagram_guide(
         "",
         "1. Start with the mechanism figures. They explain what the local update rule is actually doing.",
         "2. Move to the representative evolution panels. They show what those local rules look like at the scale of an entire spacetime.",
-        "3. Use the background and defect columns to explain the paper's decomposition idea: the selector finds a global scaffold, then studies what is left over.",
+        "3. Use the background and residual columns to explain the paper's decomposition idea: the selector finds a global background, then studies what is left over.",
         "",
         "## How to read the colors",
         "",
@@ -1160,7 +1160,7 @@ def _write_rule_diagram_guide(
         "",
         "- The mechanism figures explain the rule itself. The overview figures explain the global behavior that the selector is trying to summarize.",
         "- In 1D, the shift parameter is easiest to explain because diagonal motion is visually obvious.",
-        "- In 2D and 3D, the defect masks are often more informative than the raw slices because they separate the fitted scaffold from the persistent irregular structures.",
+        "- In 2D and 3D, the defect masks are often more informative than the raw slices because they separate the fitted background from the persistent irregular structures.",
         "- Use high-margin cases to explain stabilization. Use noisy or low-structure cases to explain why period 1 often wins.",
         "",
     ]
@@ -1188,8 +1188,8 @@ def _write_presentation_guide(
                     f"- Winner margin: `{payload.winner_margin_bits:.1f}` bits",
                     f"- Defect rate: `{payload.defect_rate:.3f}`",
                     f"- What the observed panel means: the raw CA state before any decomposition.",
-                    f"- What the background panel means: the periodic scaffold chosen by the selector.",
-                    f"- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.",
+                    f"- What the background panel means: the periodic background chosen by the selector.",
+                    f"- What the residual panel means: the cells where the background is wrong, i.e. the residual structure.",
                     f"- Why this rule is in the presentation set: {_note_for_case(payload.case)}",
                     "",
                 ]
@@ -1210,8 +1210,8 @@ def _write_presentation_guide(
         "## What the three panel types mean",
         "",
         "- `Observed`: the raw cellular automaton state.",
-        "- `Background`: the selected relative-periodic scaffold found by the period-first Bernoulli-NML selector.",
-        "- `Defect`: the mismatch between the raw state and that scaffold.",
+        "- `Background`: the selected relative-periodic background found by the period-first Bernoulli-NML selector.",
+        "- `Residual`: the mismatch between the raw state and that background.",
         "",
         "## Why these should look less flat",
         "",
@@ -1378,7 +1378,7 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
     _plot_1d_overview(payloads_1d, overview_1d_path)
     _plot_nd_overview(
         payloads_2d,
-        title="Representative 2D rules: evolution, fitted scaffold, and residual structure",
+        title="Representative 2D rules: evolution, fitted background, and residual structure",
         caption="Read left to right: how the pattern starts, how it develops, what the selected background keeps, and what it cannot explain.",
         path=overview_2d_path,
     )

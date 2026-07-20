@@ -104,7 +104,7 @@ def plot_spectrum(frame: pd.DataFrame, *, value: str = "defect_rate", title: str
         )
     elif value == "run_length_bits":
         caption = (
-            f"Darker cells mean a more compressible defect mask. "
+            f"Darker cells mean a more compressible residual mask. "
             f"Minimum scanned value at shift={best_shift}, period={best_period}."
         )
     else:
@@ -138,7 +138,7 @@ def plot_decomposition(fit: RelativePeriodicFit, *, source: np.ndarray, title_pr
     axes[1].imshow(fit.background, aspect="auto", interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
     axes[1].set_title(f"{title_prefix}background\nbest fit: s={fit.shift}, p={fit.period}")
     axes[2].imshow(fit.defect_mask.astype(np.uint8), aspect="auto", interpolation="nearest", cmap=DEFECT_CMAP, vmin=0, vmax=1)
-    axes[2].set_title(f"{title_prefix}defect mask\ndefect rate={fit.defect_rate:.3f}")
+    axes[2].set_title(f"{title_prefix}residual mask\nresidual rate={fit.defect_rate:.3f}")
     for ax in axes:
         ax.set_xlabel("cell index")
         ax.set_ylabel("time (top to bottom)")

@@ -72,7 +72,7 @@ def plot_2d_decomposition(
     shift_str = ",".join(str(s) for s in fit.shift)
     axes[1].set_title(f"{title_prefix}background\ns=({shift_str}), p={fit.period}")
     axes[2].imshow(fit.defect_mask[t].astype(np.uint8), interpolation="nearest", cmap=DEFECT_CMAP, vmin=0, vmax=1)
-    axes[2].set_title(f"{title_prefix}defects\nrate={fit.defect_rate:.3f}")
+    axes[2].set_title(f"{title_prefix}residual\nrate={fit.defect_rate:.3f}")
     for ax in axes:
         ax.set_xticks([])
         ax.set_yticks([])
@@ -144,7 +144,7 @@ def plot_3d_decomposition(
     shift_str = ",".join(str(s) for s in fit.shift)
     axes[1].set_title(f"{title_prefix}background\ns=({shift_str}), p={fit.period}")
     axes[2].imshow(fit.defect_mask[t, z].astype(np.uint8), interpolation="nearest", cmap=DEFECT_CMAP, vmin=0, vmax=1)
-    axes[2].set_title(f"{title_prefix}defects\nrate={fit.defect_rate:.3f}")
+    axes[2].set_title(f"{title_prefix}residual\nrate={fit.defect_rate:.3f}")
     for ax in axes:
         ax.set_xticks([])
         ax.set_yticks([])

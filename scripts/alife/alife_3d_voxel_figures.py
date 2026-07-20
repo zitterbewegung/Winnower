@@ -105,7 +105,7 @@ def _render_per_rule_figures(payload: VoxelPayload, output_dir: Path) -> dict[st
             payload.fit,
             source=payload.spacetime,
             n_panels=4,
-            title=f"{payload.case.name} — defects vs. background ({_rule_label(payload.case)})",
+            title=f"{payload.case.name} — residual vs. background ({_rule_label(payload.case)})",
         )
         save_figure(fig_montage, montage_path)
         plt.close(fig_montage)

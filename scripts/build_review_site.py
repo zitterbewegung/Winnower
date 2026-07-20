@@ -2,8 +2,7 @@
 """Build the reviewer-facing evaluation site (review_site/index.html).
 
 Assembles the paper abstract, claim ledger, key figures, and result tables
-into a single static HTML page aimed at someone evaluating the ALIFE 2026
-submission. Uses only the Python standard library.
+into a single static HTML page aimed at someone evaluating the paper. Uses only the Python standard library.
 
 Usage:
     python scripts/build_review_site.py                # relative image paths
@@ -480,7 +479,7 @@ def write_demo_assets(site: Path) -> None:
 
 def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf", live_demo: bool = False) -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
-    title = extract_tex_field(tex, "title") or "Winnower — ALIFE 2026 submission"
+    title = extract_tex_field(tex, "title") or "Winnower — reviewer guide"
     abstract = extract_abstract(tex)
 
     ledger_path = ROOT / "docs" / "CLAIM_LEDGER.md"
@@ -778,7 +777,9 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 <section id="results">
   <h2>Results &amp; robustness</h2>
   <p>Each table below is loaded from the CSVs in <code>outputs/alife_2026/</code> —
-  the same files the paper's tables are built from. Click a column header to sort.</p>
+  the same files the paper's tables are built from. Column names come straight from
+  the code (<code>defect_*</code> columns are the paper's <em>residual</em> quantities).
+  Click a column header to sort.</p>
   {stress_html}
   {''.join(tables_html)}
 </section>
