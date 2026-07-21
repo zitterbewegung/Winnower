@@ -48,21 +48,19 @@ zitterbewegung@gmail.com}
 \begin{abstract}
 Cellular automata (CAs) often produce extended periodic domains separated by
 localized defects, particles, and domain boundaries. We present
-\emph{Winnower}, a tool for inferring a periodic domain from a finite CA
-space--time diagram. For each candidate temporal period and lattice
-displacement, Winnower groups observed sites into translation orbits, assigns
-each orbit its majority cell state, and evaluates the resulting
-template with Bernoulli normalized maximum likelihood (NML). The selected
-template gives a compact domain model, while mismatched sites form a
-candidate-defect mask. We report preliminary experiments on one-, two-, and
-three-dimensional CAs. The selected symmetry usually settles after a short
-transient, and the NML complexity term prevents the systematic period inflation
-observed with Hamming residual or unpenalized likelihood alone. In a sweep of
-105 nontrivial Life-like rules, NML selected period~1 for 97 rules and exposed
-residual patterns that remained structured over time. These results suggest
-that Winnower can provide a lightweight first pass for CA surveys, identifying
-candidate domains before local particle or coherent-structure analysis. Data
-and code: \url{https://github.com/zitterbewegung/Winnower}.
+\emph{Winnower}, a tool that infers a periodic domain from a finite CA
+space--time diagram. Each candidate temporal period and lattice displacement
+partitions the observed sites into translation orbits; majority vote on each
+orbit gives the Hamming-nearest domain template, and candidates are ranked by
+Bernoulli normalized maximum likelihood (NML). The output is a compact domain
+template plus a candidate-defect mask. In preliminary 1D/2D/3D experiments the
+selected symmetry settles after a short transient, and the NML complexity term
+prevents the period inflation seen with fit-only selection: across 105
+nontrivial Life-like rules, NML selected period~1 for 97, while unpenalized
+likelihood always chose the largest scanned period. Winnower is a lightweight
+first pass for CA surveys, proposing candidate domains before local particle
+or coherent-structure analysis. Data and code:
+\url{https://github.com/zitterbewegung/Winnower}.
 \end{abstract}
 
 % Give TeX limited extra flexibility in the narrow conference columns.
@@ -70,148 +68,105 @@ and code: \url{https://github.com/zitterbewegung/Winnower}.
 
 \begin{figure*}[t!]
     \centering
-    \includegraphics[width=0.99\textwidth]{algorithm_nml.png}
-    \caption{Winnower's domain-inference pipeline. For each candidate temporal
-    period and lattice displacement $(p,\bs)$, the observed CA space--time block
-    is partitioned into translation orbits. Majority states define the candidate
-    domain template, mismatches define the domain residual, and Bernoulli NML
-    balances fit against the number and size of the orbit models.}
+    \includegraphics[width=0.85\textwidth]{algorithm_nml.png}
+    \caption{The Winnower pipeline. A candidate $(p,\bs)$ partitions the
+    observed CA space--time block into translation orbits; majority states
+    define the domain template, mismatches the defect mask, and Bernoulli NML
+    balances fit against orbit-model complexity.}
     \label{fig:winnower-pipeline}
 \end{figure*}
 
 \section{Introduction}
-A cellular automaton (CA) evolves a lattice by applying the same local rule to
-every cell at each time step. Many CA rules generate space--time diagrams with
-large repeating regions together with localized departures from those regions,
-such as particles, gliders, and domain boundaries. We refer to a repeating
-region as a \emph{spatiotemporal domain}: a pattern that is invariant under a
-combined temporal translation and lattice displacement. Identifying this
-domain provides a useful background model for studies of information transport,
-coherent structures, and emergent computation in artificial life.
+A cellular automaton (CA) evolves a lattice by applying the same local rule at
+every cell. Many rules produce \emph{spatiotemporal domains} --- regions
+invariant under a combined temporal translation and lattice displacement ---
+threaded with particles, gliders, and domain boundaries. The domain is the
+reference frame that makes such structure legible, so inferring it from a
+finite observation is a natural first step for artificial-life analyses.
 
-The practical problem is to infer such a domain from a finite observation. A
-candidate should explain as much of the space--time diagram as possible without
-using an unnecessarily long period. Local causal-state methods can reconstruct
-detailed spatiotemporal organization \citep{rupe2024}, while CA taxonomies,
-transient analyses, and compression-based approaches characterize whole rules
-and global pattern complexity
-\citep{vispoel2022,rollier2024,hudcova2021,alfaro2024,cisneros2023}. Here we
-present Winnower as a complementary global method. It searches a finite set of
-period-and-displacement candidates, returns a periodic domain template and a
-residual mask, and uses a complexity penalty to avoid selecting a longer period
-only because it fits the observation more closely. This late-breaking abstract
-describes the method and reports preliminary results across several CA
-families.
+Local causal-state methods reconstruct spatiotemporal organization in detail
+\citep{rupe2024}, while CA taxonomies, transient analyses, and
+compression-based approaches characterize whole rules
+\citep{vispoel2022,rollier2024,hudcova2021,alfaro2024,cisneros2023}. Winnower
+occupies a middle ground: a global, complexity-penalized selector of periodic
+domain templates, fast enough for broad rule-space sweeps.
 
 \section{Method}
-Given a finite binary CA space--time block $U$, a temporal period $p$, and a
-lattice-displacement vector $\bs$, Winnower fits templates satisfying
-$B[t{+}p,\,\mathbf{x}{+}\bs \bmod \bD]=B[t,\mathbf{x}]$, where $\bD$ contains
-the lattice dimensions. Thus, the template repeats after $p$ updates, up to the
-displacement $\bs$. This translation partitions the observed sites into
-translation orbits $\{O_j\}$. For each orbit, Winnower assigns the majority cell
-state. The resulting template is the binary template with the smallest Hamming
-disagreement for that candidate, and the mismatched sites form its domain
-residual.
-
-Winnower compares candidates with the Bernoulli NML score
+Given a binary space--time block $U$, a period $p$, and a displacement
+$\bs$, Winnower fits templates satisfying
+$B[t{+}p,\,\mathbf{x}{+}\bs \bmod \bD]=B[t,\mathbf{x}]$. The translation
+partitions the observed sites into translation orbits $\{O_j\}$; assigning
+each orbit its majority state yields the template with minimum Hamming
+disagreement, and the mismatched sites form the defect mask
+(\cref{fig:winnower-pipeline}). Candidates are ranked by the Bernoulli NML
+score
 %
 \begin{equation}
 \NML(p,\bs)=\sum_j n_j\,\Hb(\hat\theta_j)\;+\;\tfrac12\sum_j \log_2 n_j,
 \label{eq:nml}
 \end{equation}
 %
-where $n_j=|O_j|$, $n_j^{(1)}$ is the number of cells in state~1 on orbit
-$O_j$, $\hat\theta_j=n_j^{(1)}/n_j$, and $\Hb$ is binary entropy. The first term
-is the Bernoulli negative log-likelihood (NLL) of the orbit models. The second
-term is the asymptotic NML complexity cost for fitting those models
-\citep{shtarkov1987,grunwald2007,yamanishi2023}. The candidate with the lowest
-combined score is selected. \Cref{fig:winnower-pipeline} summarizes the
-procedure.
+with $n_j=|O_j|$, $\hat\theta_j=n_j^{(1)}/n_j$ the in-state-1 fraction, and
+$\Hb$ binary entropy: an NLL fit term plus the asymptotic NML complexity of
+the orbit models \citep{shtarkov1987,grunwald2007,yamanishi2023}.
 
-The complexity term addresses a recurring problem in this search. A longer
-candidate moving at the same velocity can split the orbits of a shorter
-candidate into smaller orbits. This added flexibility cannot worsen the Hamming
-residual or NLL, so fit-only selection tends to prefer the longest available
-period even when the added orbits do not represent new domain structure. NML
-charges for this added flexibility. We also machine-checked the corresponding
-divisibility and orbit-refinement relation in Lean~4 under public CI
-\citep{achim2025}. When candidates have different NLL rates per observed cell,
-the fit difference grows linearly with observation size, whereas the relevant
-penalty difference grows logarithmically. This provides a simple explanation
-for why the selected candidate settles as more of the space--time diagram is
-observed and why the shortest equivalent candidate can be recovered when it is
-included in the search.
+The penalty is essential: a velocity-matched longer period refines the orbit
+partition, so it can only improve raw fit, and fit-only selection inflates the
+period even when the extra orbits encode nothing new. We machine-checked this
+divisibility/orbit-refinement relation in Lean~4 under public CI
+\citep{achim2025}. Once candidates differ in per-site NLL rate, the linear fit
+gap dominates the logarithmic penalty gap, so the selection settles and the
+shortest equivalent candidate is recovered when it is in the search set.
 
-\section{Preliminary Results}
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.66\textwidth]{lba_results.png}
-    \caption{Representative Winnower runs. \emph{Top three rows:}
-    decompositions (observed~/ domain template~/ defect mask) for 1D ECA-54
-    (period-4 template; defect mask isolates particle world-lines), 2D S24/B11
-    (period-2 template, defect rate $0.008$ at $T{=}600$), and voxel views of
-    3D Life B5/S45 \citep{bays1987} (period-1 template captures the persistent
-    still lifes; defects are the decaying soup). \emph{Bottom:} for the same
-    rules (plus ECA-110), selected period and margin over the runner-up
-    (shared log scale) versus horizon $T$, from an exact-Bernoulli-NML sweep.
-    Periods lock immediately (ECA-54, 3D Life) or after one marked transition
-    (ECA-110 $1\!\to\!7$, S24/B11 $1\!\to\!2$); the margin dips toward zero at
-    the transition, where two periods are nearly tied, then grows.}
+    \includegraphics[width=0.90\textwidth]{lba_results.png}
+    \caption{Representative Winnower runs. \emph{Left:} decompositions
+    (observed~/ domain template~/ defect mask) for 1D ECA-54 (period-4
+    template; defects trace particle world-lines), 2D S24/B11 (period-2
+    template, defect rate $0.008$ at $T{=}600$), and voxel views of 3D Life
+    B5/S45 \citep{bays1987} (period-1 template of persistent still lifes;
+    defects are the decaying soup). \emph{Right:} selected period and
+    runner-up margin (shared log scale) versus horizon $T$. Periods lock
+    immediately (ECA-54, 3D Life) or after one marked transition (ECA-110
+    $1\!\to\!7$, S24/B11 $1\!\to\!2$); the margin dips where two periods are
+    nearly tied, then grows.}
     \label{fig:results}
 \end{figure*}
 
-We tested ECAs 30, 54, and 110; two-dimensional Life-like and totalistic
-rules; and 3D Life B5/S45 \citep{bays1987,bays2006}.
-\Cref{fig:results} shows the resulting decompositions and horizon sweep for the representative rules
-($T\in\{50,\dots,800\}$ in 1D/2D at seed~11; $T\in\{10,\dots,50\}$ at seed~42
-in 3D, where the B5/S45 soup decays toward the quiescent domain). The selected
-candidate settled immediately for ECA~54 (period~4, margin growing from 681 to
-2318 bits) and 3D Life (period~1, 3324 to 7403 bits), and after a single
-transition for ECA~110 ($1\!\to\!7$, the period-7 Ether domain) and S24/B11
-($1\!\to\!2$). Every tested rule changed its selected candidate at most twice,
-and its margin over the runner-up grew after the last change.
+\section{Preliminary Results}
+We tested ECAs 30, 54, and 110; 2D Life-like and totalistic rules; and 3D
+Life B5/S45 \citep{bays1987,bays2006}. \Cref{fig:results} shows the
+decompositions and horizon sweep ($T$ up to $800$ at seed~11 in 1D/2D; up to
+$50$ at seed~42 in 3D, where the soup decays toward the quiescent domain).
+Selection settled immediately for ECA-54 (period~4, margin 681 to 2318 bits)
+and 3D Life (period~1, 3324 to 7403 bits), and after one transition for
+ECA-110 ($1\!\to\!7$, the Ether domain) and S24/B11 ($1\!\to\!2$); margins
+grew after the last change. At $T{=}100$ on 105 nontrivial Life-like rules,
+unpenalized NLL selected the largest scanned period every time, while NML
+chose period~1 for 97 --- the orbit-refinement effect above. The defect mask
+is not noise: entropy-rate comparisons show the template captures the
+predictable component while defects retain structured variation, and in rules
+such as S37/B11 the defect population persists and scales with lattice size
+\citep{secktuohmora2023}.
 
-We also compared Hamming residual, unpenalized NLL, and NML on the Life-like
-sweep. At $T{=}100$, NLL selected the largest scanned period for all 105
-nontrivial rules, whereas NML did not show this systematic period inflation and
-selected period~1 for 97 rules. This matches the orbit-refinement argument
-above: a fit-only selector benefits from additional orbit parameters, whereas
-NML trades that improvement against model complexity.
-
-We also examined the information left in the domain residual. Entropy-rate
-comparisons suggest that the inferred template captures a predictable component
-of the space--time diagram while the residual retains structured variation. In
-two-dimensional rules such as S37/B11, the residual population persisted and
-scaled with lattice size. This behavior suggests that the mask can identify
-rules worth examining with local particle, glider, or coherent-structure
-detectors \citep{secktuohmora2023}.
-
-\paragraph{Reproducibility.} Every number and figure above regenerates
-deterministically from the released tool: single rules via \texttt{analyze},
-\texttt{analyze2d}, and \texttt{analyze3d};
-\cref{fig:results} via \texttt{alife\_lba\_figures.py} after the
-horizon sweep \texttt{convergence\_all\_dims.py}.
+\paragraph{Reproducibility.} Every number and figure regenerates from the
+released tool: \texttt{analyze}/\texttt{analyze2d}/\texttt{analyze3d} for
+single rules; \cref{fig:results} via \texttt{alife\_lba\_figures.py} after
+\texttt{convergence\_all\_dims.py}.
 
 \section{Discussion and Future Work}
-These preliminary results support Winnower as a lightweight first pass for
-broad CA rule-space surveys. It reduces each run to a selected translation
-symmetry, a periodic template, and a residual mask that can guide more detailed
-local analysis.
-
-The method assumes binary states, searches a supplied candidate set, and fits
-one global periodic model. A selected template need not be unique, and residual
-cells are candidate defects rather than identified particles. Winnower therefore
-complements local causal-state reconstruction and related approaches
-\citep{rupe2024,rupe2025}. Future work will test robustness to observation
-length, boundaries, noise, and candidate-set size; connect residual masks to
-local tracking; and extend Winnower to multistate, continuous, and neural CAs
+Winnower reduces each run to a selected translation symmetry, a periodic
+template, and a defect mask. It assumes binary states, searches a supplied
+candidate set, and complements rather than replaces local causal-state
+reconstruction \citep{rupe2024,rupe2025}. Future work: robustness to
+observation length, noise, and candidate-set size; connecting defect masks to
+local tracking; and extending to multistate, continuous, and neural CAs
 \citep{hamon2024,plantec2025,niklasson2021}.
 
-\subsection*{Acknowledgements}
-We thank Editage (\url{www.editage.com}) for language editing. ChatGPT, Claude
-Code, Aristotle, and Claude assisted with tooling and Lean proof development
-and verification.
+\paragraph{Acknowledgements.} We thank Editage
+(\url{www.editage.com}) for language editing. ChatGPT, Claude Code,
+Aristotle, and Claude assisted with tooling and Lean proofs.
 
 \footnotesize
 \setlength{\bibsep}{2pt plus 0.3ex}
