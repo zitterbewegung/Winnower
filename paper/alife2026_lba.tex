@@ -76,6 +76,22 @@ or coherent-structure analysis. Data and code:
     \label{fig:winnower-pipeline}
 \end{figure*}
 
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.90\textwidth]{lba_results.png}
+    \caption{Representative Winnower runs. \emph{Left:} decompositions
+    (observed~/ domain template~/ defect mask) for 1D ECA-54 (period-4
+    template; defects trace particle world-lines), 2D S24/B11 (period-2
+    template, defect rate $0.008$ at $T{=}600$), and voxel views of 3D Life
+    B5/S45 \citep{bays1987} (period-1 template of persistent still lifes;
+    defects are the decaying soup). \emph{Right:} selected period and
+    runner-up margin (shared log scale) versus horizon $T$. Periods lock
+    immediately (ECA-54, 3D Life) or after one marked transition (ECA-110
+    $1\!\to\!7$, S24/B11 $1\!\to\!2$); the margin dips where two periods are
+    nearly tied, then grows.}
+    \label{fig:results}
+\end{figure*}
+
 \section{Introduction}
 A cellular automaton (CA) evolves a lattice by applying the same local rule at
 every cell. Many rules produce \emph{spatiotemporal domains} --- regions
@@ -118,22 +134,6 @@ divisibility/orbit-refinement relation in Lean~4 under public CI
 gap dominates the logarithmic penalty gap, so the selection settles and the
 shortest equivalent candidate is recovered when it is in the search set.
 
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.90\textwidth]{lba_results.png}
-    \caption{Representative Winnower runs. \emph{Left:} decompositions
-    (observed~/ domain template~/ defect mask) for 1D ECA-54 (period-4
-    template; defects trace particle world-lines), 2D S24/B11 (period-2
-    template, defect rate $0.008$ at $T{=}600$), and voxel views of 3D Life
-    B5/S45 \citep{bays1987} (period-1 template of persistent still lifes;
-    defects are the decaying soup). \emph{Right:} selected period and
-    runner-up margin (shared log scale) versus horizon $T$. Periods lock
-    immediately (ECA-54, 3D Life) or after one marked transition (ECA-110
-    $1\!\to\!7$, S24/B11 $1\!\to\!2$); the margin dips where two periods are
-    nearly tied, then grows.}
-    \label{fig:results}
-\end{figure*}
-
 \section{Preliminary Results}
 We tested ECAs 30, 54, and 110; 2D Life-like and totalistic rules; and 3D
 Life B5/S45 \citep{bays1987,bays2006}. \Cref{fig:results} shows the
@@ -168,6 +168,7 @@ local tracking; and extending to multistate, continuous, and neural CAs
 (\url{www.editage.com}) for language editing. ChatGPT, Claude Code,
 Aristotle, and Claude assisted with tooling and Lean proofs.
 
+\clearpage
 \footnotesize
 \setlength{\bibsep}{2pt plus 0.3ex}
 \bibliographystyle{apalike}
