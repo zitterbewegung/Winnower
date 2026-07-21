@@ -48,11 +48,11 @@ score unchanged.
 
 **Claim:** If `p2 = m * p1` and `s2^(i) = m * s1^(i) mod D_i` for each spatial dimension, then the `(p2, s2)` orbit partition refines the `(p1, s1)` partition, hence the optimal residual count cannot increase.
 
-**Status:** CORRECT AS STATED
+**Status:** CORRECT AS STATED — MACHINE-CHECKED (as part of the six-way equivalence)
 
-**Why:** Under the velocity-matching condition, the second periodicity map is the `m`-fold iterate of the first, so every fine orbit is contained in a coarse orbit.
+**Why:** Under the velocity-matching condition, the second periodicity map is the `m`-fold iterate of the first, so every fine orbit is contained in a coarse orbit. The full six-way equivalence — including the necessity direction (refinement forces a power, THEORY_NOTE C.3, previously open) — is proved in `proofs/aristotle_submissions/verify/Verify/Theorem2.lean` (`Theorem2_Final`, torus formulation with time read modularly) and builds placeholder-free in the public CI.
 
-**Residual caution:** The theorem must not be generalized back to “same shift, larger period” without the scaling condition. That statement is false.
+**Residual caution:** The theorem must not be generalized back to “same shift, larger period” without the scaling condition. That statement is false. The windowed-time necessity direction (Theorem C.3', which needs the nondegeneracy hypothesis `p2 <= T-1`) is proved in prose and verified exhaustively by `tests/test_theory.py::test_refinement_iff_velocity_matched_multiple`, but the Lean file formalizes the torus form only.
 
 ---
 
@@ -231,7 +231,7 @@ score unchanged.
 | Claim | Status | What remains |
 |---|---|---|
 | Theorem 1 | CORRECT | Lean formalization should be straightforward |
-| Theorem 2 | CORRECT | Lean formalization should be straightforward |
+| Theorem 2 | CORRECT — MACHINE-CHECKED (six-way equivalence, torus form, CI green) | Windowed-time form is prose + exhaustive test only |
 | Theorem 3 | CORRECT AFTER EDIT | Lean should target pairwise comparison first |
 | Theorem 4 | CORRECT AFTER EDIT | Lean needs the construction details made explicit |
 | Theorem 5 | CORRECT AFTER EDIT | Lean should use eventual exact periodicity, not asymptotic purity |

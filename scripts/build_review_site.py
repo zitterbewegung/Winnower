@@ -275,7 +275,7 @@ REPO_MAP = [
     ("scripts/alife/alife_run_all.py", "One-shot driver for every experiment in the paper."),
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
     ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
-    ("proofs/", "Lean 4 artifacts at documented completeness: machine-checked proofs of majority-vote optimality and the stabilization core in the default build (public CI); the rest labeled drafts — see proofs/README.md."),
+    ("proofs/", "Lean 4 artifacts at documented completeness: machine-checked proofs of majority-vote optimality, the six-way refinement/monotonicity equivalence, and the stabilization core in the default build (public CI); the rest labeled drafts — see proofs/README.md."),
     ("tests/", "333-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
 ]
