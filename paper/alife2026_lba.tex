@@ -143,31 +143,34 @@ for why the selected candidate settles as more of the space--time diagram is
 observed and why the shortest equivalent candidate can be recovered when it is
 included in the search.
 
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=0.99\linewidth]{selector_ablation_tikz.pdf}
-    \caption{Selector ablation on 105 nontrivial Life-like CA rules at
-    $T{=}100$. Hamming-residual minimization and unpenalized Bernoulli NLL
-    concentrate at the largest scanned temporal period. Bernoulli NML instead
-    selects period~1 for 97 rules, showing the effect of the complexity term.}
-    \label{fig:ablation}
-\end{figure}
+    \includegraphics[width=0.99\textwidth]{stabilization_real.png}
+    \caption{Selected period (top) and margin over the runner-up in bits
+    (bottom, log scale) versus horizon $T$, from an exact-Bernoulli-NML sweep
+    at seed~11. ECA-54 locks at period~4 and diamoeba3d at period~1 from the
+    first horizon; ECA-110 ($1\!\to\!7$) and S24/B11 ($1\!\to\!2$) make a single
+    transition, after which the margin grows. Regenerated from the released
+    tool (see text).}
+    \label{fig:stab}
+\end{figure*}
 
 \section{Preliminary Results}
 We tested ECAs 30, 54, and 110; two-dimensional Life-like and totalistic
-rules; and a 3D totalistic CA \citep{bays1987,bays2006}. The selected candidate
-settled immediately for ECA~54 (period~4) and the 3D rule (period~1), and after
-a short transient for ECA~110 and S24/B11. Across these runs, the selected
-candidate changed no more than twice, and its margin over the next candidate
-increased after the last change.
+rules; and a 3D totalistic CA \citep{bays1987,bays2006}, sweeping the horizon
+$T\in\{50,\dots,800\}$ (\cref{fig:stab}). The selected candidate settled
+immediately for ECA~54 (period~4, margin growing from 681 to 2318 bits) and the
+3D rule diamoeba3d (period~1, 2831 to 7522 bits), and after a single transition
+for ECA~110 ($1\!\to\!7$, the period-7 Ether background) and S24/B11
+($1\!\to\!2$). Every tested rule changed its selected candidate at most twice,
+and its margin over the runner-up grew after the last change.
 
-We compared Hamming residual, unpenalized NLL, and NML. At $T{=}100$, NLL
-selected the largest scanned period for all 105 nontrivial Life-like rules. NML
-did not show this systematic period
-inflation and selected period~1 for 97 rules (\cref{fig:ablation}). This result
-matches the orbit-refinement argument above: a fit-only selector benefits from
-additional orbit parameters, whereas NML trades that improvement against model
-complexity.
+We also compared Hamming residual, unpenalized NLL, and NML on the Life-like
+sweep. At $T{=}100$, NLL selected the largest scanned period for all 105
+nontrivial rules, whereas NML did not show this systematic period inflation and
+selected period~1 for 97 rules. This matches the orbit-refinement argument
+above: a fit-only selector benefits from additional orbit parameters, whereas
+NML trades that improvement against model complexity.
 
 We also examined the information left in the domain residual. Entropy-rate
 comparisons suggest that the inferred template captures a predictable component
@@ -176,6 +179,12 @@ two-dimensional rules such as S37/B11, the residual population persisted and
 scaled with lattice size. This behavior suggests that the mask can identify
 rules worth examining with local particle, glider, or coherent-structure
 detectors \citep{secktuohmora2023}.
+
+\paragraph{Reproducibility.} Every number and figure above regenerates
+deterministically from the released tool at seed~11: the per-rule
+decompositions from \texttt{analyze}, \texttt{analyze2d}, and
+\texttt{analyze3d}, and the horizon sweep of \cref{fig:stab} from
+\texttt{convergence\_all\_dims.py}.
 
 \section{Discussion and Future Work}
 These preliminary results support Winnower as a lightweight first pass for
