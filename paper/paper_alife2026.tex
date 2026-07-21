@@ -225,7 +225,8 @@ shifts have identical complexity, so no tie-break exists there; the
 released stress report tracks every such tie we observed.) Formal
 statements and proof notes for these claims ship with the repository,
 together with Lean~4 artifacts at documented levels of completeness
-(one core lemma fully machine-checked; the rest clearly-labeled
+(the majority-vote optimality proposition and the stabilization core are
+fully machine-checked in public CI; the rest are clearly-labeled
 drafts); we deliberately keep the formal material out of the main text
 because the contribution this paper argues for is the tool, not the
 theory.
@@ -494,8 +495,9 @@ pipeline:
   claim ledger auditing every mathematical statement in the project's
   long-form theory notes, with an explicit map to this paper's
   statements. \texttt{proofs/} contains Lean~4 artifacts generated with
-  the Aristotle prover at documented levels of completeness: one
-  placeholder-free, in-build proof of the stabilization property's
+  the Aristotle prover at documented levels of completeness:
+  placeholder-free, in-build, CI-checked proofs of
+  Proposition~\ref{prop:projection} and of the stabilization property's
   algebraic core (against a pinned Mathlib toolchain), plus
   clearly-labeled work-in-progress drafts for the remaining statements;
   \texttt{proofs/README.md} records the per-file status. We make no

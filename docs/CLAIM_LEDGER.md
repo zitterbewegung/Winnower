@@ -36,11 +36,11 @@ score unchanged.
 
 **Claim:** For a fixed orbit partition, the Hamming-optimal orbit-constant background is obtained by majority vote on each orbit class. The minimum residual count is `sum_j min(n_j^(0), n_j^(1))`. The minimizer is unique iff no orbit class has an exact tie.
 
-**Status:** CORRECT AS STATED
+**Status:** CORRECT AS STATED — MACHINE-CHECKED
 
 **Why:** The Hamming objective decomposes additively over orbit classes, and each class is an independent one-bit optimization.
 
-**Residual caution:** None beyond finite-set formalization details.
+**Residual caution:** None. Formalized sorry-free and placeholder-free in `proofs/aristotle_submissions/verify/Verify/Theorem1.lean` (optimality, minimum residual count, and uniqueness-iff-no-ties), built in public CI against the pinned Mathlib toolchain.
 
 ---
 

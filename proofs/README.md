@@ -14,7 +14,7 @@ completeness* — the table below is the honest inventory.
 |---|---|---|
 | `aristotle_submissions/verify/Verify/Theorem3.lean` | Stabilization core: pairwise eventual ordering, elimination, and lock-in to a unique rate minimizer, **assuming** the NML expansion `NML = λN + (k/2)log₂T + o(N)` as a hypothesis | **Complete**: no `sorry`/`admit`/`axiom`/`exact?`; part of the default `lake build` |
 | `55d8f9ef-…-output.lean` (proofs root) | Refinement ⇒ total NLL non-increasing, plus converse (the NLL half of the "penalty is necessary" property, at the abstract-partition level) | Proof text complete but contains one `exact?` placeholder and `import Mathlib` in a package with no Mathlib dependency — **not buildable in-repo as shipped** |
-| `aristotle_submissions/verify/Verify/Theorem1.lean` | Majority vote optimal (Hamming projection) | **Draft**: 5 `exact?` placeholders; excluded from build |
+| `aristotle_submissions/verify/Verify/Theorem1.lean` | Majority vote optimal (Hamming projection), minimum residual count, uniqueness iff no class ties | **Complete**: placeholders repaired by hand and re-checked; part of the default `lake build` (CI green) |
 | `aristotle_submissions/verify/Verify/Theorem2.lean` | Six-way equivalence / refinement monotonicity | **Draft**: 17 `exact?` placeholders — all implications are declared and combined, but several rest on placeholder holes; excluded from build |
 | `aristotle_submissions/verify/Verify/Theorem5.lean` | Identifiability for eventually exactly periodic backgrounds | **Draft**: 6 `exact?` placeholders; excluded from build |
 | `aristotle_submissions/verify/Verify/Corollary.lean` | NLL convergence support (Corollary D.3) | **Draft**: 5 `exact?` placeholders; excluded from build |
@@ -28,7 +28,7 @@ yourself: `grep -rn "sorry\|admit\|exact?" proofs/ --include=*.lean`.
 ```bash
 cd proofs/aristotle_submissions/verify
 lake exe cache get   # fetch prebuilt Mathlib oleans (recommended)
-lake build           # builds Verify/Basic.lean, Verify/Theorem3.lean, Main.lean
+lake build           # builds Verify/Basic.lean, Verify/Theorem1.lean, Verify/Theorem3.lean, Main.lean
 ```
 
 The `verify` package pins its toolchain (`lean-toolchain`) and Mathlib
@@ -56,5 +56,6 @@ and builds trivially.
   formalization can silently weaken or add hypotheses.
 - LLM assistants drafted proof sketches; Aristotle generated the Lean;
   Lean's kernel — not any model's prose — is the arbiter of what is
-  proved. By that standard, exactly one statement here (the
-  stabilization core, under its stated hypothesis) is machine-checked.
+  proved. By that standard, two statements here are machine-checked: the
+  majority-vote optimality theorem (Theorem1) and the stabilization core
+  (Theorem3, under its stated hypothesis).

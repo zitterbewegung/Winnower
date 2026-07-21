@@ -261,7 +261,7 @@ REPO_MAP = [
     ("scripts/alife/alife_run_all.py", "One-shot driver for every experiment in the paper."),
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
     ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
-    ("proofs/", "Lean 4 artifacts (Aristotle-generated) at documented completeness: one machine-checked stabilization core in the default build; the rest labeled drafts — see proofs/README.md."),
+    ("proofs/", "Lean 4 artifacts at documented completeness: machine-checked proofs of majority-vote optimality and the stabilization core in the default build (public CI); the rest labeled drafts — see proofs/README.md."),
     ("tests/", "333-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
 ]
@@ -759,8 +759,9 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   rendered verbatim. It records, for every theorem and empirical claim, its current
   status, why it holds, what was weakened relative to earlier drafts, and what remains
   open. The supporting properties additionally have Lean 4 artifacts under
-  <code>proofs/</code> at documented levels of completeness — one machine-checked
-  core lemma in the default build, the rest clearly-labeled drafts (see
+  <code>proofs/</code> at documented levels of completeness — the majority-vote
+  optimality theorem and the stabilization core are machine-checked in the
+  default build with public CI, the rest are clearly-labeled drafts (see
   <code>proofs/README.md</code> for the per-file inventory). The math is supporting
   material for the tool; the paper's claims rest on the experiments and the
   reproducible pipeline.</p>

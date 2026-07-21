@@ -2,7 +2,7 @@ name: Lean proof check
 
 on:
   push:
-    branches: [main, claude/scientific-evaluation-interface-awe5sw]
+    branches: [main]
     paths:
       - "proofs/**"
       - ".github/workflows/lean-verify.yml"
