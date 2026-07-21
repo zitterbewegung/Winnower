@@ -2,7 +2,8 @@
 
 Validates the NML consistency theorem: for each rule, the NML-selected
 period stabilizes as T grows, with margins increasing monotonically
-once stabilized.  Uses exact Bernoulli NML on orbit classes.
+once stabilized.  Uses Bernoulli NML on orbit classes (exact Shtarkov normalizer for small
+    classes, its asymptote above; hybrid mode).
 """
 from __future__ import annotations
 

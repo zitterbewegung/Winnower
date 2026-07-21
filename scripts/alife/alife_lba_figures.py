@@ -183,7 +183,7 @@ def stabilization_figure(out_path: Path) -> None:
             ax[0, j].set_ylabel("selected period", fontsize=10)
             ax[1, j].set_ylabel("margin (bits)", fontsize=10)
     fig.suptitle(
-        "Selected period stabilizes as the horizon grows (exact Bernoulli NML)",
+        "Selected period stabilizes as the horizon grows (Bernoulli NML)",
         fontsize=12,
         fontweight="bold",
         color=style.TEXT_COLOR,
