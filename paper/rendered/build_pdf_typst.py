@@ -2,8 +2,8 @@ import sys, typst, fitz, pathlib
 D = pathlib.Path(__file__).parent
 
 TEMPLATE = r'''
-#set page(paper: "us-letter", margin: (left: 0.7in, right: 0.7in, top: 0.7in, bottom: 0.9in), columns: 2)
-#set columns(gutter: 0.33in)
+#set page(paper: "us-letter", margin: (left: 0.75in, right: 0.75in, top: 0.9in, bottom: 1.1in), columns: 2)
+#set columns(gutter: 0.375in)
 #set text(font: "Liberation Serif", size: BODYPT)
 #set par(justify: true, leading: LEADEM, spacing: SPACEEM, first-line-indent: 0em)
 #show heading.where(level: 1): it => block(above: 0.8em, below: 0.4em, text(size: 11pt, weight: "bold", it.body))
