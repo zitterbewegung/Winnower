@@ -1,0 +1,12 @@
+{
+  "base_seed": 11,
+  "experiment": "mask_structure_benchmark",
+  "horizons": {
+    "1": 200,
+    "2": 400,
+    "3": 40
+  },
+  "n_seeds": 3,
+  "n_shuffles": 20,
+  "statistics": "run-length bits and 3^d-connectivity component count vs uniform permutation baseline"
+}

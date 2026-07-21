@@ -287,8 +287,11 @@ and density-matched i.i.d.\ Bernoulli noise. Every single control run
 organization, while the original spacetimes in the same panel select
 periods up to~4. In 2D the separation is stark: originals leave a mean
 residual rate of 1.4\%, versus 38\% for space-shuffled and Bernoulli
-controls of the same density. The tool does not hallucinate structure
-in noise.
+controls of the same density. The same holds for residual
+\emph{structure}, not just selection: the mask-organization statistic
+introduced in the structured-residuals subsection scores every Bernoulli
+control at exactly its shuffled baseline. The tool does not hallucinate
+structure in noise.
 
 \subsection{Representative Decompositions}
 
@@ -455,13 +458,30 @@ is precisely the intended survey workflow, and we state it plainly so
 the reader does not mistake them for an independent sample. What the
 follow-up runs then establish is robustness: S37/B11's residual
 population persists at 400 steps, across 10 seeds, and at grid sizes up
-to $192 \times 192$, rather than dissolving as a transient. Whether a
-residual mask is ``organized'' is judged visually in
-Figure~\ref{fig:representative}; quantifying residual structure (and
-adding a mask-structure null control) is future work. Even so, the
-decomposition already works as survey-scale triage --- it points at the
-rules, horizons, and spatial regions that merit the much heavier cost
-of local causal-state or particle-level analysis.
+to $192 \times 192$, rather than dissolving as a transient.
+
+``Organized'' is measured, not eyeballed. For each rule we compare the
+residual mask's run-length codelength and connected-component count
+against 20 uniformly shuffled masks of identical density (released as
+\texttt{mask\_structure} in the artifact). An unstructured mask scores
+ratio $\approx 1$; and indeed every density-matched Bernoulli control
+scores $1.000$, confirming calibration. The focal rules are far below
+baseline: Diamoeba's residual codes at $0.27\times$ its shuffled
+baseline with $0.002\times$ the components; S37/B11 at $0.77\times$
+($0.35\times$ with the raster order reversed) and $0.15\times$ the
+components; Maze with Mice, S24/B11, and S11/B37 are comparable, with
+deviations of tens to hundreds of standard deviations. The statistic
+also keeps us honest in both directions: Rule~30's diffuse residual
+scores $1.000$ --- quantitatively indistinguishable from noise, matching
+its description above --- and time-shuffled controls retain the
+\emph{spatial} organization they preserve by construction, so full
+randomization (Bernoulli) is the correct no-structure baseline. Two
+dense 3D masks (crystal, diamoeba3d) are order-sensitive: organized
+under the native raster, inconclusive reversed --- the raster-order
+caveat below applies to them. With that calibration in hand, the
+decomposition works as survey-scale triage --- it points at the rules,
+horizons, and spatial regions that merit the much heavier cost of local
+causal-state or particle-level analysis.
 
 %======================================================================
 \section{Reproducibility and Artifact}

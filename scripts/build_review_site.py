@@ -162,6 +162,20 @@ TABLES = [
         claim="Selector recovers known ground truth",
     ),
     dict(
+        path=ALIFE / "mask_structure" / "mask_structure_summary.csv",
+        title="Residual-mask organization (vs shuffled baselines)",
+        caption=(
+            "Run-length codelength and component-count ratios of each selected "
+            "residual mask against 20 uniformly shuffled masks of the same "
+            "density (ratio 1 = unstructured). Originals of the focal rules sit "
+            "far below 1; every Bernoulli control sits at 1.000; ECA-30's "
+            "diffuse residual also scores 1.000 — the statistic is calibrated "
+            "in both directions. Time-shuffled controls retain per-frame "
+            "spatial organization by construction."
+        ),
+        claim="Residual organization is measured, not eyeballed",
+    ),
+    dict(
         path=ALIFE / "null_controls" / "null_controls_summary.csv",
         title="Null controls (summary)",
         caption=(
