@@ -268,10 +268,14 @@ def combined_eca_figure(out_path: Path) -> None:
         axm.set_xlabel("horizon T", fontsize=8)
         for k in range(1, len(P)):
             if P[k] != P[k - 1]:
-                axm.annotate("period\nchanges", xy=(T[k], M[k]), xytext=(6, 16),
-                             textcoords="offset points", fontsize=7,
-                             color=style.SECONDARY_COLOR,
-                             arrowprops=dict(arrowstyle="-",
+                # Anchor the label in the middle of the panel (axes fraction)
+                # with an arrow to the transition point, so it never overlaps
+                # the data line or the axis ticks.
+                axm.annotate("period\nchanges", xy=(T[k], M[k]),
+                             xycoords="data", xytext=(0.5, 0.55),
+                             textcoords="axes fraction", ha="center", va="center",
+                             fontsize=7, color=style.SECONDARY_COLOR,
+                             arrowprops=dict(arrowstyle="->",
                                              color=style.SECONDARY_COLOR, lw=0.7))
 
     fig.savefig(out_path, dpi=DPI, facecolor="white", bbox_inches="tight")
