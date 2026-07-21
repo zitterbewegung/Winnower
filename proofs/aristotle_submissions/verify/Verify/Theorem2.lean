@@ -364,11 +364,9 @@ lemma orbitPartition_isPartition (c : Candidate n) :
           exact ⟨ h_perm, Finite.injective_iff_surjective.mp h_perm ⟩;
         have h_perm : ∃ m : ℕ, m > 0 ∧ (gridTranslate n D T c)^[m] = id := by
           refine ⟨orderOf (Equiv.ofBijective (gridTranslate n D T c) h_perm), orderOf_pos _, ?_⟩
-          have hpow := pow_orderOf_eq_one (Equiv.ofBijective (gridTranslate n D T c) h_perm)
-          have hco := Equiv.Perm.coe_pow (Equiv.ofBijective (gridTranslate n D T c) h_perm)
-            (orderOf (Equiv.ofBijective (gridTranslate n D T c) h_perm))
-          rw [hpow] at hco
-          simpa using hco.symm
+          show (⇑(Equiv.ofBijective (gridTranslate n D T c) h_perm))^[orderOf
+            (Equiv.ofBijective (gridTranslate n D T c) h_perm)] = id
+          rw [← Equiv.Perm.coe_pow, pow_orderOf_eq_one, Equiv.Perm.coe_one]
         exact ⟨ h_perm.choose, h_perm.choose_spec.1, congr_fun h_perm.choose_spec.2 y ⟩;
       obtain ⟨ m, hm₁, hm₂ ⟩ := h_perm; use m * ( k + 1 ) - k; simp_all +decide [ ← Function.iterate_add_apply, Nat.sub_add_cancel ( show k ≤ m * ( k + 1 ) from by nlinarith ) ] ;
       rw [ Function.iterate_mul, Function.iterate_fixed hm₂ ];
@@ -663,7 +661,7 @@ theorem cond6_imp_cond3 (c₁ c₂ : Candidate n) : cond6 n D T c₁ c₂ → co
     · exact ho₂.1
   have h_contra : NLL n D T c₂ U ≤ NLL n D T c₁ U := by
     exact h U
-  exact h_contra.not_lt (by linarith)
+  linarith
 
 /-
 Prove that condition (iii) implies condition (vi) (real version).
