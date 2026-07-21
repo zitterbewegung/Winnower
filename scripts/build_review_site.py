@@ -336,9 +336,13 @@ def csv_to_table(path: Path, filterable: bool = False, table_id: str = "") -> st
     return "".join(parts)
 
 
+def detex_dashes(text: str) -> str:
+    return text.replace("---", "—").replace("--", "–")
+
+
 def extract_tex_field(tex: str, name: str) -> str:
     m = re.search(r"\\" + name + r"\{(.+?)\}", tex, re.S)
-    return m.group(1).strip() if m else ""
+    return " ".join(detex_dashes(m.group(1)).split()) if m else ""
 
 
 def extract_abstract(tex: str) -> str:
@@ -349,7 +353,7 @@ def extract_abstract(tex: str) -> str:
     text = re.sub(r"\\citep?\{[^}]*\}", "", text)
     text = re.sub(r"\\emph\{([^}]*)\}", r"\1", text)
     text = re.sub(r"\\[a-zA-Z]+", "", text)
-    text = text.replace("~", " ").replace("$", "")
+    text = detex_dashes(text.replace("~", " ").replace("$", ""))
     return " ".join(text.split())
 
 
@@ -745,9 +749,11 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 <section id="overview" class="active">
   <h2>What this paper does</h2>
   <div class="abstract"><strong>Abstract.</strong> {esc(abstract)}</div>
-  <p class="tbl-meta">Terminology: the ALIFE 2026 late-breaking abstract calls the
-  periodic background the <em>domain template</em> B* and the residual mask the
-  <em>defect mask</em> M; this site uses the same vocabulary throughout.</p>
+  <p class="tbl-meta">Terminology: the paper, the ALIFE 2026 late-breaking abstract,
+  and this site all say <em>domain template</em> B* and <em>defect mask</em> M;
+  earlier drafts — still quoted verbatim in the claim ledger and visible in some
+  older figure panel labels — called these the <em>background</em> and the
+  <em>residual mask</em>.</p>
   <div class="links">
     <a href="{pdf_href}" target="_blank" rel="noopener">Open the paper (PDF)</a>
     {demo_overview}
