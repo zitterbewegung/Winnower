@@ -268,6 +268,7 @@ REPRO_STEPS = [
 
 REPO_MAP = [
     ("paper/paper_alife2026.pdf", "The submission PDF."),
+    ("paper/alife2026_lba.pdf", "ALIFE 2026 late-breaking abstract (2 pages): the machine-checked period-inflation characterization."),
     ("paper/paper_alife2026.tex", "LaTeX source; figures pulled from outputs/."),
     ("docs/CLAIM_LEDGER.md", "Claim-by-claim audit: status, caveats, what remains."),
     ("docs/THEORY_NOTE.md", "Extended theory notes."),
@@ -491,7 +492,8 @@ def write_demo_assets(site: Path) -> None:
     (site / "expected_runs.json").write_text(json.dumps(_demo_expected_rows()))
 
 
-def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf", live_demo: bool = False) -> str:
+def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
+          lba_href: str = "../paper/alife2026_lba.pdf", live_demo: bool = False) -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
     title = extract_tex_field(tex, "title") or "Winnower — reviewer guide"
     abstract = extract_abstract(tex)
@@ -728,6 +730,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 </header>
 <nav><div class="wrap">
   <a href="#overview" class="active" onclick="return show('overview')">Overview</a>
+  <a href="#latebreaking" onclick="return show('latebreaking')">Late-breaking</a>
   <a href="#claims" onclick="return show('claims')">Claims &amp; theory</a>
   <a href="#figures" onclick="return show('figures')">Figures</a>
   <a href="#results" onclick="return show('results')">Results &amp; robustness</a>
@@ -765,6 +768,69 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
     <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, the project's own audit of every mathematical statement. The supporting math is deliberately secondary to the tool, and the ledger says exactly how strong each statement is.</li>
     <li>Optionally run <code>make test</code> and one <code>analyze</code> command from the <a href="#reproduce" onclick="return show('reproduce')">reproduce tab</a>.</li>
   </ol>
+</section>
+
+<section id="latebreaking">
+  <h2>Late-breaking abstract — ALIFE 2026</h2>
+  <p><strong>The exact boundary of period inflation: a machine-checked
+  characterization for the Winnower CA background detector.</strong>
+  A two-page late-breaking abstract prepared for
+  <a href="https://2026.alife.org/" target="_blank" rel="noopener">ALIFE 2026</a>
+  (Waterloo, Ontario, Canada, August 17&ndash;21, 2026 &mdash; theme
+  &ldquo;Living and Life-like Complex Adaptive Systems&rdquo;). The
+  late-breaking track accepts work in progress in a
+  <em>maximum of 2 pages excluding references</em>; accepted abstracts are
+  presented as posters and are not included in the proceedings
+  (submissions due July&nbsp;20, 2026 AoE; notification July&nbsp;27, 2026).</p>
+  <div class="links">
+    <a href="{lba_href}" target="_blank" rel="noopener">Open the late-breaking abstract (PDF, 2 pages)</a>
+    <a href="https://github.com/zitterbewegung/Winnower/blob/main/proofs/aristotle_submissions/verify/Verify/Theorem2.lean" target="_blank" rel="noopener" class="secondary">The Lean proof (Theorem2.lean)</a>
+    <a href="https://github.com/zitterbewegung/Winnower/actions/workflows/lean-verify.yml" target="_blank" rel="noopener" class="secondary">Its CI runs (Lean proof check)</a>
+  </div>
+  <h3>The result, in plain terms</h3>
+  <p>Every fit-based background detector faces <em>period inflation</em>: a
+  candidate with a longer period has more parameters, so it can never fit
+  worse, and a selector scoring by fit alone drifts to the largest model
+  scanned. The late-breaking result pins down <em>exactly</em> when that
+  pressure exists. For two constant-velocity candidates, five natural
+  conditions are all equivalent: velocity-matched divisibility of the
+  periods and shifts; one translation being a power of the other;
+  orbit-partition refinement; model-class nesting; and universal
+  improvement (on <em>every</em> spacetime) of both the residual count and
+  the Bernoulli negative log-likelihood. Divisibility is
+  <em>necessary</em>, not just sufficient &mdash; whenever it fails, some
+  spacetime makes the longer-period candidate strictly worse. That makes
+  divisibility the precise frontier of the guaranteed-improvement regime,
+  and therefore the precise set of comparisons Winnower's NML complexity
+  penalty exists to neutralize.</p>
+  <h3>How it connects to the tool on this site</h3>
+  <ul>
+    <li><strong>Machine-checked:</strong> the full six-way equivalence
+    &mdash; including the previously open necessity direction
+    (refinement&nbsp;&rArr;&nbsp;power) &mdash; is proved in Lean&nbsp;4
+    against a pinned Mathlib toolchain and rebuilt by public CI on every
+    push, which also greps the built file for placeholder tactics. The
+    prose proof is Theorem&nbsp;C.3 in the
+    <a href="#claims" onclick="return show('claims')">theory notes audited in the claim ledger</a>.</li>
+    <li><strong>Exhaustively tested:</strong>
+    <code>tests/test_theory.py::test_refinement_iff_velocity_matched_multiple</code>
+    checks the finite-window form of the equivalence over every candidate
+    pair on a 6&times;4 grid.</li>
+    <li><strong>Visible in the live demo:</strong> the
+    <a href="reproduce.html">in-browser reproduction</a> reports, for any
+    supported rule, seed, and horizon, the per-period fit (NLL) and
+    penalized (NML) scores side by side &mdash; the fit column improves
+    along velocity-matched chains exactly as the theorem dictates, while
+    the penalized column resists.</li>
+    <li><strong>At survey scale:</strong> the
+    <a href="#figures" onclick="return show('figures')">selector-ablation figure</a>
+    shows the practical stakes: at horizon 100, plain NLL selects the
+    largest scanned period on all 105 non-degenerate Life-like rules,
+    while Bernoulli NML concentrates at low period.</li>
+  </ul>
+  <p class="tbl-meta">Source: <code>paper/alife2026_lba.tex</code>, built with the
+  official <code>alifeconf</code> LaTeX style; if the conference releases a
+  dedicated 2026 template, paste the body into it before submitting.</p>
 </section>
 
 <section id="claims">
@@ -886,9 +952,12 @@ def main() -> None:
         pdf = ROOT / "paper" / "paper_alife2026.pdf"
         if pdf.exists():
             shutil.copy2(pdf, site / pdf.name)
+        lba = ROOT / "paper" / "alife2026_lba.pdf"
+        if lba.exists():
+            shutil.copy2(lba, site / lba.name)
         write_demo_assets(site)
         out = site / "index.html"
-        out.write_text(build(embed=True, pdf_href=pdf.name, live_demo=True))
+        out.write_text(build(embed=True, pdf_href=pdf.name, lba_href=lba.name, live_demo=True))
     else:
         OUT_DIR.mkdir(exist_ok=True)
         out = OUT_DIR / ("index_portable.html" if args.embed_images else "index.html")
