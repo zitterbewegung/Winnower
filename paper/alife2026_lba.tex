@@ -144,10 +144,26 @@ observed and why the shortest equivalent candidate can be recovered when it is
 included in the search.
 
 \section{Preliminary Results}
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.66\textwidth]{lba_results.png}
+    \caption{Representative Winnower runs. \emph{Top three rows:}
+    decompositions (observed~/ domain template~/ defect mask) for 1D ECA-54
+    (period-4 template; defect mask isolates particle world-lines), 2D S24/B11
+    (period-2 template, defect rate $0.008$ at $T{=}600$), and voxel views of
+    3D Life B5/S45 \citep{bays1987} (period-1 template captures the persistent
+    still lifes; defects are the decaying soup). \emph{Bottom:} for the same
+    rules (plus ECA-110), selected period and margin over the runner-up
+    (shared log scale) versus horizon $T$, from an exact-Bernoulli-NML sweep.
+    Periods lock immediately (ECA-54, 3D Life) or after one marked transition
+    (ECA-110 $1\!\to\!7$, S24/B11 $1\!\to\!2$); the margin dips toward zero at
+    the transition, where two periods are nearly tied, then grows.}
+    \label{fig:results}
+\end{figure*}
+
 We tested ECAs 30, 54, and 110; two-dimensional Life-like and totalistic
 rules; and 3D Life B5/S45 \citep{bays1987,bays2006}.
-\Cref{fig:decomp} shows the resulting decompositions for the representative
-rules, and \cref{fig:stab} the corresponding horizon sweep
+\Cref{fig:results} shows the resulting decompositions and horizon sweep for the representative rules
 ($T\in\{50,\dots,800\}$ in 1D/2D at seed~11; $T\in\{10,\dots,50\}$ at seed~42
 in 3D, where the B5/S45 soup decays toward the quiescent domain). The selected
 candidate settled immediately for ECA~54 (period~4, margin growing from 681 to
@@ -174,7 +190,7 @@ detectors \citep{secktuohmora2023}.
 \paragraph{Reproducibility.} Every number and figure above regenerates
 deterministically from the released tool: single rules via \texttt{analyze},
 \texttt{analyze2d}, and \texttt{analyze3d};
-\cref{fig:decomp,fig:stab} via \texttt{alife\_lba\_figures.py} after the
+\cref{fig:results} via \texttt{alife\_lba\_figures.py} after the
 horizon sweep \texttt{convergence\_all\_dims.py}.
 
 \section{Discussion and Future Work}
@@ -287,36 +303,5 @@ Yamanishi, K. (2023).
 \emph{Learning with the Minimum Description Length Principle}. Springer.
 
 \end{thebibliography}
-
-\normalsize
-\clearpage
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.72\textwidth]{lba_decompositions.png}
-    \caption{Winnower decompositions of the representative rules
-    (observed~/ domain template~/ defect mask). Top: ECA-54
-    (seed~11, $T{=}144$) selects a period-4 template; the defect mask isolates
-    particle world-lines against the periodic domain. Middle: 2D S24/B11
-    (seed~11, $T{=}600$, frame $t{=}300$) selects a period-2 template that
-    explains almost every cell (defect rate $0.008$). Bottom: voxel views of 3D
-    Life B5/S45 \citep{bays1987} (seed~42, $16^3$, $T{=}24$): the period-1
-    template captures the persistent still lifes, and the defect overlay marks
-    the decaying transient soup.}
-    \label{fig:decomp}
-\end{figure*}
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.72\textwidth]{stabilization_real.png}
-    \caption{Selected period (top) and margin over the runner-up in bits
-    (bottom, shared log scale) versus horizon $T$, for the rules of
-    \cref{fig:decomp}, from an exact-Bernoulli-NML sweep. ECA-54 locks at
-    period~4 and 3D Life at period~1 from the first horizon, with the margin
-    growing throughout. ECA-110 ($1\!\to\!7$) and S24/B11 ($1\!\to\!2$) each
-    make one transition (marked); the margin briefly collapses toward zero at
-    the transition itself, where the old and new periods are nearly tied,
-    then grows once the new period pulls ahead.}
-    \label{fig:stab}
-\end{figure*}
 
 \end{document}
