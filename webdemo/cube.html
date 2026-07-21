@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CA cube — Winnower</title>
+<style>
+:root {
+  --bg: #f7f7f5; --fg: #1a1a1a; --muted: #5a5a55; --card: #ffffff;
+  --line: #e0dfda; --accent: #305c7a; --accent-soft: #e7eef3;
+  --voxel-bg: #eef0f2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181b; --fg: #e6e4df; --muted: #a3a29b; --card: #1e2126;
+    --line: #33363c; --accent: #7fb0d0; --accent-soft: #22303a;
+    --voxel-bg: #0c0e11;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 Georgia, 'Times New Roman', serif; }
+header { background: var(--card); border-bottom: 1px solid var(--line);
+  padding: 1.4rem 1.5rem 1rem; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+header .wrap { padding: 0; }
+h1 { font-size: 1.5rem; margin: 0 0 .3rem; }
+.subtitle { color: var(--muted); margin: 0; }
+.subtitle a { color: var(--accent); }
+main { padding: 1.5rem 0 4rem; }
+.card { background: var(--card); border: 1px solid var(--line);
+  border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;
+  font-family: system-ui, sans-serif; font-size: .92rem; }
+.controls label { display: flex; flex-direction: column; gap: .25rem;
+  color: var(--muted); }
+.controls select, .controls input { font: inherit; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: .45rem .6rem; min-width: 6rem; }
+.controls input[type=range] { min-width: 9rem; padding: 0; }
+.controls input.narrow { min-width: 4rem; width: 4.6rem; }
+button.btn { font: inherit; font-family: system-ui, sans-serif; font-weight: 600;
+  color: #fff; background: var(--accent); border: 0; border-radius: 8px;
+  padding: .55rem 1.2rem; cursor: pointer; }
+button.btn.ghost { color: var(--accent); background: var(--accent-soft); }
+button.btn:disabled { opacity: .5; cursor: wait; }
+.stage { position: relative; width: 100%; aspect-ratio: 16 / 10;
+  background: var(--voxel-bg); border: 1px solid var(--line);
+  border-radius: 10px; overflow: hidden; margin: 1rem 0; touch-action: none; }
+canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+canvas:active { cursor: grabbing; }
+.overlay { position: absolute; left: .75rem; bottom: .6rem;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: .78rem; color: var(--muted); background: var(--card);
+  border: 1px solid var(--line); border-radius: 6px; padding: .3rem .5rem;
+  pointer-events: none; opacity: .92; }
+.hint { font-family: system-ui, sans-serif; font-size: .85rem; color: var(--muted);
+  margin: .4rem 0 0; }
+code { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: .86em; background: var(--accent-soft); padding: .06em .35em;
+  border-radius: 4px; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Cellular-automaton cube</h1>
+  <p class="subtitle">A CA run rendered as a rotating 3D voxel cube — either a 2D
+  rule stacked along its time axis (a <em>spacetime cube</em>), or a true 3D
+  totalistic rule from <a href="../src/relative_symmetry_repair/ca3d.py"><code>ca3d.py</code></a>.
+  Drag to orbit, scroll to zoom.</p>
+</div></header>
+
+<main><div class="wrap">
+  <div class="card">
+    <div class="controls">
+      <label>Mode
+        <select id="mode">
+          <option value="spacetime">Spacetime cube (2D CA × time)</option>
+          <option value="volume">3D CA volume</option>
+        </select>
+      </label>
+      <label>Rule
+        <select id="rule"></select>
+      </label>
+      <label>Size <span id="sizeVal"></span>
+        <input id="size" type="range" min="16" max="56" step="4" value="40">
+      </label>
+      <label>Density <span id="densVal"></span>
+        <input id="dens" type="range" min="5" max="80" step="5" value="30">
+      </label>
+      <label>Seed
+        <input id="seed" class="narrow" type="number" value="1" min="0">
+      </label>
+      <button id="regen" class="btn">Regenerate</button>
+      <button id="spin" class="btn ghost">Pause spin</button>
+    </div>
+    <p class="hint" id="ruleHint"></p>
+  </div>
+
+  <div class="stage" id="stage">
+    <canvas id="gl"></canvas>
+    <div class="overlay" id="overlay">…</div>
+  </div>
+  <p class="hint">Voxels are live cells. In spacetime mode the vertical axis is
+  time (bottom = initial condition, top = final step) and colour tracks the time
+  step; in volume mode colour tracks height. Everything runs locally in your
+  browser — no data leaves the page.</p>
+</div></main>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------------------
+// Cellular-automaton simulation (JS ports of ca2d.py / ca3d.py rules)
+// ---------------------------------------------------------------------------
+
+// Deterministic PRNG (mulberry32) so a seed reproduces an initial condition.
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// 2D Life-like rules: birth/survive neighbour-count sets (0..8). Non-contiguous
+// sets (highlife, diamoeba, daynight) are represented exactly, matching the
+// general-LUT path in ca2d.py rather than the approximate contiguous ranges.
+const RULES_2D = {
+  "life":      { label: "Life  B3/S23",         B: [3],           S: [2, 3],          dens: 0.30 },
+  "highlife":  { label: "HighLife  B36/S23",    B: [3, 6],        S: [2, 3],          dens: 0.30 },
+  "daynight":  { label: "Day & Night  B3678/S34678", B: [3,6,7,8], S: [3,4,6,7,8],    dens: 0.50 },
+  "seeds":     { label: "Seeds  B2/S",          B: [2],           S: [],              dens: 0.06 },
+  "diamoeba":  { label: "Diamoeba  B35678/S5678", B: [3,5,6,7,8], S: [5,6,7,8],       dens: 0.48 },
+};
+
+// 3D totalistic rules (26-neighbour Moore, counts 0..26), from RULES_3D /
+// RULES_3D_DENSITY in ca3d.py — stored as (survive lo,hi / birth lo,hi).
+const RULES_3D = {
+  "3d-life":    { label: "3D Life  S4-5/B5",       Slo: 4,  Shi: 5,  Blo: 5,  Bhi: 5,  dens: 0.20 },
+  "clouds":     { label: "Clouds  S13-26/B13-14",  Slo: 13, Shi: 26, Blo: 13, Bhi: 14, dens: 0.60 },
+  "crystal":    { label: "Crystal  S1/B1-3",       Slo: 1,  Shi: 1,  Blo: 1,  Bhi: 3,  dens: 0.10 },
+  "diamoeba3d": { label: "Diamoeba3D  S5-8/B5-8",  Slo: 5,  Shi: 8,  Blo: 5,  Bhi: 8,  dens: 0.50 },
+};
+
+// One 2D step on a torus with birth/survive lookup tables (length 9).
+function step2d(grid, W, H, Blut, Slut) {
+  const out = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) {
+    const ym = ((y - 1 + H) % H) * W, yp = ((y + 1) % H) * W, y0 = y * W;
+    for (let x = 0; x < W; x++) {
+      const xm = (x - 1 + W) % W, xp = (x + 1) % W;
+      const n =
+        grid[ym + xm] + grid[ym + x] + grid[ym + xp] +
+        grid[y0 + xm] +                grid[y0 + xp] +
+        grid[yp + xm] + grid[yp + x] + grid[yp + xp];
+      out[y0 + x] = grid[y0 + x] ? Slut[n] : Blut[n];
+    }
+  }
+  return out;
+}
+
+// Build a spacetime cube: grid (N×N) advanced `N` steps, stacked along t.
+// Returns {N, cells:[{x,y,z,t}]} with z = time.
+function buildSpacetime(ruleKey, N, density, seed) {
+  const r = RULES_2D[ruleKey];
+  const Blut = new Uint8Array(9), Slut = new Uint8Array(9);
+  r.B.forEach(k => Blut[k] = 1);
+  r.S.forEach(k => Slut[k] = 1);
+  const rng = mulberry32(seed >>> 0);
+  let grid = new Uint8Array(N * N);
+  for (let i = 0; i < grid.length; i++) grid[i] = rng() < density ? 1 : 0;
+
+  const cells = [];
+  for (let t = 0; t < N; t++) {
+    for (let y = 0; y < N; y++)
+      for (let x = 0; x < N; x++)
+        if (grid[y * N + x]) cells.push([x, y, t]);
+    if (t < N - 1) grid = step2d(grid, N, N, Blut, Slut);
+  }
+  return { N, cells, tMax: N - 1 };
+}
+
+// One 3D step on a 3-torus (26-neighbour Moore) with lo/hi survive/birth bands.
+function step3d(vol, S, Slo, Shi, Blo, Bhi) {
+  const out = new Uint8Array(S * S * S);
+  const idx = (z, y, x) => (z * S + y) * S + x;
+  for (let z = 0; z < S; z++)
+    for (let y = 0; y < S; y++)
+      for (let x = 0; x < S; x++) {
+        let n = 0;
+        for (let dz = -1; dz <= 1; dz++) {
+          const zz = (z + dz + S) % S;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = (y + dy + S) % S;
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dz === 0 && dy === 0 && dx === 0) continue;
+              n += vol[idx(zz, yy, (x + dx + S) % S)];
+            }
+          }
+        }
+        const alive = vol[idx(z, y, x)];
+        out[idx(z, y, x)] = alive
+          ? (n >= Slo && n <= Shi ? 1 : 0)
+          : (n >= Blo && n <= Bhi ? 1 : 0);
+      }
+  return out;
+}
+
+// Build a 3D CA volume: run `steps` steps, return the live voxels of the last.
+function buildVolume(ruleKey, S, density, seed) {
+  const r = RULES_3D[ruleKey];
+  const rng = mulberry32(seed >>> 0);
+  let vol = new Uint8Array(S * S * S);
+  for (let i = 0; i < vol.length; i++) vol[i] = rng() < density ? 1 : 0;
+  const steps = Math.max(4, Math.round(S / 3));
+  for (let t = 0; t < steps; t++) vol = step3d(vol, S, r.Slo, r.Shi, r.Blo, r.Bhi);
+
+  const cells = [];
+  const idx = (z, y, x) => (z * S + y) * S + x;
+  for (let z = 0; z < S; z++)
+    for (let y = 0; y < S; y++)
+      for (let x = 0; x < S; x++)
+        if (vol[idx(z, y, x)]) cells.push([x, y, z]);
+  return { N: S, cells, tMax: S - 1, steps };
+}
+
+// ---------------------------------------------------------------------------
+// Minimal WebGL2 instanced voxel renderer
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById("gl");
+const gl = canvas.getContext("webgl2", { antialias: true, alpha: false });
+
+const VS = `#version 300 es
+layout(location=0) in vec3 aPos;      // unit cube vertex
+layout(location=1) in vec3 aNormal;
+layout(location=2) in vec3 iOffset;   // per-instance grid cell
+layout(location=3) in vec3 iColor;    // per-instance colour
+uniform mat4 uMVP;
+uniform mat4 uModel;
+out vec3 vNormal;
+out vec3 vColor;
+void main() {
+  vec3 world = aPos * 0.5 + iOffset;   // 0.5 -> unit cubes with a hairline gap
+  gl_Position = uMVP * vec4(world, 1.0);
+  vNormal = mat3(uModel) * aNormal;
+  vColor = iColor;
+}`;
+
+const FS = `#version 300 es
+precision highp float;
+in vec3 vNormal;
+in vec3 vColor;
+out vec4 fragColor;
+void main() {
+  vec3 nrm = normalize(vNormal);
+  vec3 L = normalize(vec3(0.5, 0.8, 0.6));
+  float diff = max(dot(nrm, L), 0.0);
+  float amb = 0.35;
+  float shade = amb + 0.75 * diff;
+  // subtle rim so silhouettes read against the background
+  fragColor = vec4(vColor * shade, 1.0);
+}`;
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
+  throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+const uMVP = gl.getUniformLocation(prog, "uMVP");
+const uModel = gl.getUniformLocation(prog, "uModel");
+
+// Unit cube: 24 verts (4 per face) with per-face normals, 36 indices.
+function cubeGeometry() {
+  const f = [ // normal, then 4 corner offsets (in ±0.5 space)
+    [[0,0,1],  [[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]],
+    [[0,0,-1], [[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1]]],
+    [[1,0,0],  [[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1]]],
+    [[-1,0,0], [[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1]]],
+    [[0,1,0],  [[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1]]],
+    [[0,-1,0], [[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]]],
+  ];
+  const pos = [], nrm = [], idx = [];
+  let v = 0;
+  for (const [n, corners] of f) {
+    for (const c of corners) { pos.push(c[0], c[1], c[2]); nrm.push(n[0], n[1], n[2]); }
+    idx.push(v, v + 1, v + 2, v, v + 2, v + 3); v += 4;
+  }
+  return { pos: new Float32Array(pos), nrm: new Float32Array(nrm), idx: new Uint16Array(idx) };
+}
+
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+const geo = cubeGeometry();
+const posBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+gl.bufferData(gl.ARRAY_BUFFER, geo.pos, gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+const nrmBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, nrmBuf);
+gl.bufferData(gl.ARRAY_BUFFER, geo.nrm, gl.STATIC_DRAW);
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+const idxBuf = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, geo.idx, gl.STATIC_DRAW);
+
+const offBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, offBuf);
+gl.enableVertexAttribArray(2);
+gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 0, 0);
+gl.vertexAttribDivisor(2, 1);
+const colBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, colBuf);
+gl.enableVertexAttribArray(3);
+gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 0, 0);
+gl.vertexAttribDivisor(3, 1);
+
+let instanceCount = 0;
+let modelCenter = 0;
+
+// Colour ramps ----------------------------------------------------------------
+function lerp(a, b, t) { return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]; }
+// viridis-ish 5-stop ramp, used for the time / height axis
+const RAMP = [[0.27,0.00,0.33],[0.21,0.36,0.55],[0.13,0.57,0.55],[0.37,0.79,0.38],[0.99,0.91,0.14]];
+function ramp(t) {
+  t = Math.min(0.999, Math.max(0, t)) * (RAMP.length - 1);
+  const i = Math.floor(t);
+  return lerp(RAMP[i], RAMP[i + 1], t - i);
+}
+
+// Upload live cells as instances; axis chooses which coord drives the colour.
+function upload(result, colorAxis) {
+  const { cells, N, tMax } = result;
+  const off = new Float32Array(cells.length * 3);
+  const col = new Float32Array(cells.length * 3);
+  const c = (N - 1) / 2;
+  for (let i = 0; i < cells.length; i++) {
+    const [x, y, z] = cells[i];
+    off[i*3] = x - c; off[i*3+1] = z - c; off[i*3+2] = y - c;   // z(time/height) -> up
+    const t = tMax > 0 ? cells[i][colorAxis] / tMax : 0.5;
+    const rgb = ramp(t);
+    col[i*3] = rgb[0]; col[i*3+1] = rgb[1]; col[i*3+2] = rgb[2];
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, offBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, off, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, colBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, col, gl.STATIC_DRAW);
+  instanceCount = cells.length;
+  modelCenter = N;
+}
+
+// ---------------------------------------------------------------------------
+// Camera / matrices
+// ---------------------------------------------------------------------------
+function mat4Mul(a, b) {
+  const o = new Float32Array(16);
+  for (let r = 0; r < 4; r++)
+    for (let c = 0; c < 4; c++)
+      o[c*4+r] = a[0*4+r]*b[c*4+0] + a[1*4+r]*b[c*4+1] + a[2*4+r]*b[c*4+2] + a[3*4+r]*b[c*4+3];
+  return o;
+}
+function perspective(fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  return new Float32Array([
+    f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0]);
+}
+function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]);}
+function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]);}
+function translate(x,y,z){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1]);}
+
+let yaw = 0.7, pitch = 0.5, dist = 2.4, autoSpin = true;
+
+function render() {
+  const stage = document.getElementById("stage");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.round(stage.clientWidth * dpr), h = Math.round(stage.clientHeight * dpr);
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  gl.viewport(0, 0, w, h);
+
+  const bgDark = matchMedia("(prefers-color-scheme: dark)").matches;
+  if (bgDark) gl.clearColor(0.047, 0.055, 0.067, 1); else gl.clearColor(0.933, 0.941, 0.949, 1);
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  if (autoSpin) yaw += 0.005;
+  const radius = modelCenter * dist;
+  const model = mat4Mul(rotX(pitch), rotY(yaw));
+  const view = translate(0, 0, -radius);
+  const proj = perspective(0.9, w / h, 0.1, radius * 6 + 100);
+  const mvp = mat4Mul(proj, mat4Mul(view, model));
+  gl.uniformMatrix4fv(uMVP, false, mvp);
+  gl.uniformMatrix4fv(uModel, false, model);
+
+  gl.bindVertexArray(vao);
+  gl.drawElementsInstanced(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0, instanceCount);
+  requestAnimationFrame(render);
+}
+
+// ---------------------------------------------------------------------------
+// Orbit + zoom interaction
+// ---------------------------------------------------------------------------
+let dragging = false, lastX = 0, lastY = 0;
+canvas.addEventListener("pointerdown", e => {
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener("pointermove", e => {
+  if (!dragging) return;
+  yaw += (e.clientX - lastX) * 0.01;
+  pitch += (e.clientY - lastY) * 0.01;
+  pitch = Math.max(-1.5, Math.min(1.5, pitch));
+  lastX = e.clientX; lastY = e.clientY;
+});
+canvas.addEventListener("pointerup", () => { dragging = false; });
+canvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  dist *= Math.exp(e.deltaY * 0.001);
+  dist = Math.max(1.2, Math.min(6, dist));
+}, { passive: false });
+
+// ---------------------------------------------------------------------------
+// UI wiring
+// ---------------------------------------------------------------------------
+const modeSel = document.getElementById("mode");
+const ruleSel = document.getElementById("rule");
+const sizeEl = document.getElementById("size");
+const densEl = document.getElementById("dens");
+const seedEl = document.getElementById("seed");
+const overlay = document.getElementById("overlay");
+const ruleHint = document.getElementById("ruleHint");
+const sizeVal = document.getElementById("sizeVal");
+const densVal = document.getElementById("densVal");
+
+function populateRules() {
+  const rules = modeSel.value === "spacetime" ? RULES_2D : RULES_3D;
+  ruleSel.innerHTML = "";
+  for (const [k, v] of Object.entries(rules)) {
+    const o = document.createElement("option");
+    o.value = k; o.textContent = v.label; ruleSel.appendChild(o);
+  }
+  // sensible default densities and size caps per mode
+  if (modeSel.value === "volume") { sizeEl.max = 44; if (+sizeEl.value > 44) sizeEl.value = 40; }
+  else sizeEl.max = 56;
+}
+
+function currentDensityDefault() {
+  const rules = modeSel.value === "spacetime" ? RULES_2D : RULES_3D;
+  return rules[ruleSel.value].dens;
+}
+
+function regenerate() {
+  const N = +sizeEl.value;
+  const density = +densEl.value / 100;
+  const seed = +seedEl.value || 0;
+  sizeVal.textContent = "(" + N + ")";
+  densVal.textContent = "(" + Math.round(density * 100) + "%)";
+
+  let result, label, colorAxis;
+  if (modeSel.value === "spacetime") {
+    result = buildSpacetime(ruleSel.value, N, density, seed);
+    label = RULES_2D[ruleSel.value].label;
+    colorAxis = 2; // time
+    overlay.textContent =
+      `${label}  ·  ${N}×${N} grid × ${N} steps  ·  ${result.cells.length.toLocaleString()} live voxels`;
+    ruleHint.textContent =
+      "Spacetime cube: each horizontal slab is one time step of the 2D rule; " +
+      "stacking them upward gives the (x, y, t) volume this project analyses.";
+  } else {
+    result = buildVolume(ruleSel.value, N, density, seed);
+    label = RULES_3D[ruleSel.value].label;
+    colorAxis = 2; // height
+    overlay.textContent =
+      `${label}  ·  ${N}³ torus × ${result.steps} steps  ·  ${result.cells.length.toLocaleString()} live voxels`;
+    ruleHint.textContent =
+      "3D volume: a 26-neighbour totalistic rule evolved on a 3-torus; the final " +
+      "state's live cells are shown, coloured by height.";
+  }
+  upload(result, colorAxis);
+}
+
+modeSel.addEventListener("change", () => {
+  populateRules();
+  densEl.value = Math.round(currentDensityDefault() * 100);
+  regenerate();
+});
+ruleSel.addEventListener("change", () => {
+  densEl.value = Math.round(currentDensityDefault() * 100);
+  regenerate();
+});
+sizeEl.addEventListener("input", regenerate);
+densEl.addEventListener("input", regenerate);
+seedEl.addEventListener("change", regenerate);
+document.getElementById("regen").addEventListener("click", () => {
+  seedEl.value = (+seedEl.value || 0) + 1; regenerate();
+});
+document.getElementById("spin").addEventListener("click", e => {
+  autoSpin = !autoSpin;
+  e.target.textContent = autoSpin ? "Pause spin" : "Resume spin";
+});
+
+populateRules();
+densEl.value = Math.round(currentDensityDefault() * 100);
+regenerate();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
