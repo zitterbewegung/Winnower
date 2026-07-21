@@ -1,0 +1,205 @@
+% ============================================================================
+% ALIFE 2026 Late-Breaking Abstract
+% The 2026 Conference on Artificial Life (ALIFE 2026),
+% Waterloo, Ontario, Canada, 17-21 August 2026.
+% Theme: "Living and Life-like Complex Adaptive Systems".
+%
+% Track: Late-Breaking Abstract. Per the call for papers:
+%   - PDF length <= 2 pages for extended/late-breaking abstracts
+%     (NOT including citations); consistent US-letter (8.5 x 11 in) pages.
+%   - Abstract length <= 250 words.
+%   - Reports new ideas / work in progress; reviewed for relevance and quality.
+%   - Accepted late-breaking abstracts are presented as posters and are NOT
+%     included in the proceedings.
+%   - Submission deadline 20 July 2026 (AoE); notification 27 July 2026.
+%   - Images <= 300 dpi at 100% scale; embedded fonts; active links; <5 MB.
+%
+% This file follows the accepted-submission format (alifeconf style, numbered
+% natbib citations) shown in the ALIFE 2025 examples supplied by the author.
+% If the late-breaking track is double-blind, remove the author block below and
+% refer to prior work by the authors in the third person before submitting.
+% ============================================================================
+\documentclass[letterpaper]{article}
+
+\usepackage{natbib}     %% author-year (apalike), matching the companion paper
+\usepackage{alifeconf}  %% The order is important
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,graphicx}
+\usepackage{url,hyperref,cleveref}  % cleveref must load after amsmath
+
+\graphicspath{{figures/}{../outputs/alife_2026/editable_figures/}{../poster/figures/}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\bs}{\mathbf{s}}
+\newcommand{\bD}{\mathbf{D}}
+\newcommand{\NML}{\operatorname{NML}}
+\newcommand{\NLL}{\operatorname{NLL}}
+
+\title{The Exact Boundary of Period Inflation: A Machine-Checked
+  Characterization for the Winnower Cellular-Automaton Background Detector}
+
+% Remove/anonymize this block if the late-breaking track is double-blind.
+\author{Joshua Herman$^{1}$ \\
+\mbox{}\\
+$^1$Independent Researcher \\
+zitterbewegung@gmail.com}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A recurring task in artificial life is separating a life-like pattern from
+the periodic domain it lives in: a glider is a glider only relative to its
+background. \emph{Winnower} is an open-source tool that performs this split
+on a cellular-automaton (CA) spacetime, fitting a drifting periodic
+\emph{background} by majority vote and returning the \emph{residual mask} of
+cells the background cannot explain. Like every fit-based detector it faces
+\emph{period inflation}: a longer-period candidate has more parameters and
+can never fit worse, so a selector scoring by fit alone drifts to the largest
+model. We report a result that pins down exactly when this pressure exists.
+For two constant-velocity candidates, five natural conditions --- velocity-matched
+divisibility, orbit-partition refinement, model-class nesting, universal
+residual improvement, and universal likelihood improvement --- are all
+equivalent, and divisibility is \emph{necessary}, not merely sufficient:
+whenever it fails, some spacetime makes the longer candidate strictly worse.
+The full equivalence, including the previously open necessity direction, is
+now machine-checked in Lean~4 under public continuous integration, with an
+exhaustive finite-window test as a cross-check. The characterization is the
+precise justification for Winnower's complexity penalty, and it is
+reproducible and inspectable in the tool's live web companion.
+\end{abstract}
+
+\section{Introduction}
+Cellular automata routinely settle into broad periodic domains threaded with
+defects, interfaces, and particle-like activity. For artificial life those
+domains are not noise to be discarded but the \emph{reference frame} that
+makes coherent structure legible: gliders, spaceships, and their collisions
+are defined against the background they traverse
+\citep{hanson1992,crutchfield1997}. Extracting that background at scale is a
+prerequisite for cataloguing where life-like behaviour appears --- a concern
+squarely within the ALIFE 2026 theme of living and life-like complex adaptive
+systems.
+
+\emph{Winnower} is a fast global front end for this problem. Given a binary
+spacetime $U$ and a grid of \emph{candidates} $(p,\bs)$ --- ``the pattern
+repeats every $p$ steps, drifting sideways by $\bs$'' --- it groups the cells
+each candidate forces to be equal (its \emph{orbit classes}), takes a
+majority vote in each class to build the best-fitting background $B^{*}$, and
+records the residual mask $M = U \oplus B^{*}$. Each candidate costs one
+linear pass, so whole-catalogue 1D/2D/3D surveys are practical, and every
+reported number re-runs in a browser-based reproduction.
+
+A selector that scores candidates by fit alone carries a built-in bias. Call
+$(p_2,\bs_2)$ a \emph{velocity-matched multiple} of $(p_1,\bs_1)$ when
+$p_2 = m\,p_1$ and $\bs_2 = m\,\bs_1 \bmod \bD$: the same drift at a longer
+period. Such a multiple splits every orbit class into finer pieces, so its
+optimal residual count and its negative log-likelihood ($\NLL$) can only
+improve. Unpenalized selection therefore inflates the period whether or not
+extra structure is present. Winnower counters this with a Bernoulli
+normalized-maximum-likelihood (NML) complexity penalty
+\citep{shtarkov1987,grunwald2007}, but a penalty is well-motivated only if we
+know \emph{exactly} which comparisons carry the inflation pressure. This
+abstract reports that boundary and its machine-checked proof.
+
+\section{An Exact Boundary}
+Fix a torus with spatial dimensions $\bD$ and temporal length $T$, and two
+candidates $c_1,c_2$ acting by spacetime translation. Write $\Pi_i$ for the
+orbit partition of $c_i$, $\mathcal{B}_i$ for the model class of fields
+constant on $\Pi_i$-classes, $d^{*}_U(c_i)$ for the minimum Hamming distance
+from $U$ to $\mathcal{B}_i$, and $\NLL_U(c_i)$ for the orbit-class Bernoulli
+negative log-likelihood. The following are equivalent:
+\emph{(i)}~$c_2$ is a velocity-matched multiple of $c_1$;
+\emph{(ii)}~$c_2$'s translation is a power of $c_1$'s;
+\emph{(iii)}~$\Pi_2$ refines $\Pi_1$;
+\emph{(iv)}~$\mathcal{B}_1 \subseteq \mathcal{B}_2$;
+\emph{(v)}~$d^{*}_U(c_2) \le d^{*}_U(c_1)$ for \emph{every} $U$;
+\emph{(vi)}~$\NLL_U(c_2) \le \NLL_U(c_1)$ for \emph{every} $U$.
+
+The forward chain (i)$\Rightarrow\cdots\Rightarrow$(vi) is routine
+(cyclic-group structure; Jensen's inequality for the concavity of binary
+entropy). The content is \emph{necessity}: if divisibility fails, refinement
+fails, and a concrete adversarial spacetime --- constant on $\Pi_1$-classes but
+mixing two of them inside one $\Pi_2$-class --- makes $c_2$ strictly worse
+under both $d^{*}$ and $\NLL$. Closing the loop needs
+(iii)$\Rightarrow$(ii), that refinement \emph{forces} a power: on the torus
+orbits are cosets of the cyclic subgroup a translation generates, so
+refinement at the identity gives subgroup containment, and a translation is
+fixed by its value at one point. Divisibility is thus the exact frontier of
+the guaranteed-improvement regime --- on one side longer periods always win, on
+the other the data can always punish them --- and hence exactly the set of
+comparisons Winnower's penalty must neutralize.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{selector_ablation_tikz.pdf}
+    \caption{Why the boundary matters in practice. On the 105 non-degenerate
+    Life-like rules at horizon $T{=}100$, selecting by fit alone (raw residual
+    count, or plain $\NLL$) is pulled to the largest scanned period --- the
+    inflation the theorem predicts along every velocity-matched chain --- while
+    the complexity-penalized score (Bernoulli NML) concentrates at low period.
+    Plain $\NLL$ selects the maximum period for \emph{all} 105 rules.}
+    \label{fig:ablation}
+\end{figure}
+
+\section{Machine-Checked, and Reproducible in the Tool}
+We treat a claim as verified only when Lean's kernel accepts it. The full
+six-way equivalence, including the necessity direction (iii)$\Rightarrow$(ii)
+that earlier drafts left open, is proved in Lean~4 against a pinned Mathlib
+toolchain and rebuilt on every push by the project's public
+continuous-integration workflow, which additionally greps the built artifact
+for placeholder tactics. Independently, an exhaustive test enumerates all
+candidate pairs on a $6\times4$ space--time window and checks that refinement
+holds \emph{iff} velocity-matched divisibility holds --- a finite-window
+counterpart to the torus theorem and a guard against silent formalization
+drift.
+
+The characterization is not a footnote to the tool; it is its justification,
+and it is inspectable where the tool lives. The Winnower web companion carries
+a dedicated late-breaking section stating the theorem in plain terms and
+linking the machine-checked Lean file and its CI runs; and the same in-browser
+reproduction that backs every other number reports, for any supported rule,
+seed, and horizon, the per-period fit ($\NLL$) and penalized ($\NML$) scores
+side by side --- so a visitor can watch the fit column improve monotonically
+along velocity-matched chains, exactly as the theorem dictates, while the
+penalized column resists (\cref{fig:ablation}).
+
+\section{Status and Future Work}
+This is work in progress. The empirical picture --- planted-ground-truth
+recovery at $1.00$ joint accuracy over $642$ runs, zero false positives on
+shuffled and random controls, and the ablation above --- is established in the
+companion full paper; the contribution here is the exact, machine-checked
+characterization explaining \emph{why} the penalty has the shape it does and
+\emph{exactly} where it is needed. Open threads include lifting the
+finite-window necessity direction (which currently carries one nondegeneracy
+hypothesis, $p_2 \le T-1$) into Lean alongside the torus form, and extending
+the analysis from pairwise comparisons to the full candidate lattice the
+scanner searches. The tool, the proofs, the tests, and the in-browser
+reproduction are public.
+
+\footnotesize
+\setlength{\bibsep}{2pt plus 0.3ex}
+\bibliographystyle{apalike}
+\begin{thebibliography}{9}
+
+\bibitem[Crutchfield and Hanson, 1997]{crutchfield1997}
+Crutchfield, J.~P. and Hanson, J.~E. (1997).
+Computational mechanics of cellular automata: An example.
+\emph{Physica D}, 103:169--189.
+
+\bibitem[Gr{\"u}nwald, 2007]{grunwald2007}
+Gr{\"u}nwald, P. (2007).
+\emph{The Minimum Description Length Principle}. MIT Press.
+
+\bibitem[Hanson and Crutchfield, 1992]{hanson1992}
+Hanson, J.~E. and Crutchfield, J.~P. (1992).
+The attractor-basin portrait of a cellular automaton.
+\emph{Journal of Statistical Physics}, 66:1415--1462.
+
+\bibitem[Shtarkov, 1987]{shtarkov1987}
+Shtarkov, Y. (1987).
+Universal sequential coding of single messages.
+\emph{Problems of Information Transmission}, 23:3--17.
+
+\end{thebibliography}
+
+\end{document}

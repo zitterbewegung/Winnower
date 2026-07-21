@@ -1,6 +1,6 @@
 # Winnower: Relative-Periodic Decomposition for Cellular Automata
 
-[![Tests](https://img.shields.io/badge/tests-363%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-364%20passing-brightgreen)]()
 
 Fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured residual masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
 
@@ -110,7 +110,7 @@ scripts/                        Experiment and survey scripts
 paper/                          Paper (LaTeX + compiled PDF)
 poster/                         Conference poster
 proofs/                         Lean 4 artifacts (see proofs/README.md for per-file status)
-tests/                          Test suite (363 tests)
+tests/                          Test suite (364 tests)
 notebooks/                      Demo and paper companion notebooks
 outputs/                        Generated CSVs, figures, survey results
 docs/                           Theory notes and claim audit trail

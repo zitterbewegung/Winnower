@@ -166,6 +166,36 @@ class TestPartitionRefinement:
         )
         assert fit2.defect_sites <= fit1.defect_sites
 
+    def test_refinement_iff_velocity_matched_multiple(self):
+        """Theorem C.3' (windowed form), checked exhaustively on T=6, D=4.
+
+        For nondegenerate candidates (p <= T-1), the orbit partition of
+        (p2, s2) refines that of (p1, s1) exactly when p2 = m*p1 and
+        s2 = m*s1 (mod D) for the integer m = p2/p1 >= 1.
+        """
+        T, D = 6, 4
+
+        def labels(period: int, shift: int) -> np.ndarray:
+            return component_labels((T, D), shift=shift, period=period)
+
+        def refines(lab2: np.ndarray, lab1: np.ndarray) -> bool:
+            mapping: dict[int, int] = {}
+            for l2, l1 in zip(lab2.ravel().tolist(), lab1.ravel().tolist()):
+                if mapping.setdefault(l2, l1) != l1:
+                    return False
+            return True
+
+        for p1 in range(1, T):
+            for s1 in range(D):
+                lab1 = labels(p1, s1)
+                for p2 in range(1, T):
+                    for s2 in range(D):
+                        lab2 = labels(p2, s2)
+                        condition = p2 % p1 == 0 and (s2 - (p2 // p1) * s1) % D == 0
+                        assert refines(lab2, lab1) == condition, (
+                            f"refinement mismatch for (p1={p1},s1={s1}) vs (p2={p2},s2={s2})"
+                        )
+
 
 # ──────────────────────────────────────────────────────────────────────
 # C. Counterexample to FALSE Monotonicity (Paper's Theorem 2)

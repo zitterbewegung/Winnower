@@ -44,6 +44,11 @@ set_option autoImplicit false
 
 noncomputable section
 
+-- The whole file lives in its own namespace: Theorem1.lean also declares
+-- top-level names like `ModelClass`, and both files must coexist in the
+-- default build.
+namespace RefinementEquivalence
+
 /-
 Check if ZMod is available and if Fintype instances work.
 -/
@@ -363,9 +368,10 @@ lemma orbitPartition_isPartition (c : Candidate n) :
             exact Prod.ext hxy.1 ( funext fun i => by simpa using congr_fun hxy.2 i );
           exact ⟨ h_perm, Finite.injective_iff_surjective.mp h_perm ⟩;
         have h_perm : ∃ m : ℕ, m > 0 ∧ (gridTranslate n D T c)^[m] = id := by
-          have h_perm : ∃ m : ℕ, m > 0 ∧ (Equiv.ofBijective (gridTranslate n D T c) h_perm)^[m] = Equiv.refl (SpacetimeGrid n D T) := by
-            exact ⟨ orderOf ( Equiv.ofBijective ( gridTranslate n D T c ) h_perm ), orderOf_pos _, by simp +decide [ pow_orderOf_eq_one ] ⟩;
-          exact?;
+          refine ⟨orderOf (Equiv.ofBijective (gridTranslate n D T c) h_perm), orderOf_pos _, ?_⟩
+          show (⇑(Equiv.ofBijective (gridTranslate n D T c) h_perm))^[orderOf
+            (Equiv.ofBijective (gridTranslate n D T c) h_perm)] = id
+          rw [← Equiv.Perm.coe_pow, pow_orderOf_eq_one, Equiv.Perm.coe_one]
         exact ⟨ h_perm.choose, h_perm.choose_spec.1, congr_fun h_perm.choose_spec.2 y ⟩;
       obtain ⟨ m, hm₁, hm₂ ⟩ := h_perm; use m * ( k + 1 ) - k; simp_all +decide [ ← Function.iterate_add_apply, Nat.sub_add_cancel ( show k ≤ m * ( k + 1 ) from by nlinarith ) ] ;
       rw [ Function.iterate_mul, Function.iterate_fixed hm₂ ];
@@ -447,7 +453,7 @@ theorem cond3_imp_cond6 (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → co
     convert entropy_inequality_for_partition n D T o₁ _ U _ _ using 1;
     · intros o₁_1 ho₁_1 o₂ ho₂ hne; exact (by
       have h_partition : Setoid.IsPartition (orbitPartition n D T c₂) := by
-        exact?;
+        exact orbitPartition_isPartition n D T c₂;
       have := h_partition.2;
       exact Set.disjoint_left.mpr fun x hx₁ hx₂ => hne <| ExistsUnique.unique ( this x ) ⟨ by aesop, hx₁ ⟩ ⟨ by aesop, hx₂ ⟩);
     · exact h_union;
@@ -462,7 +468,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond3_imp_cond6_proof (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Prove that condition (iii) implies condition (vi) using the helper lemmas.
@@ -473,7 +479,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond3_imp_cond6_thm (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Prove that condition (iii) implies condition (vi) using the helper lemmas (v2).
@@ -484,7 +490,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond3_imp_cond6_v2 (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Prove that condition (iii) implies condition (vi) using the helper lemmas (final attempt).
@@ -495,7 +501,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond3_imp_cond6_final (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Check if cond3_imp_cond6 is already declared.
@@ -559,7 +565,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem theorem_iii_implies_vi (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Prove that condition (iii) implies condition (vi) (proven version).
@@ -570,7 +576,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond3_imp_cond6_proven (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Prove that condition (iii) implies condition (vi) (final v2).
@@ -581,7 +587,7 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond3_imp_cond6_final_v2 (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → cond6 n D T c₁ c₂ := by
-  exact?
+  exact cond3_imp_cond6 n D T c₁ c₂
 
 /-
 Prove that condition (iii) implies condition (vi) (correct version).
@@ -660,7 +666,7 @@ theorem cond6_imp_cond3 (c₁ c₂ : Candidate n) : cond6 n D T c₁ c₂ → co
     · exact ho₂.1
   have h_contra : NLL n D T c₂ U ≤ NLL n D T c₁ U := by
     exact h U
-  exact h_contra.not_lt (by linarith)
+  linarith
 
 /-
 Prove that condition (iii) implies condition (vi) (real version).
@@ -753,19 +759,19 @@ variable (n : ℕ) (D : Fin n → ℕ) (T : ℕ)
 variable [NeZero T] [∀ i, NeZero (D i)]
 
 theorem cond1_mod_iff_cond2 (c₁ c₂ : Candidate n) : cond1_mod n D T c₁ c₂ ↔ cond2 n D T c₁ c₂ := by
-  constructor <;> intro h;
-  · obtain ⟨ m, hm₁, hm₂, hm₃ ⟩ := h;
-    refine' ⟨ m, hm₁, _ ⟩;
-    funext pt; exact (by
-    simp +decide [ gridTranslate, hm₂, hm₃ ];
-    exact?);
-  · obtain ⟨ m, hm ⟩ := h;
-    -- By equating the actions of τ₁ᵐ and τ₂, we can derive the required congruences for p and s.
-    have h_congrs : ∀ pt : SpacetimeGrid n D T, (pt.1 + c₂.p, fun i => pt.2 i + c₂.s i) = (pt.1 + m * c₁.p, fun i => pt.2 i + m * c₁.s i) := by
-      intro pt; have := congr_fun hm.2 pt; simp_all +decide [ gridTranslate ] ;
-      exact?;
-    norm_num +zetaDelta at *;
-    exact ⟨ m, hm.1, h_congrs 0 |>.1, fun i => by simpa using congr_fun ( h_congrs 0 |>.2 ) i ⟩
+  constructor <;> intro h
+  · obtain ⟨m, hm₁, hm₂, hm₃⟩ := h
+    refine ⟨m, hm₁, ?_⟩
+    funext pt
+    obtain ⟨t, x⟩ := pt
+    rw [gridTranslate_iterate]
+    simp [gridTranslate, hm₂, hm₃]
+  · obtain ⟨m, hm₁, hm₂⟩ := h
+    have h0 := congr_fun hm₂ ((0, fun _ => 0) : SpacetimeGrid n D T)
+    rw [gridTranslate_iterate] at h0
+    refine ⟨m, hm₁, ?_, fun i => ?_⟩
+    · simpa [gridTranslate] using congr_arg Prod.fst h0
+    · simpa [gridTranslate] using congr_fun (congr_arg Prod.snd h0) i
 
 /-
 Check if gridTranslate_iterate is defined.
@@ -806,7 +812,7 @@ theorem cond3_imp_cond2 (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → co
           -- Since $T$ and $\prod_{i} D_i$ are both positive, we can simplify the expression.
           have h_simplify : (gridTranslate n D T c₁)^[T * ∏ i, D i] pt = pt := by
             have h_simplify : ∀ m : ℕ, (gridTranslate n D T c₁)^[m] pt = (pt.1 + m * (c₁.p : ZMod T), fun i => pt.2 i + m * (c₁.s i : ZMod (D i))) := by
-              exact?
+              exact fun m => gridTranslate_iterate n D T c₁ m pt
             generalize_proofs at *; (
             simp +decide [ h_simplify, Finset.prod_eq_zero_iff, NeZero.ne ];
             exact Prod.ext rfl ( funext fun i => by simp +decide [ Finset.prod_eq_prod_diff_singleton_mul ( Finset.mem_univ i ) ] ) ;)
@@ -832,9 +838,7 @@ theorem cond3_imp_cond2 (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → co
     generalize_proofs at *; (
     -- By definition of $gridTranslate$, we have:
     have h_gridTranslate_iterate : ∀ k : ℕ, (gridTranslate n D T c₁)^[k] (0, 0) = (k * (c₁.p : ZMod T), fun i => k * (c₁.s i : ZMod (D i))) := by
-      intro k; induction k <;> simp_all +decide [ Function.iterate_succ_apply', mul_add, add_mul ] ; ring;
-      · rfl;
-      · exact?
+      intro k; simpa using gridTranslate_iterate n D T c₁ k (0, 0)
     generalize_proofs at *; (
     simp_all +decide [ ZMod.natCast_eq_zero_iff ];
     ext i; simp +decide [ Finset.prod_eq_prod_diff_singleton_mul ( Finset.mem_univ i ) ] ;)));
@@ -843,7 +847,7 @@ theorem cond3_imp_cond2 (c₁ c₂ : Candidate n) : cond3 n D T c₁ c₂ → co
     funext ⟨t, x⟩; simp [gridTranslate] at *; (
     -- By definition of gridTranslate, we have that applying it m times is equivalent to adding m times the translation vector.
     have h_iter : ∀ m : ℕ, ∀ (pt : SpacetimeGrid n D T), (gridTranslate n D T c₁)^[m] pt = (pt.1 + m * (c₁.p : ZMod T), fun i => pt.2 i + m * (c₁.s i : ZMod (D i))) := by
-      exact?
+      exact gridTranslate_iterate n D T c₁
     generalize_proofs at *; (
     simp_all +decide [ funext_iff ]));⟩;
 
@@ -873,16 +877,10 @@ theorem Theorem2 (c₁ c₂ : Candidate n) :
   have h35 : cond3 n D T c₁ c₂ ↔ cond5 n D T c₁ c₂ := ⟨fun h => h45 (h34 h), h53⟩
   have h36_iff : cond3 n D T c₁ c₂ ↔ cond6 n D T c₁ c₂ := ⟨h36, h63⟩
 
-  -- NOTE: the (iii) -> (ii) direction of the six-way equivalence is not
-  -- established in this draft; the file is excluded from the default
-  -- build until the remaining implications and `exact?` placeholders
-  -- are repaired (see verify/README.md and proofs/README.md).
-  refine ⟨ h12, ⟨ h23, ?_ ⟩, ⟨ h34, ?_ ⟩, ⟨ h45, ?_ ⟩, ⟨ ?_, ?_ ⟩ ⟩;
-  · exact?;
-  · exact?;
-  · grind;
-  · exact fun h => h36_iff.mp ( h35.mpr h );
-  · exact fun h => h35.mp ( h36_iff.mpr h )
+  have h32 : cond3 n D T c₁ c₂ → cond2 n D T c₁ c₂ := cond3_imp_cond2 n D T c₁ c₂
+  refine ⟨h12, ⟨h23, h32⟩, ⟨h34, fun h => h53 (h45 h)⟩, ⟨h45, fun h => h34 (h53 h)⟩, ⟨?_, ?_⟩⟩
+  · exact fun h => h36_iff.mp (h35.mpr h)
+  · exact fun h => h35.mp (h36_iff.mpr h)
 
 /-
 Prove Theorem 2 (Final) by combining all the proved implications.
@@ -916,3 +914,5 @@ theorem Theorem2_Final (c₁ c₂ : Candidate n) :
   
   exact ⟨h12, h23_iff, h34_iff, h45_iff, h56_iff⟩
 
+
+end RefinementEquivalence

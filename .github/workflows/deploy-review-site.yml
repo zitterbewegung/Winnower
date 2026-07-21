@@ -10,6 +10,8 @@ on:
       - "outputs/alife_2026/**"
       - "paper/paper_alife2026.pdf"
       - "paper/paper_alife2026.tex"
+      - "paper/alife2026_lba.pdf"
+      - "paper/alife2026_lba.tex"
       - "docs/CLAIM_LEDGER.md"
       - ".github/workflows/deploy-review-site.yml"
   workflow_dispatch:

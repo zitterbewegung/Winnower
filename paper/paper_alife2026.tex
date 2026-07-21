@@ -111,7 +111,11 @@ showing that the background-plus-residual split isolates particle-like
 structure at survey scale; and (iv) two supporting mathematical
 properties, stated informally here with formal versions in the
 repository, that explain \emph{why} the complexity penalty is necessary
-and why selections stabilize as the observation window grows.
+and why selections stabilize as the observation window grows. The first
+of these is now an exact characterization --- velocity-matched
+divisibility is necessary as well as sufficient for one candidate to fit
+at least as well on \emph{every} spacetime --- with a machine-checked
+Lean proof in the repository's public CI.
 
 \begin{figure*}[t]
     \centering
@@ -207,8 +211,17 @@ Unpenalized selection therefore drifts toward the largest available
 candidate whether or not extra periodic structure exists. This is not
 hypothetical: in the ablation of
 Figure~\ref{fig:ablation}, plain NLL picks the largest scanned period
-for \emph{every} rule tested. The formal statement and proof are in the
-repository's theory notes.
+for \emph{every} rule tested. The relationship is in fact exact:
+velocity-matched divisibility, orbit-partition refinement,
+model-class nesting, universal residual improvement, and universal NLL
+improvement are all \emph{equivalent} --- for any candidate pair
+violating the divisibility condition there is a spacetime on which the
+larger candidate fits strictly worse, so divisibility is the precise
+boundary of the guaranteed-improvement regime. The full equivalence,
+including this necessity direction, is proved in the repository's
+theory notes and machine-checked in Lean (public CI); an exhaustive
+test additionally verifies the finite-window form over every candidate
+pair on a small grid.
 
 \paragraph{Why selections stabilize (informal).}
 For a fixed finite candidate grid, the fit term grows linearly with the
@@ -225,11 +238,11 @@ shifts have identical complexity, so no tie-break exists there; the
 released stress report tracks every such tie we observed.) Formal
 statements and proof notes for these claims ship with the repository,
 together with Lean~4 artifacts at documented levels of completeness
-(the majority-vote optimality proposition and the stabilization core are
-fully machine-checked in public CI; the rest are clearly-labeled
-drafts); we deliberately keep the formal material out of the main text
-because the contribution this paper argues for is the tool, not the
-theory.
+(the majority-vote optimality proposition, the refinement/monotonicity
+equivalence above, and the stabilization core are fully machine-checked
+in public CI; the rest are clearly-labeled drafts); we deliberately
+keep the formal material out of the main text because the contribution
+this paper argues for is the tool, not the theory.
 
 %======================================================================
 \section{Results}
@@ -517,9 +530,12 @@ pipeline:
   statements. \texttt{proofs/} contains Lean~4 artifacts generated with
   the Aristotle prover at documented levels of completeness:
   placeholder-free, in-build, CI-checked proofs of
-  Proposition~\ref{prop:projection} and of the stabilization property's
-  algebraic core (against a pinned Mathlib toolchain), plus
-  clearly-labeled work-in-progress drafts for the remaining statements;
+  Proposition~\ref{prop:projection}, of the six-way
+  refinement/monotonicity equivalence behind the velocity-matched
+  comparison (including the necessity direction), and of the
+  stabilization property's algebraic core (against a pinned Mathlib
+  toolchain), plus clearly-labeled work-in-progress drafts for the
+  remaining statements;
   \texttt{proofs/README.md} records the per-file status. We make no
   claim in this paper that depends on the Lean artifacts.
 \end{itemize}
@@ -554,8 +570,10 @@ Winnower turns a simple observation --- relative-periodic fitting
 reduces to independent majority votes --- into a practical survey
 instrument: linear-time background fitting, a complexity-aware selector
 that resists the period inflation raw fit criteria demonstrably suffer
-(with a prose proof, audited in the repository's claim ledger, that it
-resists it whenever the background is exactly periodic),
+(with a machine-checked characterization of exactly when that inflation
+pressure exists, and a prose proof, audited in the repository's claim
+ledger, that the selector resists it whenever the background is exactly
+periodic),
 calibration on planted truth and null controls, and a residual mask
 that isolates particle-like structure across 1D, 2D, and 3D. The tool, the data, the
 proofs, and an in-browser reproduction of every reported number are
