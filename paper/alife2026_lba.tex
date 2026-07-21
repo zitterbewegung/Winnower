@@ -143,33 +143,6 @@ for why the selected candidate settles as more of the space--time diagram is
 observed and why the shortest equivalent candidate can be recovered when it is
 included in the search.
 
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.92\textwidth]{lba_decompositions.png}
-    \caption{Winnower decompositions of the representative rules
-    (observed~/ domain template~/ defect mask). Top: ECA-54
-    (seed~11, $T{=}144$) selects a period-4 template; the defect mask isolates
-    particle world-lines against the periodic domain. Middle: 2D S24/B11
-    (seed~11, $T{=}600$, frame $t{=}300$) selects a period-2 template that
-    explains almost every cell (defect rate $0.008$). Bottom: voxel views of 3D
-    Life B5/S45 \citep{bays1987} (seed~42, $16^3$, $T{=}24$): the period-1
-    template captures the persistent still lifes, and the defect overlay marks
-    the decaying transient soup.}
-    \label{fig:decomp}
-\end{figure*}
-
-\begin{figure*}[b!]
-    \centering
-    \includegraphics[width=0.92\textwidth]{stabilization_real.png}
-    \caption{Selected period (top) and margin over the runner-up in bits
-    (bottom, log scale) versus horizon $T$, for the rules of
-    \cref{fig:decomp}, from an exact-Bernoulli-NML sweep. ECA-54 locks at
-    period~4 and 3D Life at period~1 from the first horizon; ECA-110
-    ($1\!\to\!7$) and S24/B11 ($1\!\to\!2$) make a single transition, after
-    which the margin grows.}
-    \label{fig:stab}
-\end{figure*}
-
 \section{Preliminary Results}
 We tested ECAs 30, 54, and 110; two-dimensional Life-like and totalistic
 rules; and 3D Life B5/S45 \citep{bays1987,bays2006}.
@@ -223,6 +196,33 @@ local tracking; and extend Winnower to multistate, continuous, and neural CAs
 We thank Editage (\url{www.editage.com}) for language editing. ChatGPT, Claude
 Code, Aristotle, and Claude assisted with tooling and Lean proof development
 and verification.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.72\textwidth]{lba_decompositions.png}
+    \caption{Winnower decompositions of the representative rules
+    (observed~/ domain template~/ defect mask). Top: ECA-54
+    (seed~11, $T{=}144$) selects a period-4 template; the defect mask isolates
+    particle world-lines against the periodic domain. Middle: 2D S24/B11
+    (seed~11, $T{=}600$, frame $t{=}300$) selects a period-2 template that
+    explains almost every cell (defect rate $0.008$). Bottom: voxel views of 3D
+    Life B5/S45 \citep{bays1987} (seed~42, $16^3$, $T{=}24$): the period-1
+    template captures the persistent still lifes, and the defect overlay marks
+    the decaying transient soup.}
+    \label{fig:decomp}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.72\textwidth]{stabilization_real.png}
+    \caption{Selected period (top) and margin over the runner-up in bits
+    (bottom, log scale) versus horizon $T$, for the rules of
+    \cref{fig:decomp}, from an exact-Bernoulli-NML sweep. ECA-54 locks at
+    period~4 and 3D Life at period~1 from the first horizon; ECA-110
+    ($1\!\to\!7$) and S24/B11 ($1\!\to\!2$) make a single transition, after
+    which the margin grows.}
+    \label{fig:stab}
+\end{figure*}
 
 \footnotesize
 \setlength{\bibsep}{2pt plus 0.3ex}
