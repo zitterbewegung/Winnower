@@ -8,7 +8,7 @@
 <circle cx="82" cy="168" r="23" fill="#2b6cb0"/>
 <text x="82" y="177" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">1</text>
 <text x="276.0" y="158" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Observed</text>
-<text x="276.0" y="198" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">spacetime</text>
+<text x="276.0" y="198" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">space–time</text>
 <text x="262.0" y="246" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Choose candidate (<tspan font-style="italic">p</tspan>, <tspan font-style="italic">s</tspan>).</text>
 <text x="262.0" y="284" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Example: <tspan font-style="italic">p</tspan> = 2, <tspan font-style="italic">s</tspan> = 1.</text>
 <text x="262.0" y="336" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#333" font-weight="normal" font-style="italic" text-anchor="middle">x</text>
@@ -42,10 +42,10 @@
 <rect x="262.0" y="512" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
 <rect x="302.0" y="512" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
 <rect x="342.0" y="512" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
-<text x="262.0" y="646" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Raw CA spacetime to explain.</text>
+<text x="262.0" y="646" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Raw CA space–time diagram.</text>
 <circle cx="584" cy="152" r="23" fill="#2b6cb0"/>
 <text x="584" y="161" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">2</text>
-<text x="774.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Orbit classes</text>
+<text x="780.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="31" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Translation orbits</text>
 <text x="754.0" y="216" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Apply (<tspan font-style="italic">t</tspan>,<tspan font-style="italic">x</tspan>) ↦ (<tspan font-style="italic">t</tspan>+<tspan font-style="italic">p</tspan>, <tspan font-style="italic">x</tspan>+<tspan font-style="italic">s</tspan>).</text>
 <text x="754.0" y="254" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Same color = same orbit.</text>
 <rect x="634.0" y="320" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
@@ -108,8 +108,8 @@
 <text x="814.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
 <rect x="834.0" y="480" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
 <text x="854.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
-<text x="754.0" y="616" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Each orbit contributes one</text>
-<text x="754.0" y="652" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">background bit.</text>
+<text x="754.0" y="616" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Each orbit gives one</text>
+<text x="754.0" y="652" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">template bit.</text>
 <circle cx="1072" cy="152" r="23" fill="#2b6cb0"/>
 <text x="1072" y="161" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">3</text>
 <text x="1270.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Majority-vote fit</text>
@@ -137,7 +137,7 @@
 <text x="1396.0" y="452" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">one bit</text>
 <text x="1396.0" y="482" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">per</text>
 <text x="1396.0" y="512" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">orbit</text>
-<text x="1246.0" y="652" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Residual mask: <tspan font-style="italic">M</tspan> = <tspan font-style="italic">U</tspan> ⊕ <tspan font-style="italic">B</tspan>*.</text>
+<text x="1246.0" y="652" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Defect mask: <tspan font-style="italic">M</tspan> = <tspan font-style="italic">U</tspan> ⊕ <tspan font-style="italic">B</tspan>*.</text>
 <circle cx="1564" cy="152" r="23" fill="#2b6cb0"/>
 <text x="1564" y="161" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">4</text>
 <text x="1762.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Score and select</text>
@@ -168,6 +168,6 @@
 <text x="1828" y="504" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#2b6cb0" font-weight="normal" font-style="normal" text-anchor="middle">↓</text>
 <text x="1828" y="544" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#2b6cb0" font-weight="bold" font-style="normal" text-anchor="middle">Select</text>
 <text x="1828" y="582" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#1a1a1a" font-weight="normal" font-style="normal" text-anchor="middle">Lowest NML wins.</text>
-<text x="1738.0" y="632" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Output: periodic background +</text>
+<text x="1738.0" y="632" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Output: periodic domain +</text>
 <text x="1738.0" y="666" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">residual.</text>
 </svg>
