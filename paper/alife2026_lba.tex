@@ -94,28 +94,23 @@ and code: \url{https://github.com/zitterbewegung/Winnower}.
 \end{figure*}
 
 \section{Introduction}
-A cellular automaton (CA) updates a regular lattice synchronously under a local
-transition rule. Many rules produce space--time diagrams with extended periodic domains,
-localized structures such as particles or gliders, and interfaces between
-domains. The domain provides the background against which such
-structures are defined. We ask which temporal period and spatial displacement
-give the simplest adequate domain model for a finite observation.
-
-Local causal-state methods reconstruct local spatiotemporal organization
-\citep{rupe2024}, while taxonomies, transient analyses, and compression-based
-approaches characterize rule-level dynamics
+Many cellular automata (CAs) produce space--time diagrams with extended
+periodic domains threaded by particles, gliders, and domain interfaces. The
+domain is the background against which such structures are defined; we ask
+which temporal period and spatial displacement give the simplest adequate
+domain model for a finite observation. Local causal-state methods reconstruct
+such organization in detail \citep{rupe2024}; taxonomies, transient analyses,
+and compression-based methods characterize whole rules
 \citep{vispoel2022,rollier2024,hudcova2021,alfaro2024,cisneros2023}. Winnower
-complements these approaches by fitting global periodic domain templates with
-a complexity penalty suitable for broad rule-space sweeps.
+instead fits global periodic templates with a complexity penalty, for broad
+rule-space sweeps.
 
 \section{Method}
-Given a finite binary space--time block $U$, temporal period $p$, spatial
-displacement vector $\bs$, and periodic lattice extents $\bD$, Winnower fits
-templates satisfying
-$B[t{+}p,\,\mathbf{x}{+}\bs \bmod \bD]=B[t,\mathbf{x}]$. The translation
-partitions observed sites into orbits $\{O_j\}$. Assigning each orbit its
-majority state yields the template with minimum Hamming disagreement for the
-fixed candidate; mismatches form the defect mask
+Given a binary space--time block $U$, period $p$, displacement $\bs$, and
+lattice extents $\bD$, Winnower fits templates with
+$B[t{+}p,\,\mathbf{x}{+}\bs \bmod \bD]=B[t,\mathbf{x}]$. This partitions
+observed sites into orbits $\{O_j\}$; each orbit's majority state gives the
+minimum-Hamming template, and mismatches form the defect mask
 (\cref{fig:winnower-pipeline}). Candidates are ranked by the Bernoulli NML
 criterion
 %
@@ -127,19 +122,15 @@ criterion
 where $n_j=|O_j|$, $\hat\theta_j=n_j^{(1)}/n_j$, $\Hb$ is binary entropy, and
 $\mathcal{C}(n)=\log_2\!\sum_{k=0}^{n}\binom{n}{k}(k/n)^{k}((n{-}k)/n)^{\,n-k}$
 is the exact Bernoulli NML (Shtarkov) complexity of an $n$-observation class.
-The first term is the orbitwise Bernoulli NLL at the maximum-likelihood
-estimates; the implementation evaluates $\mathcal{C}$ exactly for small orbit
-classes and by its leading asymptote $\tfrac12\log_2(n\pi/2)$ for larger ones
+The code evaluates $\mathcal{C}$ exactly for small classes and by its
+asymptote $\tfrac12\log_2(n\pi/2)$ for larger ones
 \citep{shtarkov1987,grunwald2007,yamanishi2023}.
 
-The penalty is needed because a compatible longer-period candidate can refine
-the orbit partition of a shorter candidate with the same drift. Refinement
-cannot worsen Hamming disagreement or unpenalized likelihood, so fit-only
-selection systematically favors longer periods. NML penalizes the additional
-orbit models. We formalized the corresponding divisibility and
-orbit-refinement result in Lean~4 \citep{achim2025}. Once candidates differ in
-per-site NLL rate, the linear fit gap dominates the logarithmic penalty gap,
-giving stable selection as the horizon grows.
+The penalty is essential: a velocity-matched longer period refines a shorter
+candidate's orbits, which cannot worsen fit, so unpenalized selection inflates
+the period. We verified this divisibility/refinement relation in Lean~4
+\citep{achim2025}. Once per-site NLL rates differ, the linear fit gap
+dominates the logarithmic penalty gap, giving stable selection as $T$ grows.
 
 
 \section{Preliminary Results}
