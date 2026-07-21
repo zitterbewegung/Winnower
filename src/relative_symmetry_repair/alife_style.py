@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from matplotlib.colors import ListedColormap
 
-BACKGROUND_COLOR = "#efe2d0"
+BACKGROUND_COLOR = "#ffffff"
 PAPER_COLOR = "#ffffff"
 TEXT_COLOR = "#3b3b3b"
 ACCENT_COLOR = "#b00300"
@@ -20,7 +20,7 @@ DEFECT_COLOR = ACCENT_COLOR
 
 BINARY_CMAP = ListedColormap([ZERO_COLOR, ONE_COLOR])
 DEFECT_CMAP = ListedColormap([ZERO_COLOR, DEFECT_COLOR])
-ORBIT_COLORS = [ACCENT_SOFT_COLOR, BACKGROUND_COLOR, MUTED_COLOR, BLUSH_COLOR]
+ORBIT_COLORS = [ACCENT_SOFT_COLOR, "#efe2d0", MUTED_COLOR, BLUSH_COLOR]
 
 
 def apply_figure_theme(fig, *, facecolor: str = BACKGROUND_COLOR) -> None:

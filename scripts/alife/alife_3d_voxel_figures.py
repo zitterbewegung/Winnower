@@ -6,9 +6,9 @@ show midplane z-slices, which loses volumetric structure.  This script uses
 ``plot_3d_volume_decomposition`` and ``plot_3d_volume_montage`` from
 ``plotting_nd`` to render proper 3D voxel views of:
 
-  - the observed spacetime,
-  - the selected relative-periodic background, and
-  - the residual defect mask, overlaid on a faded background volume.
+  - the observed space-time block,
+  - the selected relative-periodic domain template, and
+  - the candidate-defect mask, overlaid on a faded domain-template volume.
 
 It also stitches the per-rule figures together into a manuscript-ready
 composite ``alife_3d_voxel_diagrams.png``.
@@ -105,7 +105,7 @@ def _render_per_rule_figures(payload: VoxelPayload, output_dir: Path) -> dict[st
             payload.fit,
             source=payload.spacetime,
             n_panels=4,
-            title=f"{payload.case.name} — residual vs. background ({_rule_label(payload.case)})",
+            title=f"{payload.case.name} — defects vs. domain template ({_rule_label(payload.case)})",
         )
         save_figure(fig_montage, montage_path)
         plt.close(fig_montage)

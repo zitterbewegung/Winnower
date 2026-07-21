@@ -111,7 +111,7 @@ def _info_card(
 
 
 def _observed_panel(ax: plt.Axes) -> None:
-    _panel(ax, 1, "Observed spacetime")
+    _panel(ax, 1, "Observed space-time diagram")
     _panel_subtitle(ax, "Choose candidate $(p,s)$.", "Example: $p=2$, $s=1$.")
 
     data = np.array(
@@ -142,7 +142,7 @@ def _observed_panel(ax: plt.Axes) -> None:
     ax.text(
         0.50,
         0.12,
-        "Raw CA spacetime to explain.",
+        "Raw CA space-time diagram to explain.",
         ha="center",
         va="center",
         fontsize=12,
@@ -151,7 +151,7 @@ def _observed_panel(ax: plt.Axes) -> None:
 
 
 def _orbit_panel(ax: plt.Axes) -> None:
-    _panel(ax, 2, "Orbit classes")
+    _panel(ax, 2, "Translation orbits")
     _panel_subtitle(ax, "Apply $(t,x)\\mapsto(t+p,x+s)$.", "Same color = same orbit.")
 
     colors = [CARD_BG, PANEL_BG, MUTED, BLUSH_COLOR]
@@ -202,7 +202,7 @@ def _orbit_panel(ax: plt.Axes) -> None:
     ax.text(
         0.50,
         0.12,
-        "Each orbit contributes one background bit.",
+        "Each orbit contributes one domain-template bit.",
         ha="center",
         va="center",
         fontsize=12,
@@ -243,7 +243,7 @@ def _majority_panel(ax: plt.Axes) -> None:
         body_fontsize=12.2,
     )
     ax.add_patch(FancyArrowPatch((table_x + table_w + 0.015, frame_bottom + 0.25), (card_left - 0.01, frame_bottom + 0.25), arrowstyle="->", mutation_scale=14, linewidth=1.8, color=ARROW))
-    ax.text(0.50, 0.13, "Residual mask: $M = U \\oplus B^*$.", ha="center", va="center", fontsize=14, color=TEXT)
+    ax.text(0.50, 0.13, "Defect mask: $M = U \\oplus B^*$.", ha="center", va="center", fontsize=14, color=TEXT)
 
 
 def _score_panel(ax: plt.Axes) -> None:
@@ -309,7 +309,7 @@ def _score_panel(ax: plt.Axes) -> None:
     ax.text(
         0.50,
         0.10,
-        "Output: periodic background + residual.",
+        "Output: periodic domain template + defect mask.",
         ha="center",
         va="center",
         fontsize=12,

@@ -4,9 +4,9 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 
 ## Files
 
-- `representative_rules_1d.png`: observed 1D spacetimes, selected backgrounds, and residual masks.
-- `representative_rules_2d.png`: early, middle, late, selected-background, and residual slices for the 2D panel.
-- `representative_rules_3d.png`: midplane slices through the 3D panel with selected-background and residual views.
+- `representative_rules_1d.png`: observed 1D space-time diagrams, selected domain templates, and defect masks.
+- `representative_rules_2d.png`: early, middle, late, selected-domain-template, and defect-mask slices for the 2D panel.
+- `representative_rules_3d.png`: midplane slices through the 3D panel with selected-domain-template and defect-mask views.
 - `rule_mechanisms_1d.png`: lookup-table view of the studied elementary rules.
 - `rule_mechanisms_2d.png`: Moore-neighborhood plus birth/survival count diagrams for the studied 2D rules.
 - `rule_mechanisms_3d.png`: 3D Moore-neighborhood plus birth/survival count diagrams for the studied 3D rules.
@@ -21,29 +21,29 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 ## Recommended explanation order
 
 1. Start with the mechanism figures. They explain what the local update rule is actually doing.
-2. Move to the representative evolution panels. They show what those local rules look like at the scale of an entire spacetime.
-3. Use the background and defect columns to explain the paper's decomposition idea: the selector finds a global scaffold, then studies what is left over.
+2. Move to the representative evolution panels. They show what those local rules look like at the scale of an entire space-time diagram.
+3. Use the domain-template and defect columns to explain the paper's decomposition idea: the selector finds a global domain template, then studies what is left over.
 
 ## How to read the colors
 
 - Light cells use `#fcdeb9` and mean value `0`.
 - Dark cells use `#3b3b3b` and mean value `1`.
-- Red cells use `#b00300` and mark disagreement with the selected relative-periodic background.
+- Red cells use `#b00300` and mark disagreement with the selected relative-periodic domain template.
 - In mechanism figures, `#b00300` marks birth counts and `#5f5f5f` marks survival counts.
 
 ## Representative 1D rules
 
-- `ECA-30`: best `(p, s) = (1, -2)`, margin `153.4` bits, defect rate `0.471`. Chaotic texture with little large-scale repetition; the selector still prefers a simple background.
-- `ECA-54`: best `(p, s) = (4, 0)`, margin `1484.9` bits, defect rate `0.179`. Alternating domains and clearer phase locking make the periodic background easier to see.
-- `ECA-110`: best `(p, s) = (7, 0)`, margin `857.0` bits, defect rate `0.314`. Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.
+- `ECA-30`: best `(p, s) = (1, -2)`, margin `153.4` bits, defect rate `0.471`. Chaotic texture with little large-scale repetition; the selector still prefers a simple domain template.
+- `ECA-54`: best `(p, s) = (4, 0)`, margin `1484.9` bits, defect rate `0.179`. Alternating domains and clearer phase locking make the periodic domain template easier to see.
+- `ECA-110`: best `(p, s) = (7, 0)`, margin `857.0` bits, defect rate `0.314`. Drifting multi-phase lanes; this seed's best fit absorbs them into a period-7, zero-shift domain template (other seeds prefer a drifting period-4 fit).
 
 ## Representative 2D rules
 
-- `Diamoeba`: best `(p, s) = (2, (0, 0))`, margin `1703.5` bits, defect rate `0.114`. Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.
+- `Diamoeba`: best `(p, s) = (2, (0, 0))`, margin `1703.5` bits, defect rate `0.114`. Large breathing blobs; this run sits on the period-2 side of a near-boundary selection (the across-seed modal period is 1).
 - `Maze with Mice`: best `(p, s) = (2, (0, 0))`, margin `11564.5` bits, defect rate `0.007`. Maze-like corridors remain coherent while local fluctuations ride on top of them.
-- `S24/B11`: best `(p, s) = (1, (0, 0))`, margin `615.0` bits, defect rate `0.014`. Sparse patches form and dissolve, so the background captures only the broadest cadence.
+- `S24/B11`: best `(p, s) = (1, (0, 0))`, margin `615.0` bits, defect rate `0.014`. Sparse patches form and dissolve, so the domain template captures only the broadest cadence.
 - `S11/B37`: best `(p, s) = (2, (0, 0))`, margin `6111.3` bits, defect rate `0.014`. Explosive local birth competes with fast die-out, producing noisy but still structured slices.
-- `S37/B11`: best `(p, s) = (2, (0, 0))`, margin `20464.8` bits, defect rate `0.016`. Persistent residual structure remains after fitting, making the defect mask especially informative.
+- `S37/B11`: best `(p, s) = (2, (0, 0))`, margin `20464.8` bits, defect rate `0.016`. Persistent defect structure remains after fitting, making the defect mask especially informative.
 
 ## Representative 3D rules
 
@@ -56,6 +56,6 @@ These figures are discussion aids for the representative ALIFE rules. They are m
 
 - The mechanism figures explain the rule itself. The overview figures explain the global behavior that the selector is trying to summarize.
 - In 1D, the shift parameter is easiest to explain because diagonal motion is visually obvious.
-- In 2D and 3D, the defect masks are often more informative than the raw slices because they separate the fitted scaffold from the persistent irregular structures.
+- In 2D and 3D, the defect masks are often more informative than the raw slices because they separate the fitted domain template from the persistent irregular structures.
 - Use high-margin cases to explain stabilization. Use noisy or low-structure cases to explain why period 1 often wins.
 

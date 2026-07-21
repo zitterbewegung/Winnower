@@ -10,8 +10,8 @@
   --line: #e0dfda; --accent: #305c7a; --accent-soft: #e7eef3;
   --ok: #1c7a45; --ok-bg: #e2f3e8; --warn: #8a6100; --warn-bg: #fdf1d7;
   --err: #a02020; --err-bg: #fbe4e4; --code-bg: #efeeea;
-  --cell-zero: #fcdeb9; --cell-one: #3b3b3b; --cell-defect: #b00300;
-  --voxel-bg: #fdf6ec;
+  --cell-zero: #ffffff; --cell-one: #3b3b3b; --cell-defect: #b00300;
+  --voxel-bg: #ffffff;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -106,10 +106,10 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
 <body>
 <header>
   <div class="wrap">
-    <h1>Live reproduction: run the pipeline in your browser</h1>
+    <h1>Live reproduction: run the Winnower pipeline in your browser</h1>
     <p class="subtitle">
-      This page runs the actual <code>relative_symmetry_repair</code> code
-      (WebAssembly Python) on a spacetime it simulates from your chosen rule,
+      This page runs Winnower's actual <code>relative_symmetry_repair</code> code
+      (WebAssembly Python) on a space-time diagram it simulates from your chosen rule,
       seed, and horizon — then compares the result against the committed row in
       the paper's result CSVs. &larr; <a href="index.html">Back to the reviewer guide</a>
     </p>
@@ -191,11 +191,11 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   <p class="note" id="voxel-help" style="display:none">Voxel views: drag to
     rotate, scroll to zoom. The three views share one camera.</p>
 
-  <h2>Residual sites over time</h2>
+  <h2>Defect sites over time</h2>
   <div class="card">
     <canvas id="spark" width="1000" height="90"></canvas>
-    <p class="note">Residual sites per time step under the selected background B* —
-    persistent structured residuals show up as a non-vanishing tail.</p>
+    <p class="note">Defects per time step under the selected domain template B* —
+    persistent structured defects show up as a non-vanishing tail.</p>
   </div>
 
   <h2>Period ranking (Bernoulli NML)</h2>
@@ -689,8 +689,8 @@ function renderPanels(res) {
   const T = fields.spacetime.shape[0];
 
   if (dim === 1) {
-    // Full spacetime diagrams — nothing sliced away in 1D.
-    const captions = ["Observed spacetime U (time ↓)", "Selected background B*", "Residual mask M = U ⊕ B*"];
+    // Full space-time diagrams — nothing sliced away in 1D.
+    const captions = ["Observed space-time diagram U (time ↓)", "Selected domain template B*", "Defect mask M = U ⊕ B*"];
     FIELD_ORDER.forEach((name, i) => {
       const f = fields[name];
       const canvas = panelFigure(panels, captions[i], "flat");
@@ -709,7 +709,7 @@ function renderPanels(res) {
 
   if (dim === 2) {
     const [_, Hh, Ww] = fields.spacetime.shape;
-    const captions = ["Frame of spacetime U", "Frame of background B*", "Frame of residual mask M"];
+    const captions = ["Frame of space-time block U", "Frame of domain template B*", "Frame of defect mask M"];
     const flatCanvases = FIELD_ORDER.map((name, i) => panelFigure(panels, captions[i], "flat"));
     view.drawFrame = (t) => {
       FIELD_ORDER.forEach((name, i) => {
@@ -722,7 +722,7 @@ function renderPanels(res) {
     $("voxel-help").style.display = "";
     const cam = makeCamera();
     view.camera = cam;
-    const canvas = panelFigure(panels, "Residual world-tubes M — time increases upward; drag to rotate", "voxel");
+    const canvas = panelFigure(panels, "Defect world-tubes M — time increases upward; drag to rotate", "voxel");
     const viewer = new VoxelViewer(canvas, {
       color: hexToRgb(cssColor("--cell-defect")), camera: cam, heightPx: 420,
     });
@@ -742,7 +742,7 @@ function renderPanels(res) {
   const frameSize = Sz * Sy * Sx;
   const cam = makeCamera();
   view.camera = cam;
-  const captions = ["Observed U at t", "Background B* at t", "Residual mask M at t"];
+  const captions = ["Observed U at t", "Domain template B* at t", "Defect mask M at t"];
   const one = hexToRgb(cssColor("--cell-one"));
   const red = hexToRgb(cssColor("--cell-defect"));
   const viewers = FIELD_ORDER.map((name, i) => {
@@ -784,7 +784,7 @@ function drawSpark(canvas, series) {
   ctx.stroke();
   ctx.fillStyle = cssColor("--fg");
   ctx.font = "11px system-ui";
-  ctx.fillText(`max ${maxV} residual sites/frame · final ${series[series.length - 1]}`, pad + 2, 12);
+  ctx.fillText(`max ${maxV} defect sites/frame · final ${series[series.length - 1]}`, pad + 2, 12);
 }
 
 function render(res) {
@@ -800,7 +800,7 @@ function render(res) {
     ["Selected period p", rec.selected_period],
     [shiftLabel, rec.selected_shift_str],
     ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
-    ["Residual rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
+    ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
     ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
     ["Status", rec.status],
   ];
@@ -816,7 +816,7 @@ function render(res) {
 
   let html = "<tr><th class='num'>Rank</th><th class='num'>Period</th><th>Best shift</th>" +
     "<th class='num'>NML bits</th><th class='num'>NLL bits</th><th class='num'>Complexity</th>" +
-    "<th class='num'>Residual rate</th></tr>";
+    "<th class='num'>Defect rate</th></tr>";
   for (const row of res.period_summary) {
     html += `<tr><td class="num">${row.period_rank}</td><td class="num">${row.period}</td>` +
       `<td>${row.best_shift_str}</td>` +

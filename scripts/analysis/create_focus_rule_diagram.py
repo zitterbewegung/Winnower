@@ -79,7 +79,7 @@ FOCUS_RULES = (
         case_name="ECA-54",
         display_name="Rule 54",
         rule_label="1D Wolfram rule 54",
-        summary="Finds a period-4 scaffold; the residual isolates clean domain walls and particle-like world-tubes.",
+        summary="Finds a period-4 domain template; the defect mask isolates clean domain walls and particle-like world-tubes.",
         view_kind="spacetime_tail",
         display_rows=240,
     ),
@@ -87,7 +87,7 @@ FOCUS_RULES = (
         case_name="ECA-110",
         display_name="Rule 110",
         rule_label="1D Wolfram rule 110",
-        summary="Finds a drifting period-4 scaffold with shift -2; the residual keeps coherent but more tangled lanes.",
+        summary="Finds a drifting period-4 domain template with shift -2; the defect mask keeps coherent but more tangled lanes.",
         view_kind="spacetime_tail",
         display_rows=240,
     ),
@@ -95,15 +95,15 @@ FOCUS_RULES = (
         case_name="S24/B11",
         display_name="S24/B11",
         rule_label="2D Life-like S24/B11",
-        summary="Finds a period-2 scaffold and leaves a sparse persistent defect population instead of featureless noise.",
+        summary="Finds a period-2 domain template and leaves a sparse persistent defect population instead of featureless noise.",
         view_kind="slice_2d",
         display_time_mode="late_representative",
     ),
     FocusRule(
-        case_name="diamoeba3d",
-        display_name="3D Rule 5858",
-        rule_label="3D totalistic S5-8/B5-8",
-        summary="At the stabilized horizon, NML selects only a trivial period-1 scaffold here, so the residual is essentially the observed 3D mass.",
+        case_name="3d-life",
+        display_name="3D Life",
+        rule_label="3D Bays Life B5/S45",
+        summary="At the stabilized horizon, NML selects only a trivial period-1 domain template here, so the defect mask is essentially the observed 3D mass.",
         view_kind="slice_3d",
         display_time_mode="stabilized_mid",
     ),
@@ -304,7 +304,7 @@ def render_focus_rule_figure(*, preview_path: Path, paper_path: Path) -> tuple[P
             wspace=0.10,
         )
 
-        column_titles = ("Observed", "Selected Background", "Defect Mask")
+        column_titles = ("Observed", "Domain Template", "Defect Mask")
         for row, payload in enumerate(payloads):
             text_ax = fig.add_subplot(grid[row, 0])
             _decorate_text_axis(text_ax, payload)

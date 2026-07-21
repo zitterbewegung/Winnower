@@ -134,9 +134,9 @@
       "horizons": [
         10,
         20,
+        30,
         40,
-        60,
-        80
+        50
       ],
       "period_range": [
         1,
@@ -147,7 +147,7 @@
         6
       ],
       "rules": [
-        "diamoeba3d"
+        "3d-life"
       ],
       "seed": 11,
       "shift_handling": "joint_shift_optimization",
@@ -173,6 +173,15 @@
     "score_type": "bernoulli_nml",
     "selector_type": "period_first",
     "shift_handling": "joint_shift_optimization",
+    "tie_break_rule": "score asc, period asc, shift lex asc"
+  },
+  "shift_zero_selector_variant": {
+    "name": "period_first_nml_shift_zero_hybrid",
+    "nml_mode": "hybrid",
+    "score_column": "nml_bits",
+    "score_type": "bernoulli_nml",
+    "selector_type": "period_first",
+    "shift_handling": "shift_zero_only",
     "tie_break_rule": "score asc, period asc, shift lex asc"
   }
 }

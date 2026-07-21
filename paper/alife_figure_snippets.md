@@ -8,7 +8,7 @@ Label: `fig:alife-representative-rules`
 
 Caption:
 
-Representative rules across 1D, 2D, and 3D. (A) Elementary cellular automata show the raw spacetime, the selected relative-periodic background, and the residual defect mask. (B) Representative 2D rules show early, middle, and late slices together with the selected background and the final residual mask. (C) Representative 3D rules show midplane slices through the observed spacetime, selected background, and residual mask. Across dimensions, the same selector extracts a global background and isolates the structured residuals that remain.
+Representative rules across 1D, 2D, and 3D. (A) Elementary cellular automata show the raw space-time diagram, the selected relative-periodic domain template, and the defect mask. (B) Representative 2D rules show early, middle, and late slices together with the selected domain template and the final defect mask. (C) Representative 3D rules show midplane slices through the observed space-time block, selected domain template, and defect mask. Across dimensions, the same selector extracts a global domain template and isolates the structured defects that remain.
 
 LaTeX:
 
@@ -16,7 +16,7 @@ LaTeX:
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/alife_representative_rules.png}
-  \caption{Representative rules across 1D, 2D, and 3D. (A) Elementary cellular automata show the raw spacetime, the selected relative-periodic background, and the residual defect mask. (B) Representative 2D rules show early, middle, and late slices together with the selected background and the final residual mask. (C) Representative 3D rules show midplane slices through the observed spacetime, selected background, and residual mask. Across dimensions, the same selector extracts a global background and isolates the structured residuals that remain.}
+  \caption{Representative rules across 1D, 2D, and 3D. (A) Elementary cellular automata show the raw space-time diagram, the selected relative-periodic domain template, and the defect mask. (B) Representative 2D rules show early, middle, and late slices together with the selected domain template and the final defect mask. (C) Representative 3D rules show midplane slices through the observed space-time block, selected domain template, and defect mask. Across dimensions, the same selector extracts a global domain template and isolates the structured defects that remain.}
   \label{fig:alife-representative-rules}
 \end{figure}
 ```

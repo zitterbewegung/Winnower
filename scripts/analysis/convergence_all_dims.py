@@ -38,11 +38,15 @@ RULES_2D = [
 T_VALUES_2D = [60, 100, 200, 400, 600, 800]
 
 # ── 3D Rules ─────────────────────────────────────────────────────────────────
+# 3d-life (Bays B5/S45) soup decays toward the quiescent vacuum; at seed 11 it
+# dies entirely before T=60, so the 3D block uses seed 42 and horizons <= 50,
+# where both rules remain nontrivial.
 RULES_3D = [
     ("3d-life", (4, 5), (5, 5)),
     ("diamoeba3d", (5, 8), (5, 8)),
 ]
-T_VALUES_3D = [10, 20, 40, 60, 80]
+T_VALUES_3D = [10, 20, 30, 40, 50]
+SEED_3D = 42
 
 
 def convergence_1d(max_period=10):
@@ -133,7 +137,7 @@ def convergence_3d(max_period=6):
         print(f"\n  {name}:")
         max_T = max(T_VALUES_3D)
         density = RULES_3D_DENSITY.get(name, 0.5)
-        initial = random_initial_volume(sx=16, sy=16, sz=16, density=density, seed=11)
+        initial = random_initial_volume(sx=16, sy=16, sz=16, density=density, seed=SEED_3D)
         spacetime_full = simulate_3d(initial, steps=max_T, rule="custom",
                                      survive=survive, birth=birth)
 

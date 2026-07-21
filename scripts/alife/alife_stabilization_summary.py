@@ -28,7 +28,7 @@ from relative_symmetry_repair.alife_style import (  # noqa: E402
 )
 from relative_symmetry_repair.plotting import save_figure  # noqa: E402
 
-FOCUS_RULES = ("ECA-54", "ECA-110", "S24/B11", "diamoeba3d")
+FOCUS_RULES = ("ECA-54", "ECA-110", "S24/B11", "3d-life")
 
 
 def build_summary_figure(

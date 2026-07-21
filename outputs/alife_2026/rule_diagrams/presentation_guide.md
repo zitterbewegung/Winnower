@@ -11,8 +11,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 ## What the three panel types mean
 
 - `Observed`: the raw cellular automaton state.
-- `Background`: the selected relative-periodic scaffold found by the period-first Bernoulli-NML selector.
-- `Defect`: the mismatch between the raw state and that scaffold.
+- `Domain template`: the selected relative-periodic domain template found by the period-first Bernoulli-NML selector.
+- `Defects`: the mismatch between the raw state and that domain template.
 
 ## Why these should look less flat
 
@@ -28,9 +28,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `1484.9` bits
 - Defect rate: `0.179`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
-- Why this rule is in the presentation set: Alternating domains and clearer phase locking make the periodic background easier to see.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
+- Why this rule is in the presentation set: Alternating domains and clearer phase locking make the periodic domain template easier to see.
 
 ### ECA-110
 
@@ -38,9 +38,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `857.0` bits
 - Defect rate: `0.314`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
-- Why this rule is in the presentation set: Drifting multi-phase lanes are visible; the best fit uses a nonzero shift to follow motion.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
+- Why this rule is in the presentation set: Drifting multi-phase lanes; this seed's best fit absorbs them into a period-7, zero-shift domain template (other seeds prefer a drifting period-4 fit).
 
 ## 2D presentation rules
 
@@ -50,9 +50,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `1703.5` bits
 - Defect rate: `0.114`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
-- Why this rule is in the presentation set: Large breathing blobs dominate the frame and create a stronger long-horizon periodic signal.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
+- Why this rule is in the presentation set: Large breathing blobs; this run sits on the period-2 side of a near-boundary selection (the across-seed modal period is 1).
 
 ### Maze with Mice
 
@@ -60,8 +60,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `11564.5` bits
 - Defect rate: `0.007`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
 - Why this rule is in the presentation set: Maze-like corridors remain coherent while local fluctuations ride on top of them.
 
 ### S37/B11
@@ -70,9 +70,9 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `20464.8` bits
 - Defect rate: `0.016`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
-- Why this rule is in the presentation set: Persistent residual structure remains after fitting, making the defect mask especially informative.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
+- Why this rule is in the presentation set: Persistent defect structure remains after fitting, making the defect mask especially informative.
 
 ## 3D presentation rules
 
@@ -82,8 +82,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `6765.0` bits
 - Defect rate: `0.111`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
 - Why this rule is in the presentation set: Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.
 
 ### clouds
@@ -92,8 +92,8 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `8366.1` bits
 - Defect rate: `0.017`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
 - Why this rule is in the presentation set: High-count thresholds create bulky, cloud-like regions instead of thin fronts.
 
 ### diamoeba3d
@@ -102,7 +102,7 @@ This note exists for the less-flat presentation figure set. Use it when you want
 - Winner margin: `5507.5` bits
 - Defect rate: `0.265`
 - What the observed panel means: the raw CA state before any decomposition.
-- What the background panel means: the periodic scaffold chosen by the selector.
-- What the defect panel means: the cells where the scaffold is wrong, i.e. the residual structure.
+- What the domain template panel means: the periodic domain template chosen by the selector.
+- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.
 - Why this rule is in the presentation set: Large volumetric domains survive for long periods, so the midplane slices show broad coherent masses.
 

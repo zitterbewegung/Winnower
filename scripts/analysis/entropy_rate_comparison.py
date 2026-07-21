@@ -158,18 +158,18 @@ def main():
         results["T"] = T
 
         print(f"\nMarginal entropy (bits/site):")
-        print(f"  Raw spacetime:  {results['raw_marginal_H']:.4f}")
-        print(f"  Background:     {results['background_marginal_H']:.4f}")
-        print(f"  Residual mask:  {results['residual_marginal_H']:.4f}")
+        print(f"  Raw space-time diagram:  {results['raw_marginal_H']:.4f}")
+        print(f"  Domain template:         {results['background_marginal_H']:.4f}")
+        print(f"  Defect mask:             {results['residual_marginal_H']:.4f}")
         print(f"\nConditional entropy rate H(X_t | context), neighborhood={neighborhood}, history={history}:")
-        print(f"  Raw spacetime:  {results['raw_cond_H']:.4f}")
-        print(f"  Background:     {results['background_cond_H']:.4f}")
-        print(f"  Residual mask:  {results['residual_cond_H']:.4f}")
+        print(f"  Raw space-time diagram:  {results['raw_cond_H']:.4f}")
+        print(f"  Domain template:         {results['background_cond_H']:.4f}")
+        print(f"  Defect mask:             {results['residual_cond_H']:.4f}")
 
         # Fraction of entropy in residual vs raw
         if results["raw_cond_H"] > 0:
             ratio = results["residual_cond_H"] / results["raw_cond_H"]
-            print(f"\n  Residual/Raw entropy ratio: {ratio:.4f}")
+            print(f"\n  Defect-mask/raw entropy ratio: {ratio:.4f}")
             results["entropy_ratio"] = ratio
 
         all_results.append(results)
@@ -187,7 +187,7 @@ def main():
         r = all_results[i]
         ax = axes[i]
 
-        labels = ["Raw\nspacetime", "Background\n(periodic)", "Residual\n(defects)"]
+        labels = ["Observed\nspace-time", "Domain\ntemplate", "Defect\nmask"]
         marginals = [r["raw_marginal_H"], r["background_marginal_H"], r["residual_marginal_H"]]
         conditionals = [r["raw_cond_H"], r["background_cond_H"], r["residual_cond_H"]]
 
@@ -203,7 +203,7 @@ def main():
         ax.set_ylim(0, 1.05)
 
     fig.suptitle(
-        "Entropy rate decomposition: periodic background captures predictable structure",
+        "Entropy rate decomposition: the periodic domain template captures predictable structure",
         fontsize=12,
     )
     plt.tight_layout()

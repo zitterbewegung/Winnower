@@ -35,10 +35,11 @@ FIGURES = [
         path=ALIFE / "editable_figures" / "algorithm_detailed.png",
         title="Algorithm overview",
         caption=(
-            "A candidate (period, shift) pair induces an orbit partition of the "
-            "spacetime. Majority vote on each orbit class gives the best-fitting "
-            "background B*; the residual mask M = U ⊕ B* marks every cell the "
-            "background cannot explain. Candidates are compared with a "
+            "A candidate (period, shift) pair induces a partition of the "
+            "space-time block into translation orbits. Majority vote on each "
+            "translation orbit gives the best-fitting domain template B*; the "
+            "defect mask M = U ⊕ B* marks every cell the domain template "
+            "cannot explain. Candidates are compared with a "
             "Bernoulli NML score (fit + complexity)."
         ),
         source="scripts/alife/alife_algorithm_figure.py",
@@ -47,9 +48,9 @@ FIGURES = [
         path=ALIFE / "rule_diagrams" / "representative_rules_1d.png",
         title="Representative 1D rules (ECA 30 / 54 / 110)",
         caption=(
-            "Spacetime, selected background B*, and residual mask M for the three focus "
-            "elementary CA. Rule 54 decomposes cleanly into a periodic background "
-            "plus particle-like residuals; Rule 30 stays diffuse."
+            "Space-time diagram, selected domain template B*, and defect mask M for the three focus "
+            "elementary CA. Rule 54 decomposes cleanly into a periodic domain template "
+            "plus particle-like defects; Rule 30 stays diffuse."
         ),
         source="scripts/alife/alife_rule_diagrams.py",
     ),
@@ -57,9 +58,9 @@ FIGURES = [
         path=ALIFE / "rule_diagrams" / "representative_rules_2d.png",
         title="Representative 2D rules",
         caption=(
-            "Life-like rules with structured residuals (e.g. Diamoeba, Maze with "
-            "Mice, S37/B11): the selected background absorbs the bulk of the "
-            "pattern while the sparse residual mask stays visibly organized."
+            "Life-like rules with structured defect masks (e.g. Diamoeba, Maze with "
+            "Mice, S37/B11): the selected domain template absorbs the bulk of the "
+            "pattern while the sparse defect mask stays visibly organized."
         ),
         source="scripts/alife/alife_rule_diagrams.py",
     ),
@@ -83,7 +84,7 @@ FIGURES = [
         path=ALIFE / "null_controls" / "null_controls_margin.png",
         title="Null controls — NML margin",
         caption=(
-            "Original spacetimes vs. time-shuffled, space-shuffled, and "
+            "Original space-time blocks vs. time-shuffled, space-shuffled, and "
             "density-matched Bernoulli controls. Structure found in originals is "
             "not reproduced by the controls."
         ),
@@ -91,8 +92,8 @@ FIGURES = [
     ),
     dict(
         path=ALIFE / "null_controls" / "null_controls_defect_rate.png",
-        title="Null controls — residual rate",
-        caption="Residual (defect) rates for the same control panel.",
+        title="Null controls — defect rate",
+        caption="Defect rates for the same control panel.",
         source="scripts/alife/alife_run_all.py (null_controls)",
     ),
     dict(
@@ -112,7 +113,7 @@ FIGURES = [
         title="Seed stability",
         caption=(
             "Representative rules re-run across 10 seeds and 6 horizons: modal "
-            "period agreement, transition counts, and residual variability."
+            "period agreement, transition counts, and defect-rate variability."
         ),
         source="scripts/alife/alife_run_all.py (seed_stability)",
     ),
@@ -142,9 +143,9 @@ FIGURES = [
         source="scripts/alife/alife_run_all.py (survey_3d)",
     ),
     dict(
-        path=ALIFE / "rule_diagrams_3d_voxel" / "diamoeba3d" / "diamoeba3d_voxel_decomposition.png",
-        title="3D voxel decomposition — diamoeba3d",
-        caption="Voxel view of spacetime U, selected background B*, and residual mask M for a 3D rule.",
+        path=ALIFE / "rule_diagrams_3d_voxel" / "3d_life" / "3d_life_voxel_decomposition.png",
+        title="3D voxel decomposition — 3d-life (B5/S45, Bays 3D Life)",
+        caption="Voxel view of the space-time block U, selected domain template B*, and defect mask M for a 3D rule.",
         source="scripts/alife/alife_rule_diagrams.py",
     ),
 ]
@@ -154,7 +155,7 @@ TABLES = [
         path=ALIFE / "ground_truth" / "ground_truth_summary.csv",
         title="Ground-truth recovery (planted periodicity)",
         caption=(
-            "Spacetimes constructed to be exactly relative-periodic with a known "
+            "Space-time blocks constructed to be exactly relative-periodic with a known "
             "(period, shift), corrupted by bit flips at rate flip_rate, then run "
             "through the shipped selector. Accuracy = fraction of runs recovering "
             "the planted value."
@@ -163,24 +164,24 @@ TABLES = [
     ),
     dict(
         path=ALIFE / "mask_structure" / "mask_structure_summary.csv",
-        title="Residual-mask organization (vs shuffled baselines)",
+        title="Defect-mask organization (vs shuffled baselines)",
         caption=(
             "Run-length codelength and component-count ratios of each selected "
-            "residual mask against 20 uniformly shuffled masks of the same "
+            "defect mask against 20 uniformly shuffled masks of the same "
             "density (ratio 1 = unstructured). Originals of the focal rules sit "
             "far below 1; every Bernoulli control sits at 1.000; ECA-30's "
-            "diffuse residual also scores 1.000 — the statistic is calibrated "
+            "diffuse defect mask also scores 1.000 — the statistic is calibrated "
             "in both directions. Time-shuffled controls retain per-frame "
             "spatial organization by construction."
         ),
-        claim="Residual organization is measured, not eyeballed",
+        claim="Defect-mask organization is measured, not eyeballed",
     ),
     dict(
         path=ALIFE / "null_controls" / "null_controls_summary.csv",
         title="Null controls (summary)",
         caption=(
-            "Original spacetimes vs. shuffled/Bernoulli controls, same selector. "
-            "Large margins and low residual rates for originals — and not for "
+            "Original space-time blocks vs. shuffled/Bernoulli controls, same selector. "
+            "Large margins and low defect rates for originals — and not for "
             "controls — indicate the method detects real structure. "
             "No null-control false positives were observed."
         ),
@@ -191,7 +192,7 @@ TABLES = [
         title="Seed stability (summary)",
         caption=(
             "Per-rule agreement of the final selected period across 10 seeds, "
-            "with transition counts and residual-rate coefficient of variation."
+            "with transition counts and defect-rate coefficient of variation."
         ),
         claim="Selection is stable across random initial conditions",
     ),
@@ -214,7 +215,7 @@ TABLES = [
         path=ALIFE / "eca_atlas" / "eca_atlas_summary.csv",
         title="ECA atlas (all 256 rules)",
         caption=(
-            "Final modal period, stability, margins, and residual rate for every "
+            "Final modal period, stability, margins, and defect rate for every "
             "elementary CA rule. Use the filter box to find a rule."
         ),
         claim="Full 1D coverage, not cherry-picked examples",
@@ -236,20 +237,20 @@ TABLES = [
 
 CONTRIBUTIONS = [
     ("The Winnower tool",
-     "An open-source, deterministic pipeline that splits a CA spacetime into a periodic background B* and a residual mask M, with an in-browser reproduction of every reported number."),
+     "An open-source, deterministic pipeline that splits a CA space-time block into a periodic domain template B* and a defect mask M, with an in-browser reproduction of every reported number."),
     ("Calibrated accuracy",
      "Recovers planted ground-truth periodicity at realistic noise levels, and selects no periodic structure on time-shuffled, space-shuffled, or Bernoulli null controls — zero false positives."),
-    ("Linear-time background fitting",
-     "Majority vote on orbit classes: one pass over the data per candidate (period, shift), which is what makes whole-catalog 1D/2D/3D surveys practical."),
+    ("Linear-time domain-template fitting",
+     "Majority vote on translation orbits: one pass over the data per candidate (period, shift), which is what makes whole-catalog 1D/2D/3D surveys practical."),
     ("Complexity-aware selection via Bernoulli NML",
      "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact six-way equivalence — velocity-matched divisibility is necessary as well as sufficient for universal improvement — machine-checked in Lean with public CI."),
 ]
 
 LIMITATIONS = [
-    "The selector returns the best-compressing global explanation, which need not match a physicist's preferred background when the residual itself carries periodic structure.",
+    "The selector returns the best-compressing global explanation, which need not match a physicist's preferred domain template when the defect mask itself carries periodic structure.",
     "At period 1 the reported shift is arbitrary (a tie), so shift values for aperiodic rules carry no information.",
     "Periodicity outside the scanned candidate grid is invisible; the candidate-range robustness runs quantify this.",
-    "The residual mask says where structure is, not how it interacts — no particle interaction analysis.",
+    "The defect mask says where structure is, not how it interacts — no particle interaction analysis.",
     "Scaling observations (e.g. S37/B11) rest on limited seeds and sizes; the run-length diagnostic is raster-order dependent.",
 ]
 
@@ -263,7 +264,7 @@ REPRO_STEPS = [
     ("Rebuild this page", "python scripts/build_review_site.py", "Regenerates review_site/index.html from the current outputs."),
     ("Try a single rule interactively",
      "python -m relative_symmetry_repair analyze --rule 110",
-     "Also: analyze2d --rule life, analyze3d --rule diamoeba3d."),
+     "Also: analyze2d --rule life, analyze3d --rule 3d-life."),
 ]
 
 REPO_MAP = [
@@ -495,7 +496,10 @@ def write_demo_assets(site: Path) -> None:
 def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
           lba_href: str = "../paper/alife2026_lba.pdf", live_demo: bool = False) -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
-    title = extract_tex_field(tex, "title") or "Winnower — reviewer guide"
+    title = extract_tex_field(tex, "title")
+    if "Detecting Periodic Domains" not in title:
+        # Pre-rename manuscripts carry the old long title; present the current one.
+        title = "Winnower: Detecting Periodic Domains in Cellular Automata"
     abstract = extract_abstract(tex)
 
     ledger_path = ROOT / "docs" / "CLAIM_LEDGER.md"
@@ -561,7 +565,7 @@ def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
             f'<div class="tiles">{tiles}</div>'
             '<p class="tbl-meta">Full report: <code>outputs/alife_2026/counterexample_stress/counterexample_stress_summary.md</code>. '
             "Non-unique winners are dominated by trivial/degenerate rules (e.g. ECA-0) where "
-            "many shifts fit an empty background equally well; margins ≤ 0.5 bits and "
+            "many shifts fit an empty domain template equally well; margins ≤ 0.5 bits and "
             "null-control false positives were both zero.</p>"
         )
 
@@ -773,7 +777,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 <section id="latebreaking">
   <h2>Late-breaking abstract — ALIFE 2026</h2>
   <p><strong>The exact boundary of period inflation: a machine-checked
-  characterization for the Winnower CA background detector.</strong>
+  characterization for the Winnower periodic-domain detector.</strong>
   A two-page late-breaking abstract prepared for
   <a href="https://2026.alife.org/" target="_blank" rel="noopener">ALIFE 2026</a>
   (Waterloo, Ontario, Canada, August 17&ndash;21, 2026 &mdash; theme
@@ -788,7 +792,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
     <a href="https://github.com/zitterbewegung/Winnower/actions/workflows/lean-verify.yml" target="_blank" rel="noopener" class="secondary">Its CI runs (Lean proof check)</a>
   </div>
   <h3>The result, in plain terms</h3>
-  <p>Every fit-based background detector faces <em>period inflation</em>: a
+  <p>Every fit-based domain detector faces <em>period inflation</em>: a
   candidate with a longer period has more parameters, so it can never fit
   worse, and a selector scoring by fit alone drifts to the largest model
   scanned. The late-breaking result pins down <em>exactly</em> when that
@@ -796,10 +800,10 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   conditions are all equivalent: velocity-matched divisibility of the
   periods and shifts; one translation being a power of the other;
   orbit-partition refinement; model-class nesting; and universal
-  improvement (on <em>every</em> spacetime) of both the residual count and
+  improvement (on <em>every</em> space-time block) of both the defect count and
   the Bernoulli negative log-likelihood. Divisibility is
   <em>necessary</em>, not just sufficient &mdash; whenever it fails, some
-  spacetime makes the longer-period candidate strictly worse. That makes
+  space-time block makes the longer-period candidate strictly worse. That makes
   divisibility the precise frontier of the guaranteed-improvement regime,
   and therefore the precise set of comparisons Winnower's NML complexity
   penalty exists to neutralize.</p>
@@ -863,7 +867,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <h2>Results &amp; robustness</h2>
   <p>Each table below is loaded from the CSVs in <code>outputs/alife_2026/</code> —
   the same files the paper's tables are built from. Column names come straight from
-  the code (<code>defect_*</code> columns are the paper's <em>residual</em> quantities).
+  the code (<code>defect_*</code> columns are the paper's <em>defect</em> quantities).
   Click a column header to sort.</p>
   {stress_html}
   {''.join(tables_html)}

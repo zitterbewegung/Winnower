@@ -145,23 +145,41 @@ included in the search.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.99\textwidth]{stabilization_real.png}
+    \includegraphics[width=0.92\textwidth]{lba_decompositions.png}
+    \caption{Winnower decompositions of the representative rules
+    (observed~/ domain template~/ defect mask). Top: ECA-54
+    (seed~11, $T{=}144$) selects a period-4 template; the defect mask isolates
+    particle world-lines against the periodic domain. Middle: 2D S24/B11
+    (seed~11, $T{=}600$, frame $t{=}300$) selects a period-2 template that
+    explains almost every cell (defect rate $0.008$). Bottom: voxel views of 3D
+    Life B5/S45 \citep{bays1987} (seed~42, $16^3$, $T{=}24$): the period-1
+    template captures the persistent still lifes, and the defect overlay marks
+    the decaying transient soup.}
+    \label{fig:decomp}
+\end{figure*}
+
+\begin{figure*}[b!]
+    \centering
+    \includegraphics[width=0.92\textwidth]{stabilization_real.png}
     \caption{Selected period (top) and margin over the runner-up in bits
-    (bottom, log scale) versus horizon $T$, from an exact-Bernoulli-NML sweep
-    at seed~11. ECA-54 locks at period~4 and diamoeba3d at period~1 from the
-    first horizon; ECA-110 ($1\!\to\!7$) and S24/B11 ($1\!\to\!2$) make a single
-    transition, after which the margin grows. Regenerated from the released
-    tool (see text).}
+    (bottom, log scale) versus horizon $T$, for the rules of
+    \cref{fig:decomp}, from an exact-Bernoulli-NML sweep. ECA-54 locks at
+    period~4 and 3D Life at period~1 from the first horizon; ECA-110
+    ($1\!\to\!7$) and S24/B11 ($1\!\to\!2$) make a single transition, after
+    which the margin grows.}
     \label{fig:stab}
 \end{figure*}
 
 \section{Preliminary Results}
 We tested ECAs 30, 54, and 110; two-dimensional Life-like and totalistic
-rules; and a 3D totalistic CA \citep{bays1987,bays2006}, sweeping the horizon
-$T\in\{50,\dots,800\}$ (\cref{fig:stab}). The selected candidate settled
-immediately for ECA~54 (period~4, margin growing from 681 to 2318 bits) and the
-3D rule diamoeba3d (period~1, 2831 to 7522 bits), and after a single transition
-for ECA~110 ($1\!\to\!7$, the period-7 Ether background) and S24/B11
+rules; and 3D Life B5/S45 \citep{bays1987,bays2006}.
+\Cref{fig:decomp} shows the resulting decompositions for the representative
+rules, and \cref{fig:stab} the corresponding horizon sweep
+($T\in\{50,\dots,800\}$ in 1D/2D at seed~11; $T\in\{10,\dots,50\}$ at seed~42
+in 3D, where the B5/S45 soup decays toward the quiescent domain). The selected
+candidate settled immediately for ECA~54 (period~4, margin growing from 681 to
+2318 bits) and 3D Life (period~1, 3324 to 7403 bits), and after a single
+transition for ECA~110 ($1\!\to\!7$, the period-7 Ether domain) and S24/B11
 ($1\!\to\!2$). Every tested rule changed its selected candidate at most twice,
 and its margin over the runner-up grew after the last change.
 
@@ -181,10 +199,10 @@ rules worth examining with local particle, glider, or coherent-structure
 detectors \citep{secktuohmora2023}.
 
 \paragraph{Reproducibility.} Every number and figure above regenerates
-deterministically from the released tool at seed~11: the per-rule
-decompositions from \texttt{analyze}, \texttt{analyze2d}, and
-\texttt{analyze3d}, and the horizon sweep of \cref{fig:stab} from
-\texttt{convergence\_all\_dims.py}.
+deterministically from the released tool: single rules via \texttt{analyze},
+\texttt{analyze2d}, and \texttt{analyze3d};
+\cref{fig:decomp,fig:stab} via \texttt{alife\_lba\_figures.py} after the
+horizon sweep \texttt{convergence\_all\_dims.py}.
 
 \section{Discussion and Future Work}
 These preliminary results support Winnower as a lightweight first pass for

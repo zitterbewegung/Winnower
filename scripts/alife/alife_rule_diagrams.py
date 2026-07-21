@@ -59,13 +59,13 @@ PRESENTATION_GUIDE_NAME = "presentation_guide.md"
 
 PAPER_OVERVIEW_CAPTION = (
     "Representative rules across 1D, 2D, and 3D. "
-    "(A) Elementary cellular automata show the raw spacetime, the selected relative-periodic background, "
-    "and the residual mask. "
-    "(B) Representative 2D rules show early, middle, and late slices together with the selected background "
-    "and the final residual mask. "
-    "(C) Representative 3D rules show midplane slices through the observed spacetime, selected background, "
-    "and residual mask. "
-    "Across dimensions, the same selector extracts a global background and isolates the structured residuals that remain."
+    "(A) Elementary cellular automata show the raw space-time diagram, the selected relative-periodic domain template, "
+    "and the defect mask. "
+    "(B) Representative 2D rules show early, middle, and late slices together with the selected domain template "
+    "and the final defect mask. "
+    "(C) Representative 3D rules show midplane slices through the observed space-time block, selected domain template, "
+    "and defect mask. "
+    "Across dimensions, the same selector extracts a global domain template and isolates the structured defects that remain."
 )
 
 PAPER_MECHANISMS_CAPTION = (
@@ -85,14 +85,14 @@ CENTER_COLOR = ACCENT_SOFT_COLOR
 TEXT_COLOR = ALIFE_TEXT_COLOR
 
 RULE_NOTES = {
-    "ECA-30": "Chaotic texture with little large-scale repetition; the selector still prefers a simple background.",
-    "ECA-54": "Alternating domains and clearer phase locking make the periodic background easier to see.",
-    "ECA-110": "Drifting multi-phase lanes; this seed's best fit absorbs them into a period-7, zero-shift background (other seeds prefer a drifting period-4 fit).",
+    "ECA-30": "Chaotic texture with little large-scale repetition; the selector still prefers a simple domain template.",
+    "ECA-54": "Alternating domains and clearer phase locking make the periodic domain template easier to see.",
+    "ECA-110": "Drifting multi-phase lanes; this seed's best fit absorbs them into a period-7, zero-shift domain template (other seeds prefer a drifting period-4 fit).",
     "Diamoeba": "Large breathing blobs; this run sits on the period-2 side of a near-boundary selection (the across-seed modal period is 1).",
     "Maze with Mice": "Maze-like corridors remain coherent while local fluctuations ride on top of them.",
-    "S24/B11": "Sparse patches form and dissolve, so the background captures only the broadest cadence.",
+    "S24/B11": "Sparse patches form and dissolve, so the domain template captures only the broadest cadence.",
     "S11/B37": "Explosive local birth competes with fast die-out, producing noisy but still structured slices.",
-    "S37/B11": "Persistent residual structure remains after fitting, making the residual mask especially informative.",
+    "S37/B11": "Persistent defect structure remains after fitting, making the defect mask especially informative.",
     "3d-life": "Dense midplane activity shows how a simple 3D rule can still look highly textured in projection.",
     "clouds": "High-count thresholds create bulky, cloud-like regions instead of thin fronts.",
     "crystal": "Low-count thresholds favor sparse growth and faceted, crystal-like fronts.",
@@ -167,7 +167,7 @@ def _counts_for_case(case: ALifeCase) -> tuple[list[int], list[int], int]:
 
 
 def _note_for_case(case: ALifeCase) -> str:
-    return RULE_NOTES.get(case.name, "Look for coherent domains, drift, and compact residuals.")
+    return RULE_NOTES.get(case.name, "Look for coherent domains, drift, and compact defects.")
 
 
 def _wrap_note(note: str, *, width: int = 30) -> str:
@@ -185,7 +185,7 @@ def _text_block(payload: DiagramPayload) -> str:
             f"best p = {payload.selected_period}",
             f"best s = {payload.selected_shift}",
             f"margin = {payload.winner_margin_bits:.1f} bits",
-            f"residual = {payload.defect_rate:.3f}",
+            f"defect rate = {payload.defect_rate:.3f}",
             "",
             "What to notice:",
             note,
@@ -238,8 +238,8 @@ def _crop_image(image: np.ndarray, bbox: tuple[int, int, int, int]) -> np.ndarra
 def _presentation_panel_meaning() -> str:
     return (
         "The observed panel shows the raw CA state. "
-        "The background panel shows the selected relative-periodic background. "
-        "The residual panel shows the cells that the background cannot explain."
+        "The domain template panel shows the selected relative-periodic domain template. "
+        "The defect panel shows the cells that the domain template cannot explain."
     )
 
 
@@ -297,7 +297,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Rule", "Observed spacetime", "Selected background", "Residual mask"]
+        headers = ["Rule", "Observed space-time diagram", "Selected domain template", "Defect mask"]
         for col, header in enumerate(headers):
             if col == 0:
                 axes[0, col].set_title(header, fontsize=11)
@@ -330,7 +330,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
                 _decorate_binary_axis(ax)
 
         fig.suptitle(
-            "Representative 1D rules: raw evolution, selected background, and what the fit leaves behind",
+            "Representative 1D rules: raw evolution, selected domain template, and what the fit leaves behind",
             fontsize=13,
             y=0.995,
             color=TITLE_COLOR,
@@ -338,7 +338,7 @@ def _plot_1d_overview(payloads: list[DiagramPayload], path: Path) -> None:
         fig.text(
             0.5,
             0.012,
-            "Use these as reading panels: first see the raw texture, then the fitted background, then the residual structure in red.",
+            "Use these as reading panels: first see the raw texture, then the fitted domain template, then the defect structure in red.",
             ha="center",
             va="bottom",
             fontsize=9,
@@ -396,7 +396,7 @@ def _plot_nd_overview(payloads: list[DiagramPayload], *, title: str, caption: st
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Rule", "t = 0", "t = mid", "t = last", "Background at last", "Residual at last"]
+        headers = ["Rule", "t = 0", "t = mid", "t = last", "Domain template at last", "Defect mask at last"]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=11)
 
@@ -443,11 +443,11 @@ def _presentation_text_block(payload: DiagramPayload) -> str:
             payload.case.name,
             _rule_label(payload.case),
             f"The selected winner is ({payload.selected_period}, {payload.selected_shift}).",
-            f"The margin is {payload.winner_margin_bits:.1f} bits, and the residual rate is {payload.defect_rate:.3f}.",
+            f"The margin is {payload.winner_margin_bits:.1f} bits, and the defect rate is {payload.defect_rate:.3f}.",
             "",
             "The observed panel shows the raw state.",
-            "The background panel shows the fitted background.",
-            "The residual panel shows the residual cells.",
+            "The domain template panel shows the fitted domain template.",
+            "The defect panel shows the defect cells.",
             "",
             "Why this rule matters:",
             note,
@@ -466,7 +466,7 @@ def _plot_presentation_1d(payloads: list[DiagramPayload], path: Path) -> None:
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Rule", "Observed\n(raw spacetime)", "Background\n(selected fit)", "Residual\n(what the fit misses)"]
+        headers = ["Rule", "Observed\n(raw space-time diagram)", "Domain template\n(selected fit)", "Defects\n(what the fit misses)"]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=12)
 
@@ -530,8 +530,8 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
             "Observed t = 0",
             "Observed t = mid",
             "Observed t = last",
-            "Background at last",
-            "Residual at last",
+            "Domain template at last",
+            "Defect mask at last",
         ]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=12)
@@ -579,7 +579,7 @@ def _plot_presentation_2d(payloads: list[DiagramPayload], path: Path) -> None:
         fig.text(
             0.5,
             0.014,
-            _presentation_panel_meaning() + " These panels are cropped to the active region so that the domains and residual structures read more clearly.",
+            _presentation_panel_meaning() + " These panels are cropped to the active region so that the domains and defect structures read more clearly.",
             ha="center",
             va="bottom",
             fontsize=9.5,
@@ -606,8 +606,8 @@ def _plot_presentation_3d(payloads: list[DiagramPayload], path: Path) -> None:
             "Observed projection t = 0",
             "Observed projection t = mid",
             "Observed projection t = last",
-            "Background projection at last",
-            "Residual projection at last",
+            "Domain template projection at last",
+            "Defect mask projection at last",
         ]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=12)
@@ -692,7 +692,7 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
         if len(payloads) == 1:
             axes = np.asarray([axes])
 
-        headers = ["Case", "Observed t = mid", "Observed t = last", "Background at last", "Residual at last"]
+        headers = ["Case", "Observed t = mid", "Observed t = last", "Domain template at last", "Defect mask at last"]
         for col, header in enumerate(headers):
             axes[0, col].set_title(header, fontsize=18.0, color=TEXT_COLOR)
 
@@ -736,7 +736,7 @@ def _plot_poster_presentation_2d(payloads: list[DiagramPayload], path: Path) -> 
 def _plot_poster_focus_3d(payload: DiagramPayload, path: Path) -> None:
     with plt.rc_context({**POSTER_DIAGRAM_RC, "axes.titlepad": 10}):
         fig, axes = plt.subplots(1, 4, figsize=(12.4, 3.1))
-        headers = ["Observed t = mid", "Observed t = last", "Background", "Residual"]
+        headers = ["Observed t = mid", "Observed t = last", "Domain template", "Defect mask"]
         for ax, header in zip(axes, headers):
             ax.set_title(header, fontsize=13.8, color=TEXT_COLOR)
 
@@ -770,7 +770,7 @@ def _plot_poster_rule_mechanisms(path: Path) -> None:
         heading_text = [
             ("1D elementary CA", "Three-cell lookup table", "Rule 54"),
             ("2D totalistic rules", "Birth/survival counts on 8 neighbors", "S37/B11"),
-            ("3D totalistic rules", "Birth/survival counts on 26 neighbors", "diamoeba3d"),
+            ("3D totalistic rules", "Birth/survival counts on 26 neighbors", "3d-life"),
         ]
         for col, (title, subtitle, exemplar) in enumerate(heading_text):
             ax = fig.add_subplot(outer[0, col])
@@ -816,7 +816,7 @@ def _plot_poster_rule_mechanisms(path: Path) -> None:
         _draw_2d_neighborhood(ax_2d_neighborhood, poster=True)
         _draw_count_rule(ax_2d_counts, birth=birth_2d, survive=survive_2d, max_neighbors=max_2d, poster=True)
 
-        case_3d = next(case for case in REPRESENTATIVE_CASES_3D if case.name == "diamoeba3d")
+        case_3d = next(case for case in REPRESENTATIVE_CASES_3D if case.name == "3d-life")
         birth_3d, survive_3d, max_3d = _counts_for_case(case_3d)
         inner_3d = outer[1, 2].subgridspec(1, 2, width_ratios=[1.05, 1.8], wspace=0.20)
         ax_3d_neighborhood = fig.add_subplot(inner_3d[0, 0])
@@ -1117,9 +1117,9 @@ def _write_rule_diagram_guide(
         "",
         "## Files",
         "",
-        "- `representative_rules_1d.png`: observed 1D spacetimes, selected backgrounds, and residual masks.",
-        "- `representative_rules_2d.png`: early, middle, late, selected-background, and residual slices for the 2D panel.",
-        "- `representative_rules_3d.png`: midplane slices through the 3D panel with selected-background and residual views.",
+        "- `representative_rules_1d.png`: observed 1D space-time diagrams, selected domain templates, and defect masks.",
+        "- `representative_rules_2d.png`: early, middle, late, selected-domain-template, and defect-mask slices for the 2D panel.",
+        "- `representative_rules_3d.png`: midplane slices through the 3D panel with selected-domain-template and defect-mask views.",
         "- `rule_mechanisms_1d.png`: lookup-table view of the studied elementary rules.",
         "- `rule_mechanisms_2d.png`: Moore-neighborhood plus birth/survival count diagrams for the studied 2D rules.",
         "- `rule_mechanisms_3d.png`: 3D Moore-neighborhood plus birth/survival count diagrams for the studied 3D rules.",
@@ -1134,14 +1134,14 @@ def _write_rule_diagram_guide(
         "## Recommended explanation order",
         "",
         "1. Start with the mechanism figures. They explain what the local update rule is actually doing.",
-        "2. Move to the representative evolution panels. They show what those local rules look like at the scale of an entire spacetime.",
-        "3. Use the background and residual columns to explain the paper's decomposition idea: the selector finds a global background, then studies what is left over.",
+        "2. Move to the representative evolution panels. They show what those local rules look like at the scale of an entire space-time diagram.",
+        "3. Use the domain-template and defect columns to explain the paper's decomposition idea: the selector finds a global domain template, then studies what is left over.",
         "",
         "## How to read the colors",
         "",
         f"- Light cells use `{ZERO_COLOR}` and mean value `0`.",
         f"- Dark cells use `{ONE_COLOR}` and mean value `1`.",
-        f"- Red cells use `{DEFECT_COLOR}` and mark disagreement with the selected relative-periodic background.",
+        f"- Red cells use `{DEFECT_COLOR}` and mark disagreement with the selected relative-periodic domain template.",
         f"- In mechanism figures, `{BIRTH_COLOR}` marks birth counts and `{SURVIVE_COLOR}` marks survival counts.",
         "",
         "## Representative 1D rules",
@@ -1160,7 +1160,7 @@ def _write_rule_diagram_guide(
         "",
         "- The mechanism figures explain the rule itself. The overview figures explain the global behavior that the selector is trying to summarize.",
         "- In 1D, the shift parameter is easiest to explain because diagonal motion is visually obvious.",
-        "- In 2D and 3D, the defect masks are often more informative than the raw slices because they separate the fitted background from the persistent irregular structures.",
+        "- In 2D and 3D, the defect masks are often more informative than the raw slices because they separate the fitted domain template from the persistent irregular structures.",
         "- Use high-margin cases to explain stabilization. Use noisy or low-structure cases to explain why period 1 often wins.",
         "",
     ]
@@ -1188,8 +1188,8 @@ def _write_presentation_guide(
                     f"- Winner margin: `{payload.winner_margin_bits:.1f}` bits",
                     f"- Defect rate: `{payload.defect_rate:.3f}`",
                     f"- What the observed panel means: the raw CA state before any decomposition.",
-                    f"- What the background panel means: the periodic background chosen by the selector.",
-                    f"- What the residual panel means: the cells where the background is wrong, i.e. the residual structure.",
+                    f"- What the domain template panel means: the periodic domain template chosen by the selector.",
+                    f"- What the defect panel means: the cells where the domain template is wrong, i.e. the defect structure.",
                     f"- Why this rule is in the presentation set: {_note_for_case(payload.case)}",
                     "",
                 ]
@@ -1210,8 +1210,8 @@ def _write_presentation_guide(
         "## What the three panel types mean",
         "",
         "- `Observed`: the raw cellular automaton state.",
-        "- `Background`: the selected relative-periodic background found by the period-first Bernoulli-NML selector.",
-        "- `Residual`: the mismatch between the raw state and that background.",
+        "- `Domain template`: the selected relative-periodic domain template found by the period-first Bernoulli-NML selector.",
+        "- `Defects`: the mismatch between the raw state and that domain template.",
         "",
         "## Why these should look less flat",
         "",
@@ -1378,8 +1378,8 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
     _plot_1d_overview(payloads_1d, overview_1d_path)
     _plot_nd_overview(
         payloads_2d,
-        title="Representative 2D rules: evolution, fitted background, and residual structure",
-        caption="Read left to right: how the pattern starts, how it develops, what the selected background keeps, and what it cannot explain.",
+        title="Representative 2D rules: evolution, fitted domain template, and defect structure",
+        caption="Read left to right: how the pattern starts, how it develops, what the selected domain template keeps, and what it cannot explain.",
         path=overview_2d_path,
     )
     _plot_nd_overview(
@@ -1412,7 +1412,7 @@ def build_rule_diagrams(output_root: Path, *, base_seed: int, paper_dir: Path) -
     _plot_presentation_2d(presentation_payloads_2d, presentation_2d_path)
     _plot_presentation_3d(presentation_payloads_3d, presentation_3d_path)
     _plot_poster_presentation_2d(presentation_payloads_2d, poster_presentation_2d_path)
-    _plot_poster_focus_3d(_payload_by_name(presentation_payloads_3d, "diamoeba3d"), poster_presentation_3d_focus_path)
+    _plot_poster_focus_3d(_payload_by_name(presentation_payloads_3d, "3d-life"), poster_presentation_3d_focus_path)
     _plot_poster_rule_mechanisms(poster_mechanisms_path)
 
     guide_path = _write_rule_diagram_guide(

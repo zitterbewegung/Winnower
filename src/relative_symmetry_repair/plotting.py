@@ -99,12 +99,12 @@ def plot_spectrum(frame: pd.DataFrame, *, value: str = "defect_rate", title: str
 
     if value == "defect_rate":
         caption = (
-            f"Darker cells mean fewer mismatches to the fitted background. "
+            f"Darker cells mean fewer mismatches to the fitted domain template. "
             f"Minimum scanned value at shift={best_shift}, period={best_period}."
         )
     elif value == "run_length_bits":
         caption = (
-            f"Darker cells mean a more compressible residual mask. "
+            f"Darker cells mean a more compressible defect mask. "
             f"Minimum scanned value at shift={best_shift}, period={best_period}."
         )
     else:
@@ -134,21 +134,21 @@ def plot_spectrum(frame: pd.DataFrame, *, value: str = "defect_rate", title: str
 def plot_decomposition(fit: RelativePeriodicFit, *, source: np.ndarray, title_prefix: str = ""):
     fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.8))
     axes[0].imshow(source, aspect="auto", interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
-    axes[0].set_title(f"{title_prefix}source")
+    axes[0].set_title(f"{title_prefix}observed space\u2013time")
     axes[1].imshow(fit.background, aspect="auto", interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
-    axes[1].set_title(f"{title_prefix}background\nbest fit: s={fit.shift}, p={fit.period}")
+    axes[1].set_title(f"{title_prefix}domain template\nbest fit: s={fit.shift}, p={fit.period}")
     axes[2].imshow(fit.defect_mask.astype(np.uint8), aspect="auto", interpolation="nearest", cmap=DEFECT_CMAP, vmin=0, vmax=1)
-    axes[2].set_title(f"{title_prefix}residual mask\nresidual rate={fit.defect_rate:.3f}")
+    axes[2].set_title(f"{title_prefix}defect mask\ndefect rate={fit.defect_rate:.3f}")
     for ax in axes:
         ax.set_xlabel("cell index")
         ax.set_ylabel("time (top to bottom)")
 
     _decorate_figure(
         fig,
-        caption="Red cells disagree with the fitted background. Look for compact world-tubes and clean boundaries instead of diffuse pepper noise.",
+        caption="Red cells disagree with the fitted domain template. Look for compact world-tubes and clean boundaries instead of diffuse pepper noise.",
         legend_handles=[
             *_binary_legend_handles(),
-            Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="residual = red"),
+            Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="defect = red"),
         ],
     )
     return fig, axes

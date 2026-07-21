@@ -41,7 +41,9 @@ from relative_symmetry_repair.selector_tools import (
 )
 
 HORIZONS = [50, 100, 200, 400, 600, 800]
-HORIZONS_3D = [10, 20, 40, 60, 80]
+# 3D horizons: 3d-life (Bays B5/S45) soup decays toward the quiescent domain and
+# is essentially dead past T~50, so the 3D sweep stops there.
+HORIZONS_3D = [10, 20, 30, 40, 50]
 NML_MODE = "hybrid"
 PERIOD_FIRST_SELECTOR = SelectorVariant(
     name="period_first_nml_joint_hybrid",
@@ -297,7 +299,7 @@ def run_3d_stabilization(
         summary = selection_summary(result)
         records.append(
             {
-                "rule": "diamoeba3d",
+                "rule": "3d-life",
                 "T": horizon,
                 "selected_period": summary["selected_period"],
                 "selected_shift": _shift_string(summary["selected_shift"]),
@@ -310,10 +312,10 @@ def run_3d_stabilization(
                 "nml_mode": NML_MODE,
             }
         )
-        period_scores.append(_period_scores_table(result, rule="diamoeba3d", horizon=horizon))
-        candidate_frames.append(_annotate_candidate_frame(frame, result, rule="diamoeba3d", horizon=horizon))
+        period_scores.append(_period_scores_table(result, rule="3d-life", horizon=horizon))
+        candidate_frames.append(_annotate_candidate_frame(frame, result, rule="3d-life", horizon=horizon))
         print(
-            f"  diamoeba3d T={horizon:4d}: p={summary['selected_period']} "
+            f"  3d-life T={horizon:4d}: p={summary['selected_period']} "
             f"margin={summary['margin_bits']:.0f}"
         )
 
@@ -479,7 +481,12 @@ def main() -> None:
         candidate_tables.extend(candidates)
 
     print("\n### 3D Stabilization ###")
-    records, period_scores, candidates = run_3d_stabilization(survive=(5, 8), birth=(5, 8))
+    # B5/S45 needs a sparse start (RULES_3D_DENSITY['3d-life']=0.2); at density 0.5
+    # every cell has far more than 5 live neighbours and the soup dies in one step.
+    # Seed 42 keeps the soup nontrivial across all HORIZONS_3D (seed 11 dies by T=60).
+    records, period_scores, candidates = run_3d_stabilization(
+        survive=(4, 5), birth=(5, 5), density=0.2, seed=42
+    )
     all_records.extend(records)
     period_score_tables.extend(period_scores)
     candidate_tables.extend(candidates)
@@ -551,7 +558,7 @@ def main() -> None:
                 "horizons": HORIZONS,
             },
             "3D": {
-                "rules": ["diamoeba3d"],
+                "rules": ["3d-life"],
                 "grid_size": [16, 16, 16],
                 "density": 0.5,
                 "seed": 11,

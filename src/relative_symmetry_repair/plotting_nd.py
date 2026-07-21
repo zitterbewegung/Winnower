@@ -67,12 +67,12 @@ def plot_2d_decomposition(
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
     axes[0].imshow(source[t], interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
-    axes[0].set_title(f"{title_prefix}source t={t}")
+    axes[0].set_title(f"{title_prefix}observed t={t}")
     axes[1].imshow(fit.background[t], interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
     shift_str = ",".join(str(s) for s in fit.shift)
-    axes[1].set_title(f"{title_prefix}background\ns=({shift_str}), p={fit.period}")
+    axes[1].set_title(f"{title_prefix}domain template\ns=({shift_str}), p={fit.period}")
     axes[2].imshow(fit.defect_mask[t].astype(np.uint8), interpolation="nearest", cmap=DEFECT_CMAP, vmin=0, vmax=1)
-    axes[2].set_title(f"{title_prefix}residual\nrate={fit.defect_rate:.3f}")
+    axes[2].set_title(f"{title_prefix}defect mask\nrate={fit.defect_rate:.3f}")
     for ax in axes:
         ax.set_xticks([])
         ax.set_yticks([])
@@ -139,12 +139,12 @@ def plot_3d_decomposition(
 
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
     axes[0].imshow(source[t, z], interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
-    axes[0].set_title(f"{title_prefix}source t={t},z={z}")
+    axes[0].set_title(f"{title_prefix}observed t={t},z={z}")
     axes[1].imshow(fit.background[t, z], interpolation="nearest", cmap=BINARY_CMAP, vmin=0, vmax=1)
     shift_str = ",".join(str(s) for s in fit.shift)
-    axes[1].set_title(f"{title_prefix}background\ns=({shift_str}), p={fit.period}")
+    axes[1].set_title(f"{title_prefix}domain template\ns=({shift_str}), p={fit.period}")
     axes[2].imshow(fit.defect_mask[t, z].astype(np.uint8), interpolation="nearest", cmap=DEFECT_CMAP, vmin=0, vmax=1)
-    axes[2].set_title(f"{title_prefix}residual\nrate={fit.defect_rate:.3f}")
+    axes[2].set_title(f"{title_prefix}defect mask\nrate={fit.defect_rate:.3f}")
     for ax in axes:
         ax.set_xticks([])
         ax.set_yticks([])
@@ -241,7 +241,7 @@ def plot_3d_volume_decomposition(
         linewidth=0.25,
         shade=True,
     )
-    axes[0].set_title(f"{title_prefix}source  t={time_index}")
+    axes[0].set_title(f"{title_prefix}observed  t={time_index}")
 
     axes[1].voxels(
         bg_filled,
@@ -251,7 +251,7 @@ def plot_3d_volume_decomposition(
         shade=True,
     )
     shift_str = ",".join(str(s) for s in fit.shift)
-    axes[1].set_title(f"{title_prefix}background\ns=({shift_str}), p={fit.period}")
+    axes[1].set_title(f"{title_prefix}domain template\ns=({shift_str}), p={fit.period}")
 
     bg_overlay_color = (0.30, 0.30, 0.30, background_alpha)
     if bg_filled.any():
@@ -271,14 +271,14 @@ def plot_3d_volume_decomposition(
             shade=True,
         )
     axes[2].set_title(
-        f"{title_prefix}residual (overlay)\n"
+        f"{title_prefix}defect mask (overlay)\n"
         f"rate={fit.defect_rate:.3f}  ({fit.defect_sites}/{fit.total_sites} cells)"
     )
 
     legend_handles = [
         Patch(facecolor=ONE_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="live cell"),
         Patch(facecolor=DEFECT_COLOR, edgecolor=LEGEND_EDGE_COLOR, label="defect"),
-        Patch(facecolor=bg_overlay_color, edgecolor=LEGEND_EDGE_COLOR, label="background (overlay)"),
+        Patch(facecolor=bg_overlay_color, edgecolor=LEGEND_EDGE_COLOR, label="template (overlay)"),
     ]
     axes[2].legend(
         handles=legend_handles,
