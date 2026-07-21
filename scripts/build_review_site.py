@@ -242,7 +242,7 @@ CONTRIBUTIONS = [
     ("Linear-time background fitting",
      "Majority vote on orbit classes: one pass over the data per candidate (period, shift), which is what makes whole-catalog 1D/2D/3D surveys practical."),
     ("Complexity-aware selection via Bernoulli NML",
-     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested); supporting math lives in the repo's theory notes, with Lean artifacts at documented completeness."),
+     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact six-way equivalence — velocity-matched divisibility is necessary as well as sufficient for universal improvement — machine-checked in Lean with public CI."),
 ]
 
 LIMITATIONS = [
@@ -258,7 +258,7 @@ REPRO_STEPS = [
     ("Run the full experiment suite", "make data",
      "Null controls, seed stability, range robustness, LifeWiki survey, ECA atlas, 3D survey, counterexample stress tests. ~30–60 min. Deterministic (base seed 11); outputs land in outputs/alife_2026/."),
     ("Regenerate figures", "make figures", "Rule diagrams, mechanism panels, algorithm figure, stabilization summary."),
-    ("Run the test suite", "make test", "333 tests covering simulators, fitting, scoring, and selection."),
+    ("Run the test suite", "make test", "364 tests covering simulators, fitting, scoring, selection, and the theory notes (including an exhaustive refinement-equivalence check)."),
     ("Rebuild the paper", "make paper", "Compiles paper/paper_alife2026.tex."),
     ("Rebuild this page", "python scripts/build_review_site.py", "Regenerates review_site/index.html from the current outputs."),
     ("Try a single rule interactively",
@@ -276,7 +276,7 @@ REPO_MAP = [
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
     ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
     ("proofs/", "Lean 4 artifacts at documented completeness: machine-checked proofs of majority-vote optimality, the six-way refinement/monotonicity equivalence, and the stabilization core in the default build (public CI); the rest labeled drafts — see proofs/README.md."),
-    ("tests/", "333-test suite."),
+    ("tests/", "364-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
 ]
 
@@ -774,7 +774,8 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   status, why it holds, what was weakened relative to earlier drafts, and what remains
   open. The supporting properties additionally have Lean 4 artifacts under
   <code>proofs/</code> at documented levels of completeness — the majority-vote
-  optimality theorem and the stabilization core are machine-checked in the
+  optimality theorem, the six-way refinement/monotonicity equivalence (including
+  its necessity direction), and the stabilization core are machine-checked in the
   default build with public CI, the rest are clearly-labeled drafts (see
   <code>proofs/README.md</code> for the per-file inventory). The math is supporting
   material for the tool; the paper's claims rest on the experiments and the
