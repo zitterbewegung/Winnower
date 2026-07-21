@@ -69,6 +69,18 @@ precise justification for Winnower's complexity penalty, and it is
 reproducible and inspectable in the tool's live web companion.
 \end{abstract}
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{selector_ablation_tikz.pdf}
+    \caption{Why the boundary matters in practice. On the 105 non-degenerate
+    Life-like rules at horizon $T{=}100$, selecting by fit alone (raw residual
+    count, or plain $\NLL$) is pulled to the largest scanned period --- the
+    inflation the theorem predicts along every velocity-matched chain --- while
+    the complexity-penalized score (Bernoulli NML) concentrates at low period.
+    Plain $\NLL$ selects the maximum period for \emph{all} 105 rules.}
+    \label{fig:ablation}
+\end{figure}
+
 \section{Introduction}
 Cellular automata routinely settle into broad periodic domains threaded with
 defects, interfaces, and particle-like activity. For artificial life those
@@ -128,18 +140,6 @@ fixed by its value at one point. Divisibility is thus the exact frontier of
 the guaranteed-improvement regime --- on one side longer periods always win, on
 the other the data can always punish them --- and hence exactly the set of
 comparisons Winnower's penalty must neutralize.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.99\linewidth]{selector_ablation_tikz.pdf}
-    \caption{Why the boundary matters in practice. On the 105 non-degenerate
-    Life-like rules at horizon $T{=}100$, selecting by fit alone (raw residual
-    count, or plain $\NLL$) is pulled to the largest scanned period --- the
-    inflation the theorem predicts along every velocity-matched chain --- while
-    the complexity-penalized score (Bernoulli NML) concentrates at low period.
-    Plain $\NLL$ selects the maximum period for \emph{all} 105 rules.}
-    \label{fig:ablation}
-\end{figure}
 
 \section{Machine-Checked, and Reproducible in the Tool}
 We treat a claim as verified only when Lean's kernel accepts it. The full
