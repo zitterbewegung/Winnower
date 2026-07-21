@@ -2,7 +2,7 @@ name: Lean proof check
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/scientific-evaluation-interface-awe5sw]
     paths:
       - "proofs/**"
       - ".github/workflows/lean-verify.yml"
@@ -32,5 +32,6 @@ jobs:
       - name: Check built targets are placeholder-free
         run: |
           # The default build covers Verify/Basic.lean, Verify/Theorem1.lean,
-          # Verify/Theorem3.lean, Main.lean. Fail if any contains a placeholder.
-          ! grep -nE "sorry|admit|exact\?" Verify/Basic.lean Verify/Theorem1.lean Verify/Theorem3.lean Main.lean Verify.lean
+          # Verify/Theorem2.lean, Verify/Theorem3.lean, Main.lean. Fail if any
+          # contains a placeholder.
+          ! grep -nE "sorry|admit|exact\?" Verify/Basic.lean Verify/Theorem1.lean Verify/Theorem2.lean Verify/Theorem3.lean Main.lean Verify.lean

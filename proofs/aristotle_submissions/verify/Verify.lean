@@ -2,11 +2,11 @@
 -- Import modules here that should be built as part of the library.
 import Verify.Basic
 import Verify.Theorem1
+import Verify.Theorem2
 import Verify.Theorem3
 
 -- Standalone theorem drafts that are not yet part of the default build live in:
 --   Verify/Corollary.lean
---   Verify/Theorem2.lean
 --   Verify/Theorem5.lean
 --
 -- They are not imported here yet because they are generated drafts that still
