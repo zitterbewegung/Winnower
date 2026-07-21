@@ -66,6 +66,18 @@ candidate particles and coherent structures for subsequent local analysis.
 Data and code: \url{https://github.com/zitterbewegung/Winnower}.
 \end{abstract}
 
+\begin{figure*}[t!]
+    \centering
+    \includegraphics[width=0.99\textwidth]{algorithm_nml.png}
+    \caption{Winnower's relative-periodic domain-inference pipeline. For each
+    candidate temporal period and lattice displacement $(p,\bs)$, the observed
+    CA space--time block is partitioned into translation orbits. The majority
+    cell state on each orbit defines the candidate domain template, its mismatch
+    defines the domain residual, and Bernoulli NML selects the lowest-scoring
+    symmetry by balancing fit against model complexity.}
+    \label{fig:winnower-pipeline}
+\end{figure*}
+
 \section{Introduction}
 A cellular automaton (CA) evolves a lattice configuration by synchronously
 applying a local update rule at every site; iteration produces a space--time
@@ -108,18 +120,6 @@ complexity of the independent translation-orbit models
 
 The complete inference pipeline is summarized in
 \cref{fig:winnower-pipeline}.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.99\textwidth]{algorithm_nml.png}
-    \caption{Winnower's relative-periodic domain-inference pipeline. For each
-    candidate temporal period and lattice displacement $(p,\bs)$, the observed
-    CA space--time block is partitioned into translation orbits. The majority
-    cell state on each orbit defines the candidate domain template, its mismatch
-    defines the domain residual, and Bernoulli NML selects the lowest-scoring
-    symmetry by balancing fit against model complexity.}
-    \label{fig:winnower-pipeline}
-\end{figure*}
 
 The penalty is essential. A velocity-matched longer-period candidate refines
 the translation-orbit partition of its shorter-period counterpart, so it can
