@@ -84,8 +84,8 @@ Given a binary spacetime $U$, a shift $\bs$, and a period $p$, Winnower fits
 backgrounds satisfying $B[t{+}p,\,\mathbf{x}{+}\bs \bmod \bD]=B[t,\mathbf{x}]$.
 The corresponding space-time translation partitions the observations into orbit
 classes $\{O_j\}$; each class is given its majority symbol, so fitting is a
-collection of independent binary votes and costs one linear pass per candidate.
-Candidates are ranked by the Bernoulli NML score
+collection of independent binary votes and costs one linear pass per candidate
+(\cref{fig:algo}). Candidates are ranked by the Bernoulli NML score
 %
 \begin{equation}
 \NML(p,\bs)=\sum_j n_j\,\Hb(\hat\theta_j)\;+\;\tfrac12\sum_j \log_2 n_j ,
@@ -109,15 +109,17 @@ gap dominates the logarithmic penalty, so the lowest-rate candidate is selected
 and the choice locks; after a finite transient the smallest true period is
 recovered.
 
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=0.99\linewidth]{selector_ablation_tikz.pdf}
-    \caption{Selector ablation on 105 nontrivial Life-like rules at $T{=}100$.
-    Raw residual minimization and plain NLL are pulled to the largest scanned
-    period; Bernoulli NML instead concentrates at low period (97 rules at
-    period~1), the inflation-control the refinement argument predicts.}
-    \label{fig:ablation}
-\end{figure}
+    \includegraphics[width=\textwidth]{algorithm_nml.png}
+    \caption{The Winnower pipeline. A candidate period/shift pair
+    $(p,\bs)$ groups spacetime cells into orbit classes; an orbit-wise
+    majority vote yields the best-fitting periodic background $B^{*}$ and the
+    residual mask $M=U\oplus B^{*}$; candidates are then ranked by the
+    Bernoulli NML score (fit plus complexity penalty), and the lowest-scoring
+    period is selected.}
+    \label{fig:algo}
+\end{figure*}
 
 \section{Experiments}
 Winnower was evaluated on 1D elementary CA (rules 30, 54, 110), broad Life-like
@@ -127,9 +129,8 @@ period~1) or pass through short transients before settling (rules~110 and
 S24/B11), and in every case the winning margin grows after the final
 transition; every tested rule made at most two transitions before locking. The
 complexity penalty is what makes this work: scoring the same families by raw
-residual, by NLL, and by NML, only NML avoids period inflation
-(\cref{fig:ablation}) --- plain NLL picks the largest period for all 105
-rules. Finally, the residual is not noise: an entropy-rate comparison shows the
+residual, by NLL, and by NML, only NML avoids period inflation --- plain NLL
+picks the largest period for all 105 rules. Finally, the residual is not noise: an entropy-rate comparison shows the
 background captures the predictable component while the residual retains
 structured uncertainty, and 2D rules such as S37/B11 leave residual
 populations that persist and scale with grid size --- the localized activity
