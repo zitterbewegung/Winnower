@@ -404,6 +404,14 @@ across horizons: B017/S01 climbs from period~2 to period~4; Serviettes
 rules (Bacteria, Invertamaze, LowLife, Maze with Mice, Mazectric with
 Mice, Snakeskin) reveal period-2 organization only at longer horizons.
 Fredkin (B1357/S02468) is the only named rule that reaches period~8.
+Although Fredkin is often described as a parity rule that negates every
+cell each step, it does not produce exact negation on the $64\times64$
+torus --- the empirical match rate between $U[t]$ and $\neg U[t{-}1]$ is
+only about 50\%. The period-8 orbit-class partition instead captures
+fine-grained temporal structure that coarser periods miss (NML drops
+from $415{,}361$ bits at $p{=}1$ to $396{,}557$ at $p{=}8$); we expect
+this to be a finite-size effect that may change at larger grids or
+longer horizons.
 Some rules sit near the decision boundary across seeds --- Diamoeba,
 for instance, stays at modal period~1 while one of five seeds moves to
 period~2 at $T \geq 400$ --- and the released per-seed tables expose
