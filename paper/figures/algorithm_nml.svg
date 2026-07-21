@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 710" font-family="Helvetica, Arial, sans-serif">
+<rect width="2000" height="710" fill="#ffffff"/>
+<text x="1000.0" y="58" font-family="Helvetica, Arial, sans-serif" font-size="44" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Relative-periodic domain selection by Bernoulli NML</text>
+<rect x="30" y="98" width="464" height="592" rx="10" fill="#fff" stroke="#d7d7d7" stroke-width="2"/>
+<rect x="522" y="98" width="464" height="592" rx="10" fill="#fff" stroke="#d7d7d7" stroke-width="2"/>
+<rect x="1014" y="98" width="464" height="592" rx="10" fill="#fff" stroke="#d7d7d7" stroke-width="2"/>
+<rect x="1506" y="98" width="464" height="592" rx="10" fill="#fff" stroke="#d7d7d7" stroke-width="2"/>
+<circle cx="82" cy="168" r="23" fill="#2b6cb0"/>
+<text x="82" y="177" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">1</text>
+<text x="276.0" y="158" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Observed</text>
+<text x="276.0" y="198" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">spacetime</text>
+<text x="262.0" y="246" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Choose candidate (<tspan font-style="italic">p</tspan>, <tspan font-style="italic">s</tspan>).</text>
+<text x="262.0" y="284" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Example: <tspan font-style="italic">p</tspan> = 2, <tspan font-style="italic">s</tspan> = 1.</text>
+<text x="262.0" y="336" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#333" font-weight="normal" font-style="italic" text-anchor="middle">x</text>
+<rect x="142.0" y="352" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="182.0" y="352" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="222.0" y="352" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="262.0" y="352" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="302.0" y="352" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="342.0" y="352" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="142.0" y="392" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="182.0" y="392" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="222.0" y="392" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="262.0" y="392" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="302.0" y="392" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="342.0" y="392" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="142.0" y="432" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="182.0" y="432" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="222.0" y="432" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="262.0" y="432" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="302.0" y="432" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="342.0" y="432" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="142.0" y="472" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="182.0" y="472" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="222.0" y="472" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="262.0" y="472" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="302.0" y="472" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="342.0" y="472" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="142.0" y="512" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="182.0" y="512" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="222.0" y="512" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="262.0" y="512" width="40" height="40" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="302.0" y="512" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="342.0" y="512" width="40" height="40" fill="#fff" stroke="#999" stroke-width="1"/>
+<text x="262.0" y="646" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Raw CA spacetime to explain.</text>
+<circle cx="584" cy="152" r="23" fill="#2b6cb0"/>
+<text x="584" y="161" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">2</text>
+<text x="774.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Orbit classes</text>
+<text x="754.0" y="216" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Apply (<tspan font-style="italic">t</tspan>,<tspan font-style="italic">x</tspan>) ↦ (<tspan font-style="italic">t</tspan>+<tspan font-style="italic">p</tspan>, <tspan font-style="italic">x</tspan>+<tspan font-style="italic">s</tspan>).</text>
+<text x="754.0" y="254" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Same color = same orbit.</text>
+<rect x="634.0" y="320" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="654.0" y="348.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="674.0" y="320" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="694.0" y="348.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="714.0" y="320" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="734.0" y="348.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="754.0" y="320" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="774.0" y="348.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="794.0" y="320" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="814.0" y="348.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="834.0" y="320" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="854.0" y="348.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="634.0" y="360" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="654.0" y="388.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="674.0" y="360" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="694.0" y="388.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="714.0" y="360" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="734.0" y="388.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="754.0" y="360" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="774.0" y="388.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="794.0" y="360" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="814.0" y="388.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="834.0" y="360" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="854.0" y="388.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="634.0" y="400" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="654.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="674.0" y="400" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="694.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="714.0" y="400" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="734.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="754.0" y="400" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="774.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="794.0" y="400" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="814.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="834.0" y="400" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="854.0" y="428.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="634.0" y="440" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="654.0" y="468.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="674.0" y="440" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="694.0" y="468.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="714.0" y="440" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="734.0" y="468.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="754.0" y="440" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="774.0" y="468.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="794.0" y="440" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="814.0" y="468.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="834.0" y="440" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="854.0" y="468.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="634.0" y="480" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="654.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="674.0" y="480" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="694.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<rect x="714.0" y="480" width="40" height="40" fill="#d8efd8" stroke="#fff" stroke-width="3"/>
+<text x="734.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<rect x="754.0" y="480" width="40" height="40" fill="#e7dcf1" stroke="#fff" stroke-width="3"/>
+<text x="774.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">4</text>
+<rect x="794.0" y="480" width="40" height="40" fill="#cfe0f5" stroke="#fff" stroke-width="3"/>
+<text x="814.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<rect x="834.0" y="480" width="40" height="40" fill="#fbe3c8" stroke="#fff" stroke-width="3"/>
+<text x="854.0" y="508.0" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#445" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<text x="754.0" y="616" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Each orbit contributes one</text>
+<text x="754.0" y="652" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">background bit.</text>
+<circle cx="1072" cy="152" r="23" fill="#2b6cb0"/>
+<text x="1072" y="161" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">3</text>
+<text x="1270.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Majority-vote fit</text>
+<text x="1246.0" y="212" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Count ones and zeros in each</text>
+<text x="1246.0" y="248" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">orbit.</text>
+<text x="1246.0" y="286" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Choose the majority bit.</text>
+<rect x="1054" y="330" width="210" height="242" fill="none" stroke="#333" stroke-width="2"/>
+<line x1="1154" y1="330" x2="1154" y2="572" stroke="#333" stroke-width="2"/>
+<line x1="1054" y1="434" x2="1264" y2="434" stroke="#333" stroke-width="2"/>
+<line x1="1054" y1="480" x2="1264" y2="480" stroke="#333" stroke-width="2"/>
+<line x1="1054" y1="526" x2="1264" y2="526" stroke="#333" stroke-width="2"/>
+<text x="1104.0" y="391.0" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">orbit</text>
+<text x="1209.0" y="364" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">ones</text>
+<text x="1209.0" y="392" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">/</text>
+<text x="1209.0" y="420" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">zeros</text>
+<text x="1104.0" y="466.0" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">1</text>
+<text x="1209.0" y="466.0" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">5 / 1</text>
+<text x="1104.0" y="512.0" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">2</text>
+<text x="1209.0" y="512.0" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">1 / 5</text>
+<text x="1104.0" y="558.0" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">3</text>
+<text x="1209.0" y="558.0" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">4 / 2</text>
+<text x="1298" y="488" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#2b6cb0" font-weight="normal" font-style="normal" text-anchor="middle">→</text>
+<text x="1396.0" y="394" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#2b6cb0" font-weight="bold" font-style="normal" text-anchor="middle">Output</text>
+<rect x="1326" y="410" width="140" height="120" rx="12" fill="none" stroke="#333" stroke-width="2"/>
+<text x="1396.0" y="452" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">one bit</text>
+<text x="1396.0" y="482" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">per</text>
+<text x="1396.0" y="512" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">orbit</text>
+<text x="1246.0" y="652" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Residual mask: <tspan font-style="italic">M</tspan> = <tspan font-style="italic">U</tspan> ⊕ <tspan font-style="italic">B</tspan>*.</text>
+<circle cx="1564" cy="152" r="23" fill="#2b6cb0"/>
+<text x="1564" y="161" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#fff" font-weight="bold" font-style="normal" text-anchor="middle">4</text>
+<text x="1762.0" y="162" font-family="Helvetica, Arial, sans-serif" font-size="34" fill="#1a1a1a" font-weight="bold" font-style="normal" text-anchor="middle">Score and select</text>
+<text x="1738.0" y="212" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">NML = fit + penalty.</text>
+<text x="1738.0" y="250" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Keep the best period.</text>
+<text x="1624" y="382" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#1a1a1a" font-weight="normal" font-style="normal" text-anchor="middle"><tspan font-style="italic">B</tspan>*(<tspan font-style="italic">p</tspan>,<tspan font-style="italic">s</tspan>)</text>
+<rect x="1560" y="398" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1592" y="398" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1624" y="398" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1656" y="398" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1560" y="430" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1592" y="430" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1624" y="430" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1656" y="430" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1560" y="462" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1592" y="462" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1624" y="462" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1656" y="462" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1560" y="494" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1592" y="494" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<rect x="1624" y="494" width="32" height="32" fill="#111" stroke="#999" stroke-width="1"/>
+<rect x="1656" y="494" width="32" height="32" fill="#fff" stroke="#999" stroke-width="1"/>
+<text x="1828" y="304" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#2b6cb0" font-weight="bold" font-style="normal" text-anchor="middle">Fit</text>
+<text x="1828" y="344" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#1a1a1a" font-weight="normal" font-style="normal" text-anchor="middle">Σ<tspan font-size="18" dy="7">j</tspan><tspan dy="-7">​</tspan> <tspan font-style="italic">n</tspan><tspan font-size="18" dy="7"><tspan font-style="italic">j</tspan></tspan><tspan dy="-7">​</tspan><tspan font-style="italic">H</tspan><tspan font-size="18" dy="7">b</tspan><tspan dy="-7">​</tspan>(<tspan font-style="italic">θ</tspan><tspan dy="-11" dx="-14" font-size="18">ˆ</tspan><tspan dy="11" dx="11">​</tspan><tspan font-size="18" dy="7"><tspan font-style="italic">j</tspan></tspan><tspan dy="-7">​</tspan>)</text>
+<text x="1828" y="384" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#2b6cb0" font-weight="normal" font-style="normal" text-anchor="middle">↓</text>
+<text x="1828" y="424" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#2b6cb0" font-weight="bold" font-style="normal" text-anchor="middle">Penalty</text>
+<text x="1828" y="464" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#1a1a1a" font-weight="normal" font-style="normal" text-anchor="middle">½ Σ<tspan font-size="18" dy="7">j</tspan><tspan dy="-7">​</tspan> log<tspan font-size="18" dy="7">2</tspan><tspan dy="-7">​</tspan> <tspan font-style="italic">n</tspan><tspan font-size="18" dy="7"><tspan font-style="italic">j</tspan></tspan><tspan dy="-7">​</tspan></text>
+<text x="1828" y="504" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#2b6cb0" font-weight="normal" font-style="normal" text-anchor="middle">↓</text>
+<text x="1828" y="544" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#2b6cb0" font-weight="bold" font-style="normal" text-anchor="middle">Select</text>
+<text x="1828" y="582" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#1a1a1a" font-weight="normal" font-style="normal" text-anchor="middle">Lowest NML wins.</text>
+<text x="1738.0" y="632" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">Output: periodic background +</text>
+<text x="1738.0" y="666" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#333" font-weight="normal" font-style="normal" text-anchor="middle">residual.</text>
+</svg>
