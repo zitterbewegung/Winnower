@@ -272,7 +272,7 @@ def combined_eca_figure(out_path: Path) -> None:
                 # with an arrow to the transition point, so it never overlaps
                 # the data line or the axis ticks.
                 axm.annotate("period\nchanges", xy=(T[k], M[k]),
-                             xycoords="data", xytext=(0.5, 0.55),
+                             xycoords="data", xytext=(0.82, 0.42),
                              textcoords="axes fraction", ha="center", va="center",
                              fontsize=7, color=style.SECONDARY_COLOR,
                              arrowprops=dict(arrowstyle="->",
