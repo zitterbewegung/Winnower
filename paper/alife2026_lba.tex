@@ -67,16 +67,15 @@ Data and code: \url{https://github.com/zitterbewegung/Winnower}.
 Cellular automata (CA) generate space-time patterns in which large regular
 domains coexist with defects, particles, and interfaces. In artificial life
 these domains matter because they are the substrate on which information
-transmission, coherent structures, and emergent computation become visible
-\citep{hanson1992,crutchfield1997}. A practical question follows: given a
+transmission, coherent structures, and emergent computation become visible. A practical question follows: given a
 finite CA space-time, what is the simplest global periodic organization that
 best explains it, and what structured residual remains once it is removed?
 
 Existing approaches optimize different objectives. Computational mechanics and
 local causal-state methods reconstruct local structure in detail
-\citep{crutchfield1997,hanson1992,rupe2018,shalizi2006,rupe2024}, while survey-
+\citep{rupe2024}, while survey-
 and compression-based traditions classify rules globally and by scale
-\citep{packard1985,boccara1999,zenil2010,vispoel2022,rollier2024,hudcova2021,alfaro2024,cisneros2023}.
+\citep{vispoel2022,rollier2024,hudcova2021,alfaro2024,cisneros2023}.
 Winnower aims at a middle ground: a global, complexity-penalized selector for
 periodic templates, fast enough for wide scans.
 
@@ -95,7 +94,7 @@ Candidates are ranked by the Bernoulli NML score
 %
 with $n_j=|O_j|$, $\hat\theta_j=n_j^{(1)}/n_j$, and $\Hb$ the binary entropy:
 a Bernoulli negative log-likelihood (NLL) fit term plus the asymptotic NML
-complexity of independent Bernoulli classes \citep{shtarkov1987,grunwald2007,yamanishi2023}.
+complexity of independent Bernoulli classes \citep{yamanishi2023}.
 
 The penalty is essential. When a longer period is a velocity-matched multiple
 of a shorter one, its orbit partition \emph{refines} the shorter one, so it can
@@ -122,7 +121,7 @@ recovered.
 
 \section{Experiments}
 Winnower was evaluated on 1D elementary CA (rules 30, 54, 110), broad Life-like
-and totalistic 2D surveys, and a 3D totalistic rule \citep{bays1987,bays2006}.
+and totalistic 2D surveys, and a 3D totalistic rule.
 Selected periods either lock immediately (rule~54 at period~4; the 3D rule at
 period~1) or pass through short transients before settling (rules~110 and
 S24/B11), and in every case the winning margin grows after the final
@@ -135,14 +134,14 @@ background captures the predictable component while the residual retains
 structured uncertainty, and 2D rules such as S37/B11 leave residual
 populations that persist and scale with grid size --- the localized activity
 that glider and coherent-structure detectors target
-\citep{secktuohmora2023,shalizi2006,crutchfield1997}.
+\citep{secktuohmora2023}.
 
 \section{Discussion and Conclusion}
 Winnower turns periodic-domain selection into a concrete model-selection
 problem: orbit classes make background fitting fast, and the NML score explains
 both why unpenalized selectors overfit and why the penalized selector locks. It
 does not replace local causal-state reconstruction
-\citep{rupe2018,rupe2024,rupe2025} and makes no claim that the selected period
+\citep{rupe2024,rupe2025} and makes no claim that the selected period
 is always ``true''; it offers a compact domain hypothesis, a residual mask, and
 a principled comparison across large rule families, and the same front-end role
 extends to modern continuous and learned substrates
@@ -170,44 +169,15 @@ Alfaro, G. and Sanju{\'a}n, M. A.~F. (2024).
 Classification of cellular automata based on the {H}amming distance.
 \emph{Chaos}, 34(8):083129.
 
-\bibitem[Bays, 1987]{bays1987}
-Bays, C. (1987).
-Candidates for the game of life in three dimensions.
-\emph{Complex Systems}, 1(3):373--400.
-
-\bibitem[Bays, 2006]{bays2006}
-Bays, C. (2006).
-A note about the discovery of many new rules for the game of three-dimensional life.
-\emph{Complex Systems}, 16:381--386.
-
-\bibitem[Boccara and Roger, 1999]{boccara1999}
-Boccara, N. and Roger, M. (1999).
-Totalistic two-dimensional cellular automata exhibiting global periodic behavior.
-\emph{International Journal of Modern Physics C}, 10(6):1051--1066.
-
 \bibitem[Cisneros, 2023]{cisneros2023}
 Cisneros, H. (2023).
 \emph{Unsupervised Learning in Complex Systems}.
 PhD thesis; arXiv:2307.10993.
 
-\bibitem[Crutchfield and Hanson, 1997]{crutchfield1997}
-Crutchfield, J.~P. and Hanson, J.~E. (1997).
-Computational mechanics of cellular automata: An example.
-\emph{Physica D}, 103:169--189.
-
-\bibitem[Gr{\"u}nwald, 2007]{grunwald2007}
-Gr{\"u}nwald, P. (2007).
-\emph{The Minimum Description Length Principle}. MIT Press.
-
 \bibitem[Hamon et al., 2024]{hamon2024}
 Hamon, G., Etcheverry, M., Chan, B. W.-C., Moulin-Frier, C., and Oudeyer, P.-Y. (2024).
 Discovering sensorimotor agency in cellular automata using diversity search.
 \emph{Science Advances}, 10:eadp0834.
-
-\bibitem[Hanson and Crutchfield, 1992]{hanson1992}
-Hanson, J.~E. and Crutchfield, J.~P. (1992).
-The attractor-basin portrait of a cellular automaton.
-\emph{Journal of Statistical Physics}, 66:1415--1462.
 
 \bibitem[Hudcov{\'a} and Mikolov, 2021]{hudcova2021}
 Hudcov{\'a}, B. and Mikolov, T. (2021).
@@ -219,11 +189,6 @@ Niklasson, E., Mordvintsev, A., Randazzo, E., and Levin, M. (2021).
 Self-organising textures.
 \emph{Distill}, 6(2).
 
-\bibitem[Packard and Wolfram, 1985]{packard1985}
-Packard, N.~H. and Wolfram, S. (1985).
-Two-dimensional cellular automata.
-\emph{Journal of Statistical Physics}, 38:901--946.
-
 \bibitem[Plantec et al., 2025]{plantec2025}
 Plantec, E., Hamon, G., Etcheverry, M., Oudeyer, P.-Y., Moulin-Frier, C., and Chan, B. W.-C. (2025).
 Flow-{L}enia: Emergent evolutionary dynamics in mass conservative continuous cellular automata.
@@ -233,11 +198,6 @@ Flow-{L}enia: Emergent evolutionary dynamics in mass conservative continuous cel
 Rollier, M., Zielinski, K. M.~C., Daly, A.~J., Bruno, O.~M., and Baetens, J.~M. (2024).
 A comprehensive taxonomy of cellular automata.
 \emph{Communications in Nonlinear Science and Numerical Simulation}. arXiv:2401.08408.
-
-\bibitem[Rupe and Crutchfield, 2018]{rupe2018}
-Rupe, A. and Crutchfield, J.~P. (2018).
-Local causal states and discrete coherent structures.
-\emph{Chaos}, 28:075312.
 
 \bibitem[Rupe and Crutchfield, 2024]{rupe2024}
 Rupe, A. and Crutchfield, J.~P. (2024).
@@ -255,16 +215,6 @@ Seck-Tuoh-Mora, J.~C., Medina-Marin, J., Hern{\'a}ndez-Romero, N., and Mart{\'i}
 Mean-field analysis with random perturbations to detect gliders in cellular automata.
 \emph{Mathematics}, 11(20):4319.
 
-\bibitem[Shalizi et al., 2006]{shalizi2006}
-Shalizi, C.~R., Haslinger, R., Rouquier, J.-B., Klinkner, K.~L., and Moore, C. (2006).
-Automatic filters for the detection of coherent structure in spatiotemporal systems.
-\emph{Physical Review E}, 73:036104.
-
-\bibitem[Shtarkov, 1987]{shtarkov1987}
-Shtarkov, Y.~M. (1987).
-Universal sequential coding of single messages.
-\emph{Problems of Information Transmission}, 23:3--17.
-
 \bibitem[Vispoel et al., 2022]{vispoel2022}
 Vispoel, M., Daly, A.~J., and Baetens, J.~M. (2022).
 Progress, gaps and obstacles in the classification of cellular automata.
@@ -273,11 +223,6 @@ Progress, gaps and obstacles in the classification of cellular automata.
 \bibitem[Yamanishi, 2023]{yamanishi2023}
 Yamanishi, K. (2023).
 \emph{Learning with the Minimum Description Length Principle}. Springer.
-
-\bibitem[Zenil, 2010]{zenil2010}
-Zenil, H. (2010).
-Compression-based investigation of the dynamical properties of cellular automata and other systems.
-\emph{Complex Systems}, 19(1):1--28.
 
 \end{thebibliography}
 
