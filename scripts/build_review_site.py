@@ -242,7 +242,7 @@ CONTRIBUTIONS = [
     ("Linear-time background fitting",
      "Majority vote on orbit classes: one pass over the data per candidate (period, shift), which is what makes whole-catalog 1D/2D/3D surveys practical."),
     ("Complexity-aware selection via Bernoulli NML",
-     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact six-way equivalence — velocity-matched divisibility is necessary as well as sufficient for universal improvement — machine-checked in Lean with public CI."),
+     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact characterization — velocity-matched divisibility is necessary as well as sufficient for universal improvement — proved directly and confirmed by an exhaustive test."),
 ]
 
 LIMITATIONS = [
@@ -268,7 +268,7 @@ REPRO_STEPS = [
 
 REPO_MAP = [
     ("paper/paper_alife2026.pdf", "The submission PDF."),
-    ("paper/alife2026_lba.pdf", "ALIFE 2026 late-breaking abstract (2 pages): the machine-checked period-inflation characterization."),
+    ("paper/alife2026_lba.pdf", "ALIFE 2026 late-breaking abstract (2 pages): the component view of the tool and the exact period-inflation characterization."),
     ("paper/paper_alife2026.tex", "LaTeX source; figures pulled from outputs/."),
     ("docs/CLAIM_LEDGER.md", "Claim-by-claim audit: status, caveats, what remains."),
     ("docs/THEORY_NOTE.md", "Extended theory notes."),
@@ -276,7 +276,7 @@ REPO_MAP = [
     ("scripts/alife/alife_run_all.py", "One-shot driver for every experiment in the paper."),
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
     ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
-    ("proofs/", "Lean 4 artifacts at documented completeness: machine-checked proofs of majority-vote optimality, the six-way refinement/monotonicity equivalence, and the stabilization core in the default build (public CI); the rest labeled drafts — see proofs/README.md."),
+    ("proofs/", "Lean 4 proof artifacts (supporting material at documented completeness; see proofs/README.md). The paper's claims rest on the experiments and the reproducible pipeline, not on these artifacts."),
     ("tests/", "364-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
 ]
@@ -772,20 +772,22 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 
 <section id="latebreaking">
   <h2>Late-breaking abstract — ALIFE 2026</h2>
-  <p><strong>The exact boundary of period inflation: a machine-checked
-  characterization for the Winnower CA background detector.</strong>
+  <p><strong>Inside Winnower: component semantics of CA background
+  decomposition, and the exact boundary of period inflation.</strong>
   A two-page late-breaking abstract prepared for
   <a href="https://2026.alife.org/" target="_blank" rel="noopener">ALIFE 2026</a>
   (Waterloo, Ontario, Canada, August 17&ndash;21, 2026 &mdash; theme
-  &ldquo;Living and Life-like Complex Adaptive Systems&rdquo;). The
-  late-breaking track accepts work in progress in a
-  <em>maximum of 2 pages excluding references</em>; accepted abstracts are
-  presented as posters and are not included in the proceedings
-  (submissions due July&nbsp;20, 2026 AoE; notification July&nbsp;27, 2026).</p>
+  &ldquo;Living and Life-like Complex Adaptive Systems&rdquo;). It gives a
+  component view of the tool &mdash; each pipeline stage a diagram element with
+  an explicit semantic role &mdash; and an exact characterization of when the
+  selector's complexity penalty is needed. The late-breaking track accepts
+  work in progress in a <em>maximum of 2 pages excluding references</em>;
+  accepted abstracts are presented as posters and are not included in the
+  proceedings (submissions due July&nbsp;20, 2026 AoE; notification
+  July&nbsp;27, 2026).</p>
   <div class="links">
     <a href="{lba_href}" target="_blank" rel="noopener">Open the late-breaking abstract (PDF, 2 pages)</a>
-    <a href="https://github.com/zitterbewegung/Winnower/blob/main/proofs/aristotle_submissions/verify/Verify/Theorem2.lean" target="_blank" rel="noopener" class="secondary">The Lean proof (Theorem2.lean)</a>
-    <a href="https://github.com/zitterbewegung/Winnower/actions/workflows/lean-verify.yml" target="_blank" rel="noopener" class="secondary">Its CI runs (Lean proof check)</a>
+    <a href="reproduce.html" class="secondary">Reproduce it in the browser</a>
   </div>
   <h3>The result, in plain terms</h3>
   <p>Every fit-based background detector faces <em>period inflation</em>: a
@@ -805,13 +807,11 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   penalty exists to neutralize.</p>
   <h3>How it connects to the tool on this site</h3>
   <ul>
-    <li><strong>Machine-checked:</strong> the full six-way equivalence
-    &mdash; including the previously open necessity direction
-    (refinement&nbsp;&rArr;&nbsp;power) &mdash; is proved in Lean&nbsp;4
-    against a pinned Mathlib toolchain and rebuilt by public CI on every
-    push, which also greps the built file for placeholder tactics. The
-    prose proof is Theorem&nbsp;C.3 in the
-    <a href="#claims" onclick="return show('claims')">theory notes audited in the claim ledger</a>.</li>
+    <li><strong>A component view:</strong> the abstract's figure names each
+    stage of the pipeline &mdash; candidate, orbit classes, majority-vote fit,
+    background, residual mask, and the Bernoulli-NML score &mdash; and pairs it
+    with the object it computes, so the diagram doubles as a legend for the
+    <a href="#overview" onclick="return show('overview')">tool overview</a>.</li>
     <li><strong>Exhaustively tested:</strong>
     <code>tests/test_theory.py::test_refinement_iff_velocity_matched_multiple</code>
     checks the finite-window form of the equivalence over every candidate
@@ -820,8 +820,8 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
     <a href="reproduce.html">in-browser reproduction</a> reports, for any
     supported rule, seed, and horizon, the per-period fit (NLL) and
     penalized (NML) scores side by side &mdash; the fit column improves
-    along velocity-matched chains exactly as the theorem dictates, while
-    the penalized column resists.</li>
+    along velocity-matched chains exactly as predicted, while the penalized
+    column resists.</li>
     <li><strong>At survey scale:</strong> the
     <a href="#figures" onclick="return show('figures')">selector-ablation figure</a>
     shows the practical stakes: at horizon 100, plain NLL selects the
@@ -841,14 +841,11 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <p>This is the project's own claim-by-claim audit (<code>docs/CLAIM_LEDGER.md</code>),
   rendered verbatim. It records, for every theorem and empirical claim, its current
   status, why it holds, what was weakened relative to earlier drafts, and what remains
-  open. The supporting properties additionally have Lean 4 artifacts under
-  <code>proofs/</code> at documented levels of completeness — the majority-vote
-  optimality theorem, the six-way refinement/monotonicity equivalence (including
-  its necessity direction), and the stabilization core are machine-checked in the
-  default build with public CI, the rest are clearly-labeled drafts (see
-  <code>proofs/README.md</code> for the per-file inventory). The math is supporting
-  material for the tool; the paper's claims rest on the experiments and the
-  reproducible pipeline.</p>
+  open. Lean 4 proof artifacts under <code>proofs/</code> provide supporting
+  formal material at documented levels of completeness (see
+  <code>proofs/README.md</code> for the per-file inventory). The math is
+  supporting material for the tool; the paper's claims rest on the experiments
+  and the reproducible pipeline.</p>
   {ledger_html}
 </section>
 
