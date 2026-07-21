@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 710" font-family="Helvetica, Arial, sans-serif">
-<rect width="2000" height="710" fill="#efe2d0"/>
+<rect width="2000" height="710" fill="#ffffff"/>
 <text x="1000.0" y="58" font-family="Helvetica, Arial, sans-serif" font-size="44" fill="#3b3b3b" font-weight="bold" font-style="normal" text-anchor="middle">Relative-periodic domain selection by Bernoulli NML</text>
 <rect x="30" y="98" width="464" height="592" rx="10" fill="#fff" stroke="#dbdbdb" stroke-width="2"/>
 <rect x="522" y="98" width="464" height="592" rx="10" fill="#fff" stroke="#dbdbdb" stroke-width="2"/>
