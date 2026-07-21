@@ -194,59 +194,6 @@ def stabilization_figure(out_path: Path) -> None:
 
 
 
-def results_3d_figure(out_path: Path) -> None:
-    """3D-only results figure: voxel decomposition row above the 3D horizon sweep."""
-    import numpy as np
-    from PIL import Image
-
-    # --- sweep row: 3d-life only (selected period | margin) ---
-    csv_path = ROOT / "outputs" / "convergence" / "convergence_all_dims.csv"
-    df = pd.read_csv(csv_path)
-    d = df[df.rule == "3d-life"].sort_values("T")
-    horizons, periods, margins = d["T"].values, d["best_period"].values, d["margin"].values
-    fig, ax = plt.subplots(1, 2, figsize=(8.6, 2.5))
-    style.apply_figure_theme(fig, facecolor="white")
-    for a in ax:
-        style.apply_axis_theme(a, facecolor="white")
-    ax[0].plot(horizons, periods, marker="o", color=style.ACCENT_COLOR, lw=2, ms=5)
-    ax[0].set_ylim(0, 4.4)
-    ax[0].set_yticks([1, 2, 3, 4])
-    ax[0].set_title("selected period", fontsize=11)
-    ax[1].plot(horizons, margins, marker="s", color=style.TEXT_COLOR, lw=2, ms=4)
-    ax[1].set_yscale("log")
-    ax[1].set_ylim(1000, 30000)
-    ax[1].set_title("margin over runner-up (bits)", fontsize=11)
-    for a in ax:
-        a.set_xlabel("horizon T", fontsize=10)
-    fig.tight_layout()
-    sweep_path = OUT_DIR / "lba_sweep_3d.png"
-    fig.savefig(sweep_path, dpi=DPI, facecolor="white")
-    plt.close(fig)
-
-    # --- stitch: voxel decomposition row above the sweep row ---
-    def load_trim(path, pad=8):
-        a = np.array(Image.open(path).convert("RGB"))
-        keep_r = np.where(~np.all(a > 250, axis=2).all(axis=1))[0]
-        keep_c = np.where(~np.all(a > 250, axis=2).all(axis=0))[0]
-        return a[max(0, keep_r.min() - pad):keep_r.max() + pad,
-                 max(0, keep_c.min() - pad):keep_c.max() + pad]
-
-    top = load_trim(OUT_DIR / "lba_row_3d.png")
-    bot = load_trim(sweep_path)
-    W = 2600
-
-    def to_w(a, W):
-        im = Image.fromarray(a)
-        h = round(im.height * W / im.width)
-        return np.array(im.resize((W, h), Image.LANCZOS))
-
-    top, bot = to_w(top, W), to_w(bot, W)
-    gap = np.full((30, W, 3), 255, np.uint8)
-    combined = np.vstack([top, gap, bot])
-    Image.fromarray(combined).save(out_path)
-    print(f"3D results figure -> {out_path} "
-          f"({combined.shape[1]}x{combined.shape[0]}, w/h={combined.shape[1]/combined.shape[0]:.2f})")
-
 
 def combined_eca_figure(out_path: Path) -> None:
     """One figure: ECA-54 and ECA-110, each row = decomposition + line graphs.
@@ -345,7 +292,6 @@ def main() -> None:
     print(f"composite -> {composite}")
     stabilization_figure(PAPER_FIG_DIR / "stabilization_real.png")
     combined_eca_figure(PAPER_FIG_DIR / "lba_results.png")
-    results_3d_figure(PAPER_FIG_DIR / "lba_results_3d.png")
     print(f"stabilization -> {PAPER_FIG_DIR / 'stabilization_real.png'}")
 
 
