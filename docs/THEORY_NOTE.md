@@ -191,64 +191,84 @@ This is the corrected and strengthened version of Theorem 3.
 
 ### Version E.1 (Bernoulli NML score — recommended)
 
-> **Status note (audit, post-review).** As stated below, full stabilization
-> overclaims: from assumption (E1) alone the NLL remainder is o(N), which can
-> swamp the (k_c/2)·log2 T complexity gap, so log-term tie-breaking between
-> equal-rate candidates is NOT established here — and equal-rate candidates
-> with the *same* period but different shifts have identical complexity, so
-> no tie-break exists for them at all. The defensible content of E.1 is
-> pairwise eventual ordering and elimination of rate-dominated candidates,
-> plus stabilization when the rate minimizer is unique — exactly the form in
-> `docs/CLAIM_LEDGER.md` (Theorem 3) and the Lean-checked core
-> (`proofs/aristotle_submissions/verify/Verify/Theorem3.lean`). Complexity
-> tie-breaking among equal-rate velocity-matched multiples is proved
-> separately under the eventually-exactly-periodic hypothesis (Theorem 5 in
-> the ledger), where the NLL gap is O(1).
+> **Status note (post-review restatement).** The original E.1 claimed full
+> stabilization with k_c tie-breaking from rate convergence alone. That proof
+> was invalid: assumption (E1) only bounds the NLL remainder by o(N), which
+> can swamp the (k_c/2)·log2 T complexity gap. E.1 is restated below in two
+> correct parts (a: elimination/unique-minimizer; b: tie-breaking under a
+> bounded-gap hypothesis), and one honest non-conclusion. The original
+> overclaiming version is preserved in git history.
 
-**Theorem E.1 (Bernoulli-NML Stabilization).** Let C = {c_1, ..., c_m} be a
-finite set of candidate models, each specifying a period p_c and shift s_c.
-For each candidate c with k_c = p_c * prod_i D_i orbit classes, define:
+**Theorem E.1a (Elimination and stabilization under a unique rate
+minimizer).** Let C = {c_1, ..., c_m} be a finite set of candidate models,
+each specifying a period p_c and shift s_c, with k_c = p_c * prod_i D_i
+orbit classes and
 
-    NML(c, T) = NLL_c(T) + COMP_c(T)
+    NML(c, T) = NLL_c(T) + COMP_c(T),
 
-where NLL_c(T) = sum_j n_j(T) * H_b(theta_hat_j(T)) is the Bernoulli
-negative log-likelihood over orbit classes, and COMP_c(T) = sum_j (1/2) log_2(n_j(T))
-is the asymptotic NML parametric complexity.
+where NLL_c(T) = sum_j n_j(T) * H_b(theta_hat_j(T)) and COMP_c(T) =
+sum_j (1/2) log_2 n_j(T) (asymptotic form; the shipped hybrid score differs
+from this by O(k_c), constant in T, so everything below transfers).
 
-**Assumption (E1):** For each candidate c, the per-site entropy rate
-h_c = lim_{T -> inf} NLL_c(T) / (T * prod D_i) exists.
+**Assumption (E1):** for each candidate the per-site rate
+h_c = lim_T NLL_c(T)/N(T) exists, N(T) = T * prod_i D_i.
 
-**Conclusion:** There exists T_0 such that the NML-selected candidate
-c*(T) = argmin_c NML(c, T) is constant for all T > T_0. The stabilized
-selection minimizes h_c, breaking ties by k_c (fewer parameters preferred).
+**Conclusions.**
+1. (Pairwise ordering) If h_{c1} < h_{c2}, then NML(c1,T) < NML(c2,T) for
+   all sufficiently large T.
+2. (Elimination) Every candidate with h_c > h* := min_c h_c is eventually
+   never selected.
+3. (Stabilization) If the rate minimizer is unique, the selection is
+   constant for all large T.
 
-**Proof.** For each candidate c, NLL_c(T) = h_c * N(T) + o(N(T)) where
-N(T) = T * prod D_i is the total number of sites. The complexity term is:
+**Proof.** NLL_c(T) = h_c N(T) + o(N(T)); each class has n_j(T) =
+Theta(T/p_c), so COMP_c(T) = (k_c/2) log_2 T + O(k_c) = o(N(T)). Hence
+NML(c1,T) − NML(c2,T) = (h_{c1} − h_{c2}) N(T) + o(N(T)), which is
+eventually negative when h_{c1} < h_{c2}. Conclusions 2–3 follow because C
+is finite. QED. (This is the content machine-checked in
+`proofs/aristotle_submissions/verify/Verify/Theorem3.lean`.)
 
-    COMP_c(T) = sum_j (1/2) log_2(n_j(T))
+**Theorem E.1b (Complexity tie-breaking under a bounded NLL gap).** Let
+c_1, c_2 have equal rates h_{c1} = h_{c2} and suppose additionally
 
-Each orbit class has n_j(T) = floor(T/p_c) or ceil(T/p_c) = Theta(T/p_c).
-So COMP_c(T) = (k_c / 2) * log_2(T / p_c) + O(k_c) = O(k_c * log T).
+**Assumption (E1'):** |NLL_{c1}(T) − NLL_{c2}(T)| = O(1).
 
-Therefore:
-    NML(c, T) = h_c * N(T) + (k_c/2) * log_2(T) + O(1)
+Then NML(c1,T) − NML(c2,T) = ((k_{c1} − k_{c2})/2) log_2 T + O(1), so if
+k_{c1} < k_{c2} the smaller-complexity candidate wins for all large T.
 
-For candidates c_1, c_2:
-    NML(c_1, T) - NML(c_2, T) = (h_{c_1} - h_{c_2}) * N(T)
-                                  + (k_{c_1} - k_{c_2})/2 * log_2(T) + O(1)
+**Proof.** Immediate from COMP_c(T) = (k_c/2) log_2 T + O(k_c). QED.
 
-Case 1: h_{c_1} != h_{c_2}. The Theta(T) term dominates for large T.
-The candidate with smaller h wins permanently.
+**When (E1') holds — the eventually-exactly-periodic case.** Suppose the
+spacetime is eventually exactly relative-periodic with minimal candidate
+(p_0, s_0) after a finite transient (ledger Definition 5), and c_2 =
+(m·p_0, m·s_0 mod D) is a velocity-matched multiple of c_1 = (p_0, s_0).
+Then for all large T:
 
-Case 2: h_{c_1} = h_{c_2}. The O(log T) term dominates. The candidate
-with smaller k_c wins permanently.
+1. Every orbit class of either candidate contains unboundedly many
+   post-transient cells, all carrying the true background value, so every
+   class's majority vote stabilizes to the true background. Consequently
+   both candidates' optimal residual sets coincide: exactly the transient
+   cells that disagree with the extended true background. Let R be this
+   common residual set and c_j the (fixed) minority count of class j.
+2. A class with minority count c_j and size n_j contributes
+   n_j H_b(c_j/n_j) = c_j log_2 n_j − c_j log_2 c_j + c_j log_2 e + o(1).
+   Summing, NLL_{c_i}(T) = |R| log_2 T + O(1) for both candidates (class
+   sizes differ only by the factor m, contributing |R| log_2 m = O(1) to
+   the difference). Hence (E1') holds, and E.1b applies with
+   k_{c2} = m·k_{c1}: the smaller period p_0 wins. This recovers ledger
+   Theorem 5 as a corollary of E.1b.
 
-Since |C| is finite, all pairwise comparisons stabilize. QED.
+**Non-conclusion (shift ties).** If h_{c1} = h_{c2} and k_{c1} = k_{c2}
+(equal periods, different shifts), the NML difference is O(1) under (E1')
+and nothing here decides it; the implementation breaks such ties
+deterministically and the stress report enumerates observed occurrences.
+No claim of shift identification is made in this regime.
 
-**Assumption (E1) is mild.** For deterministic CA spacetimes, the orbit-class
-frequencies are determined by the initial condition and rule. For any
-stationary (or even Cesaro-convergent) process, the empirical frequencies
-converge, implying (E1).
+**Assumption (E1) is mild.** For deterministic CA on finite spatial
+domains, eventual periodicity of the state sequence makes every orbit-class
+frequency converge (see G.2/G.3), implying (E1). Assumption (E1') is
+genuinely stronger and should only be invoked via an explicit hypothesis
+such as eventual exact periodicity, as above.
 
 ### Version E.2 (RL-based score — if RL is retained)
 
@@ -286,11 +306,17 @@ n > T_0. Then:
     lim_{N -> inf} L_RL(b_1 ... b_N) / N = C / Q
 
 where C is the per-period RL cost of the periodic part, defined as follows.
-Let the period pattern b_{T_0+1}, ..., b_{T_0+Q} have runs r_1, ..., r_R.
+Let the period pattern b_{T_0+1}, ..., b_{T_0+Q} have runs r_1, ..., r_R,
+and assume the pattern is **non-constant** (R >= 2).
 
 - If b_{T_0+Q} != b_{T_0+1} (no seam merging): C = sum_{i=1}^R gamma(r_i).
 - If b_{T_0+Q} = b_{T_0+1} (seam merging):
   C = gamma(r_R + r_1) + sum_{i=2}^{R-1} gamma(r_i).
+
+*Constant-pattern case (R = 1):* the tail is a single run of length
+Theta(N), whose Elias-gamma cost is O(log N), so L_RL/N -> 0. The limit
+exists in every case; the C/Q formula applies only to non-constant
+patterns.
 
 **Proof.** Write N = T_0 + M*Q + R' where 0 <= R' < Q and M = floor((N - T_0)/Q).
 The RL codelength decomposes as:
@@ -346,8 +372,35 @@ T_2 such that the majority vote is constant for all T >= T_2.
   for t >= T_0.
 - The flattened mask is eventually periodic with period Lambda * D.
 
-**Step 4 (RL convergence).** By Lemma G.1, L_RL(flattened mask) / N converges
-as N = T * D -> inf. QED.
+**Step 4 (RL convergence).** By Lemma G.1 (including its constant-pattern
+case, which covers masks that become empty after the transient),
+L_RL(flattened mask) / N converges as N = T * D -> inf. QED.
+
+**Remarks completing the write-up** (upgrading this from sketch to proof):
+
+- *Per-horizon refitting.* The mask at horizon T is computed against the
+  background refit at that horizon, so a priori M depends on T globally,
+  not just row-wise. But a candidate's background is determined by its k_c
+  majority votes, and by Step 2 all votes are constant for T >= T_2
+  (k_c is finite, so T_2 = max over classes is finite). Hence for every
+  horizon T >= T_0 the fitted background is one fixed template, and the
+  mask restricted to rows < T is the same array regardless of horizon —
+  Step 3's row-wise analysis is legitimate.
+
+- *Finite-T majority ties.* The implementation breaks exact finite-sample
+  ties (2·ones = total) toward ones. Under (NT) the limiting frequencies
+  are bounded away from 1/2, so ties can occur only finitely often and the
+  tie-break rule does not affect the stabilized votes or the limit.
+
+- *Multidimensional domains.* For spatial shape (D_1, ..., D_n) and shift
+  vector s, the template's dependence on t has period
+  Lambda_B = p * lcm_i (D_i / gcd(s_i, D_i)) (each axis's offset returns
+  to zero after D_i/gcd(s_i, D_i) blocks of p steps). Step 3 goes through
+  with this Lambda_B and row size D = prod_i D_i.
+
+- *Seam runs.* Flattening row-major makes runs cross row boundaries; the
+  Lambda*D-periodicity of the flattened tail is what Lemma G.1 consumes,
+  and G.1's seam-merging case handles runs crossing period boundaries.
 
 **Verified computationally.** Rule 30 on width 11 (CA period = 17, no exact
 ties, min |theta - 0.5| = 0.029): majority vote stabilizes at T ~ 17, mask

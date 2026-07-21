@@ -90,7 +90,7 @@ score unchanged.
 
 **Status:** CORRECT AFTER EDIT
 
-**Why:** The current version is the strongest theorem that the draft honestly supports from the asymptotic expansion. It no longer overclaims tie-breaking among equal-rate candidates.
+**Why:** The current version is the strongest theorem that the draft honestly supports from the asymptotic expansion. It no longer overclaims tie-breaking among equal-rate candidates. The theory note's E.1 has been restated to match: E.1a (elimination + unique-rate-minimizer stabilization, the Lean-checked core) plus E.1b (complexity tie-breaking under an explicit bounded-NLL-gap hypothesis, discharged for eventually-exactly-periodic data), plus an explicit non-conclusion for equal-period shift ties.
 
 **What changed from earlier drafts:** The theorem is now built around pairwise eventual ordering and elimination, with full stabilization only as a corollary under a unique rate-minimizer.
 
@@ -162,16 +162,16 @@ score unchanged.
 
 **Claim:** For deterministic CA on a finite spatial domain, under the no-exact-frequency-ties condition, the run-length codelength per site of the Hamming-optimal residual mask converges.
 
-**Status:** PLAUSIBLE BUT ONLY SKETCHED
+**Status:** CORRECT — FULL WRITE-UP IN THEORY_NOTE G.2
 
-**Why:** The proof route is coherent:
+**Why:** The proof route, now written out in full (THEORY_NOTE G.1/G.2 with completing remarks covering per-horizon refitting, finite-sample tie-breaks, multidimensional shift periods, seam runs, and the constant-mask edge case of Lemma G.1):
 
 1. finite deterministic CA implies eventual periodicity of the state sequence,
 2. no exact ties implies majority decisions stabilize,
 3. stabilized residual mask becomes eventually periodic,
 4. eventual periodicity implies RL-rate convergence.
 
-**Residual caution:** This is not proved at the same level of detail as Theorems 1 to 5. It is a good Aristotle target, but not yet a theorem I would call fully closed from the manuscript alone.
+**Residual caution:** Now proved at prose level with a computational verification test (`tests/test_theory.py::TestRLConvergence`); Lean formalization remains an open Aristotle target.
 
 ---
 
@@ -236,6 +236,6 @@ score unchanged.
 | Theorem 4 | CORRECT AFTER EDIT | Lean needs the construction details made explicit |
 | Theorem 5 | CORRECT AFTER EDIT | Lean should use eventual exact periodicity, not asymptotic purity |
 | Proposition 1 | CORRECT | Optional to formalize |
-| Theorem D.2 | PLAUSIBLE / SKETCHED | Needs stronger formal writeup |
+| Theorem D.2 | CORRECT (full write-up in THEORY_NOTE G.2) | Lean formalization open |
 | Corollary D.3 | CORRECT IN SUBSTANCE | Good appendix formalization target |
 | Experimental claims | EMPIRICAL ONLY | Keep language modest |
