@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live reproduction — Winnower</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script>
+// Keep Bootstrap's theme in sync with the OS light/dark preference.
+(function () {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  const apply = () =>
+    document.documentElement.setAttribute("data-bs-theme", mq.matches ? "dark" : "light");
+  apply();
+  mq.addEventListener("change", apply);
+})();
+</script>
+<style>
+:root {
+  --bg: #f7f7f5; --fg: #1a1a1a; --muted: #5a5a55;
+  --line: #e0dfda; --accent: #305c7a; --accent-soft: #e7eef3;
+  --accent-hover: #264b64; --accent-contrast: #ffffff;
+  --ok: #1c7a45; --err: #a02020; --code-bg: #efeeea;
+  --cell-zero: #fcdeb9; --cell-one: #3b3b3b; --cell-defect: #b00300;
+  --voxel-bg: #fdf6ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181b; --fg: #e6e4df; --muted: #a3a29b;
+    --line: #33363c; --accent: #7fb0d0; --accent-soft: #22303a;
+    --accent-hover: #93bfda; --accent-contrast: #10222e;
+    --ok: #6fce96; --err: #e08585; --code-bg: #262a30;
+    --voxel-bg: #101215;
+  }
+}
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 Georgia, 'Times New Roman', serif; }
+header.page { background: var(--bs-body-bg); border-bottom: 1px solid var(--line);
+  padding: 1.6rem 1.5rem 1.1rem; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+header.page .wrap { padding: 0; }
+h1 { font-size: 1.5rem; margin: 0 0 .3rem; }
+h2 { font-size: 1.2rem; border-bottom: 2px solid var(--accent);
+  padding-bottom: .25rem; margin: 2rem 0 .8rem; }
+.subtitle { color: var(--muted); margin: 0; }
+.subtitle a { color: var(--accent); }
+main { padding-bottom: 4rem; }
+code { background: var(--code-bg); padding: .08em .35em; border-radius: 4px;
+  font-size: .86em; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color: inherit; }
+.card { margin: 1rem 0; }
+.controls { font-family: system-ui, -apple-system, sans-serif; font-size: .92rem; }
+.controls .form-label { margin-bottom: .25rem; color: var(--muted); font-size: .85rem; }
+.controls input.narrow { width: 6.5rem; }
+.controls input.rulestring { width: 11rem; }
+#run {
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-color: var(--accent-contrast);
+  --bs-btn-hover-bg: var(--accent-hover);
+  --bs-btn-hover-border-color: var(--accent-hover);
+  --bs-btn-hover-color: var(--accent-contrast);
+  --bs-btn-active-bg: var(--accent-hover);
+  --bs-btn-active-border-color: var(--accent-hover);
+  --bs-btn-active-color: var(--accent-contrast);
+  --bs-btn-disabled-bg: var(--accent);
+  --bs-btn-disabled-border-color: var(--accent);
+  --bs-btn-disabled-color: var(--accent-contrast);
+  font-weight: 600;
+}
+#run:disabled { cursor: wait; }
+.hint { font-family: system-ui, sans-serif; font-size: .85rem; color: var(--muted); }
+.statusline { font-family: system-ui, sans-serif; font-size: .9rem; }
+.progress { height: .65rem; }
+.progress-bar { background-color: var(--accent); transition: width .2s; }
+.tbl-wrap { border: 1px solid var(--line); border-radius: 8px; }
+.table { font-family: system-ui, sans-serif; font-size: .84rem; margin-bottom: 0; }
+.table th, .table td { white-space: nowrap; }
+.table thead th { background-color: var(--accent-soft); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.match { color: var(--ok); font-weight: 700; }
+td.mismatch { color: var(--err); font-weight: 700; }
+.canvases { display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.canvases figure { margin: 0; }
+.canvases canvas.flat { width: 100%; border: 1px solid var(--line);
+  border-radius: 6px; image-rendering: pixelated; background: var(--cell-zero); }
+.canvases canvas.voxel { width: 100%; border: 1px solid var(--line);
+  border-radius: 6px; background: var(--voxel-bg); cursor: grab;
+  touch-action: none; }
+.canvases canvas.voxel:active { cursor: grabbing; }
+.canvases figcaption { font-family: system-ui, sans-serif; font-size: .85rem;
+  color: var(--muted); margin-top: .3rem; }
+.slider-row { display: flex; align-items: center; gap: .8rem;
+  font-family: system-ui, sans-serif; font-size: .9rem; }
+.slider-row input[type=range] { flex: 1; }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: .8rem; font-family: system-ui, sans-serif; }
+.kv > div { background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: .6rem .8rem; }
+.kv .k { font-size: .78rem; color: var(--muted); }
+.kv .v { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.note { font-family: system-ui, sans-serif; font-size: .85rem; color: var(--muted); }
+#error { display: none; }
+#error.visible { display: block; }
+#spark { width: 100%; height: 90px; border: 1px solid var(--line);
+  border-radius: 6px; background: var(--bs-body-bg); }
+.envline { font-family: system-ui, sans-serif; font-size: .82rem;
+  color: var(--muted); }
+footer.page { border-top: 1px solid var(--line); color: var(--muted);
+  font-size: .85rem; padding: 1.5rem 0 3rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+<header class="page">
+  <div class="wrap">
+    <h1>Live reproduction: run Winnower in your browser</h1>
+    <p class="subtitle">
+      This page runs the actual <em>Winnower</em> pipeline
+      (<code>relative_symmetry_repair</code>, WebAssembly Python) on a
+      space&ndash;time it simulates from your chosen rule, seed, and horizon —
+      infers the periodic domain template and defect mask, and compares the
+      result against the committed row in the paper's result CSVs.
+      &larr; <a href="index.html">Back to the reviewer guide</a>
+    </p>
+  </div>
+</header>
+<main class="wrap">
+
+<div class="card">
+  <div class="card-body">
+    <div class="controls row g-3 align-items-end">
+      <div class="col-auto">
+        <label class="form-label" for="case">System</label>
+        <select id="case" class="form-select"></select>
+      </div>
+      <div class="col-auto" id="rule-label">
+        <label class="form-label" for="rule">ECA rule (0&ndash;255)</label>
+        <input id="rule" class="form-control narrow" type="number" min="0" max="255" value="110">
+      </div>
+      <div class="col-auto" id="rulestring-label" style="display:none">
+        <label class="form-label" for="rulestring">Rulestring (B&hellip;/S&hellip;)</label>
+        <input id="rulestring" class="form-control rulestring" value="B36/S23" placeholder="B36/S23" spellcheck="false">
+      </div>
+      <div class="col-auto" id="rulestring3d-label" style="display:none">
+        <label class="form-label" for="rulestring3d">3D rule (counts 0&ndash;26)</label>
+        <input id="rulestring3d" class="form-control rulestring" value="B5-7,9/S4,6-8" placeholder="B5-7,9/S4,6-8" spellcheck="false">
+      </div>
+      <div class="col-auto" id="dens3-label" style="display:none">
+        <label class="form-label" for="dens3">Density</label>
+        <input id="dens3" class="form-control narrow" type="number" min="0.05" max="0.95" step="0.05" value="0.5">
+      </div>
+      <div class="col-auto">
+        <label class="form-label" for="seed">Seed</label>
+        <input id="seed" class="form-control narrow" type="number" min="0" value="11">
+      </div>
+      <div class="col-auto">
+        <label class="form-label" for="horizon">Horizon T</label>
+        <select id="horizon" class="form-select"></select>
+      </div>
+      <div class="col-auto">
+        <button id="run" type="button" class="btn btn-primary px-4" disabled>Run</button>
+      </div>
+    </div>
+    <p class="hint mt-2 mb-0" id="estimate"></p>
+    <p class="hint mb-0">Committed comparison rows exist for all 256 ECA rules
+      (seeds 11&ndash;15, T &isin; {50, 100, 200, 400, 800}), ECA 30/54/110 (seeds 11&ndash;20,
+      plus T = 600), and Diamoeba (seeds 11&ndash;15). Custom rules and other
+      configurations run in exploration mode. The candidate search grid is the
+      paper's default for each dimension.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="statusline d-flex align-items-center gap-3">
+      <span id="status">Starting Python runtime&hellip;</span>
+      <div class="progress flex-grow-1" role="progressbar" aria-label="Run progress"
+        aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" id="bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <p class="envline mt-2 mb-0" id="env"></p>
+  </div>
+</div>
+
+<div class="alert alert-danger" id="error" role="alert">
+  <strong>Something went wrong.</strong>
+  <span id="error-text"></span>
+  <p class="note mb-0 mt-2">This page needs to be served over HTTP(S) with internet access
+  (it fetches the Python runtime from jsDelivr). If you are viewing a local
+  checkout, run <code>python scripts/build_review_site.py --pages _site</code>
+  and serve it with <code>python -m http.server -d _site</code>.</p>
+</div>
+
+<div id="results" style="display:none">
+  <h2>Verdict</h2>
+  <div class="card" id="verdict-card">
+    <div class="card-body">
+      <p id="verdict-line"></p>
+      <div class="table-responsive tbl-wrap" id="compare-wrap">
+        <table id="compare" class="table table-sm table-striped"></table>
+      </div>
+    </div>
+  </div>
+
+  <h2>Selected domain template</h2>
+  <div class="card">
+    <div class="card-body">
+      <div class="kv" id="selection-kv"></div>
+      <p class="note mb-0 mt-2" id="run-meta"></p>
+    </div>
+  </div>
+
+  <div class="card" id="time-card" style="display:none">
+    <div class="card-body">
+      <div class="slider-row">
+        <span>Time step <strong id="tval">0</strong></span>
+        <input id="tslider" class="form-range" type="range" min="0" max="0" value="0">
+        <span id="tmax" class="note"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="canvases" id="panels"></div>
+  <p class="note" id="voxel-help" style="display:none">Voxel views: drag to
+    rotate, scroll to zoom. The three views share one camera.</p>
+
+  <h2>Defect sites over time</h2>
+  <div class="card">
+    <div class="card-body">
+      <canvas id="spark" width="1000" height="90"></canvas>
+      <p class="note mb-0">Defect sites per time step under the selected domain template B* —
+      persistent structured defects show up as a non-vanishing tail.</p>
+    </div>
+  </div>
+
+  <h2>Period ranking (Bernoulli NML)</h2>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive tbl-wrap">
+        <table id="periods" class="table table-sm table-striped"></table>
+      </div>
+      <p class="note mb-0 mt-2">Best candidate per period, ranked by Bernoulli NML bits (fit + complexity).
+      The winner is the rank-1 row; the margin to rank 2 is the selection confidence.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+<footer class="page"><div class="wrap">
+  Same code, same parameters, your hardware: simulation and model selection run
+  entirely in this tab via Pyodide. Verified against the committed CSVs by
+  <code>scripts/verify_webdemo_bootstrap.py</code>.
+</div></footer>
+
+<script>
+"use strict";
+
+const H2D = [50, 100, 200, 400, 600, 800];
+const H3D = [10, 20, 40, 60, 80];
+const CASES = {
+  "eca":            { label: "1D elementary CA (any rule)", dim: 1, horizons: H2D, def: 200, custom: "eca" },
+  "custom2d":       { label: "2D — custom rulestring…", dim: 2, horizons: H2D, def: 100, custom: "rulestring" },
+  "custom3d":       { label: "3D — custom rule…", dim: 3, horizons: H3D, def: 40, custom: "rule3d" },
+  "Diamoeba":       { label: "Diamoeba (2D, B35678/S5678)", dim: 2, horizons: H2D, def: 100 },
+  "Maze with Mice": { label: "Maze with Mice (2D, B37/S12345)", dim: 2, horizons: H2D, def: 100 },
+  "S24/B11":        { label: "S24/B11 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
+  "S11/B37":        { label: "S11/B37 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
+  "S37/B11":        { label: "S37/B11 (2D range rule)", dim: 2, horizons: H2D, def: 100 },
+  "3d-life":        { label: "3d-life (3D)", dim: 3, horizons: H3D, def: 40 },
+  "clouds":         { label: "clouds (3D)", dim: 3, horizons: H3D, def: 40 },
+  "crystal":        { label: "crystal (3D)", dim: 3, horizons: H3D, def: 40 },
+  "diamoeba3d":     { label: "diamoeba3d (3D)", dim: 3, horizons: H3D, def: 40 },
+};
+
+function estimateSeconds(dim, horizon) {
+  if (dim === 1) return Math.max(2, Math.round(horizon / 100));
+  if (dim === 2) return Math.max(10, Math.round(horizon * 0.4));
+  return Math.max(5, Math.round(horizon * 1.2));
+}
+
+const COMPARE_COLUMNS = [
+  ["selected_period", "int"], ["selected_shift_str", "str"],
+  ["selected_nml_bits", "float"], ["selected_nll_bits", "float"],
+  ["selected_complexity", "float"], ["selected_defect_rate", "float"],
+  ["runner_up_period", "int"], ["runner_up_nml_bits", "float"],
+  ["margin_bits", "float"], ["status", "str"],
+  ["period_tie_count", "int"], ["selected_shift_tie_count", "int"],
+];
+const REL_TOL = 1e-9, ABS_TOL = 1e-9;
+const MAX_WORLDTUBE_VOXELS = 30000;
+
+const $ = (id) => document.getElementById(id);
+let expectedRows = null;
+let workerReady = false;
+
+// ---------------------------------------------------------------------------
+// Worker plumbing
+// ---------------------------------------------------------------------------
+const worker = new Worker("repro_worker.js");
+worker.postMessage({ type: "init" });
+
+worker.onmessage = (event) => {
+  const { type, payload } = event.data;
+  if (type === "status") setStatus(payload, null);
+  else if (type === "progress") setStatus(payload.text, payload.frac);
+  else if (type === "env") {
+    $("env").textContent =
+      `Environment: Pyodide ${payload.pyodide} · Python ${payload.python} · ` +
+      `numpy ${payload.numpy} · scipy ${payload.scipy} · pandas ${payload.pandas}` +
+      (payload.lz4 ? "" : " · lz4 unavailable (zlib shim; cosmetic column only)");
+  }
+  else if (type === "ready") {
+    workerReady = true;
+    setStatus("Ready — pick a configuration and press Run.", 0);
+    $("run").disabled = false;
+  }
+  else if (type === "result") {
+    $("run").disabled = false;
+    setStatus(`Done in ${payload.runtime_s}s (${payload.n_candidates} candidates scanned).`, 1);
+    render(payload);
+  }
+  else if (type === "error") {
+    $("run").disabled = false;
+    showError(payload);
+  }
+};
+worker.onerror = (event) => showError(event.message || "worker failed to load");
+
+function setStatus(text, frac) {
+  $("status").textContent = text;
+  if (frac !== null && frac !== undefined) {
+    const pct = Math.round(frac * 100);
+    $("bar-fill").style.width = `${pct}%`;
+    $("bar-fill").parentElement.setAttribute("aria-valuenow", pct);
+  }
+}
+function showError(text) {
+  $("error").classList.add("visible");
+  $("error-text").textContent = " " + text;
+  setStatus("Failed.", 0);
+}
+
+// ---------------------------------------------------------------------------
+// Controls
+// ---------------------------------------------------------------------------
+const caseSelect = $("case");
+for (const [key, meta] of Object.entries(CASES)) {
+  const opt = document.createElement("option");
+  opt.value = key;
+  opt.textContent = meta.label;
+  caseSelect.appendChild(opt);
+}
+function refreshControls() {
+  const meta = CASES[caseSelect.value];
+  const custom = meta.custom || "";
+  $("rule-label").style.display = custom === "eca" ? "" : "none";
+  $("rulestring-label").style.display = custom === "rulestring" ? "" : "none";
+  for (const id of ["rulestring3d-label", "dens3-label"]) {
+    $(id).style.display = custom === "rule3d" ? "" : "none";
+  }
+  const horizonSelect = $("horizon");
+  horizonSelect.innerHTML = "";
+  for (const h of meta.horizons) {
+    const opt = document.createElement("option");
+    opt.value = h;
+    opt.textContent = h;
+    if (h === meta.def) opt.selected = true;
+    horizonSelect.appendChild(opt);
+  }
+  refreshEstimate();
+}
+function refreshEstimate() {
+  const meta = CASES[caseSelect.value];
+  const horizon = parseInt($("horizon").value, 10);
+  const secs = estimateSeconds(meta.dim, horizon);
+  $("estimate").textContent =
+    `Estimated runtime in this browser: ~${secs < 60 ? secs + " s" : Math.round(secs / 60) + " min"}` +
+    (secs > 90 ? " — consider a smaller horizon first." : "");
+}
+caseSelect.addEventListener("change", refreshControls);
+$("horizon").addEventListener("change", refreshEstimate);
+refreshControls();
+
+fetch("expected_runs.json")
+  .then((r) => (r.ok ? r.json() : null))
+  .then((data) => { expectedRows = data; })
+  .catch(() => { expectedRows = null; });
+
+$("run").addEventListener("click", () => {
+  if (!workerReady) return;
+  const key = caseSelect.value;
+  const meta = CASES[key];
+  let family, rule;
+  if (key === "eca") {
+    family = "eca";
+    rule = parseInt($("rule").value, 10);
+    if (isNaN(rule) || rule < 0 || rule > 255) { showError("ECA rule must be between 0 and 255."); return; }
+  } else if (key === "custom2d") {
+    family = "life2d";
+    rule = $("rulestring").value.trim();
+    if (!/^[Bb]\d*\s*\/\s*[Ss]\d*$/.test(rule)) { showError("Rulestring must look like B36/S23 (digits 0–8)."); return; }
+  } else if (key === "custom3d") {
+    const rs = $("rulestring3d").value.trim();
+    if (!/^[Bb][\d,\-\s]*\/\s*[Ss][\d,\-\s]*$/.test(rs)) {
+      showError("3D rule must look like B5-7,9/S4,6-8 — comma-separated counts or lo-hi ranges, each 0–26."); return;
+    }
+    const counts = (rs.match(/\d+/g) || []).map(Number);
+    if (counts.some((n) => n > 26)) { showError("3D neighbor counts must be 0–26."); return; }
+    const density = parseFloat($("dens3").value);
+    family = "rule3d";
+    rule = JSON.stringify({ rulestring: rs, density: isNaN(density) ? 0.5 : density });
+  } else {
+    family = "named";
+    rule = key;
+  }
+  $("error").classList.remove("visible");
+  $("run").disabled = true;
+  setStatus("Running…", 0);
+  worker.postMessage({
+    type: "run", family, rule,
+    seed: parseInt($("seed").value, 10),
+    horizon: parseInt($("horizon").value, 10),
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Field decoding
+// ---------------------------------------------------------------------------
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function decodeField(field) {
+  const raw = b64ToBytes(field.data);
+  const n = field.shape.reduce((a, b) => a * b, 1);
+  if (!field.packed) return { shape: field.shape, data: raw.subarray(0, n) };
+  const out = new Uint8Array(n);
+  for (let i = 0; i < n; i++) out[i] = (raw[i >> 3] >> (7 - (i & 7))) & 1;
+  return { shape: field.shape, data: out };
+}
+
+function cssColor(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function hexToRgb(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+}
+
+// ---------------------------------------------------------------------------
+// Flat (2D image) rendering
+// ---------------------------------------------------------------------------
+function drawFlat(canvas, data, offset, h, w, isDefect) {
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.createImageData(w, h);
+  const zero = hexToRgb(cssColor("--cell-zero"));
+  const onColor = hexToRgb(cssColor(isDefect ? "--cell-defect" : "--cell-one"));
+  const n = h * w;
+  for (let i = 0; i < n; i++) {
+    const c = data[offset + i] ? onColor : zero;
+    imageData.data[i * 4] = c[0];
+    imageData.data[i * 4 + 1] = c[1];
+    imageData.data[i * 4 + 2] = c[2];
+    imageData.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+  canvas.style.aspectRatio = `${w} / ${h}`;
+}
+
+// ---------------------------------------------------------------------------
+// Voxel inspector: dependency-free canvas renderer.
+// Orthographic projection, painter's sort, surface-face culling.
+// Volume convention: dims [D0, D1, D2] with D0 drawn as the vertical axis.
+// ---------------------------------------------------------------------------
+const FACE_DIRS = [
+  { n: [0, 0, 1] }, { n: [0, 0, -1] },   // ±vertical (D0)
+  { n: [0, 1, 0] }, { n: [0, -1, 0] },   // ±depth (D1)
+  { n: [1, 0, 0] }, { n: [-1, 0, 0] },   // ±horizontal (D2)
+];
+// Corner offsets for the face with normal n: the face's 4 corners around the
+// voxel center, in world axes (x = D2, y = D1, z = D0 pointing up).
+function faceCorners(n) {
+  const [nx, ny, nz] = n;
+  const c = [];
+  // pick the two axes orthogonal to the normal
+  const axes = [[1, 0, 0], [0, 1, 0], [0, 0, 1]].filter(
+    (a) => a[0] * nx + a[1] * ny + a[2] * nz === 0
+  );
+  const [u, v] = axes;
+  for (const [su, sv] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    c.push([
+      0.5 * (nx + su * u[0] + sv * v[0]),
+      0.5 * (ny + su * u[1] + sv * v[1]),
+      0.5 * (nz + su * u[2] + sv * v[2]),
+    ]);
+  }
+  return c;
+}
+const FACE_GEOMS = FACE_DIRS.map((f) => ({ n: f.n, corners: faceCorners(f.n) }));
+
+class VoxelViewer {
+  constructor(canvas, { color, camera, heightPx }) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.color = color;                    // [r, g, b]
+    this.camera = camera;                  // shared {yaw, pitch, zoom, viewers[]}
+    this.heightPx = heightPx || 300;
+    this.faces = [];
+    this.dims = [1, 1, 1];
+    this.note = "";
+    camera.viewers.push(this);
+    this.attachEvents();
+  }
+
+  // get(i0, i1, i2) -> 0|1 over dims [D0, D1, D2]
+  setVolume(dims, get) {
+    this.dims = dims;
+    const [D0, D1, D2] = dims;
+    const cz = (D0 - 1) / 2, cy = (D1 - 1) / 2, cx = (D2 - 1) / 2;
+    const faces = [];
+    const filled = (i0, i1, i2) =>
+      i0 >= 0 && i0 < D0 && i1 >= 0 && i1 < D1 && i2 >= 0 && i2 < D2 && get(i0, i1, i2);
+    let count = 0;
+    for (let i0 = 0; i0 < D0; i0++) {
+      for (let i1 = 0; i1 < D1; i1++) {
+        for (let i2 = 0; i2 < D2; i2++) {
+          if (!get(i0, i1, i2)) continue;
+          count++;
+          const x = i2 - cx, y = i1 - cy, z = i0 - cz;
+          for (const geom of FACE_GEOMS) {
+            const [nx, ny, nz] = geom.n;
+            if (filled(i0 + nz, i1 + ny, i2 + nx)) continue; // internal face
+            faces.push({ x, y, z, geom });
+          }
+        }
+      }
+    }
+    this.faces = faces;
+    this.voxelCount = count;
+    this.radius = 0.5 * Math.sqrt(D0 * D0 + D1 * D1 + D2 * D2);
+    this.render();
+  }
+
+  attachEvents() {
+    const cam = this.camera;
+    let dragging = false, lastX = 0, lastY = 0;
+    this.canvas.addEventListener("pointerdown", (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      this.canvas.setPointerCapture(e.pointerId);
+    });
+    this.canvas.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      cam.yaw += (e.clientX - lastX) * 0.01;
+      cam.pitch = Math.max(-1.5, Math.min(1.5, cam.pitch + (e.clientY - lastY) * 0.01));
+      lastX = e.clientX; lastY = e.clientY;
+      cam.requestRender();
+    });
+    const stop = (e) => { dragging = false; };
+    this.canvas.addEventListener("pointerup", stop);
+    this.canvas.addEventListener("pointercancel", stop);
+    this.canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      cam.zoom *= Math.exp(-e.deltaY * 0.001);
+      cam.zoom = Math.max(0.2, Math.min(8, cam.zoom));
+      cam.requestRender();
+    }, { passive: false });
+  }
+
+  render() {
+    const canvas = this.canvas;
+    const cssWidth = canvas.clientWidth || 320;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = Math.round(cssWidth * dpr), H = Math.round(this.heightPx * dpr);
+    if (canvas.width !== W) canvas.width = W;
+    if (canvas.height !== H) canvas.height = H;
+    canvas.style.height = `${this.heightPx}px`;
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, W, H);
+
+    if (!this.faces.length) {
+      ctx.fillStyle = cssColor("--muted");
+      ctx.font = `${13 * dpr}px system-ui`;
+      ctx.textAlign = "center";
+      ctx.fillText("no filled sites", W / 2, H / 2);
+      return;
+    }
+
+    const { yaw, pitch, zoom } = this.camera;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const scale = zoom * 0.44 * Math.min(W, H) / this.radius;
+    const cxs = W / 2, cys = H / 2;
+    // rotate: yaw about z (up), then pitch about x; view looks along +y
+    const project = (x, y, z) => {
+      const x1 = x * cy - y * sy, y1 = x * sy + y * cy;
+      const y2 = y1 * cp - z * sp, z2 = y1 * sp + z * cp;
+      return [cxs + x1 * scale, cys - z2 * scale, y2];
+    };
+    const light = [-0.35, -0.75, 0.55]; // view-space light direction
+    const drawList = [];
+    for (const f of this.faces) {
+      const [nx, ny, nz] = f.geom.n;
+      // rotated normal
+      const rnx = nx * cy - ny * sy, rny1 = nx * sy + ny * cy;
+      const rny = rny1 * cp - nz * sp, rnz = rny1 * sp + nz * cp;
+      if (rny >= 0) continue; // backface (pointing away from viewer)
+      const [px, py, depth] = project(f.x, f.y, f.z);
+      const lam = Math.max(0, -(rnx * light[0] + rny * light[1] + rnz * light[2]));
+      drawList.push({ f, depth, shade: 0.55 + 0.45 * lam });
+    }
+    drawList.sort((a, b) => b.depth - a.depth); // far to near
+    const [r, g, b] = this.color;
+    for (const item of drawList) {
+      const { f, shade } = item;
+      ctx.beginPath();
+      let first = true;
+      for (const [ox, oy, oz] of f.geom.corners) {
+        const [px, py] = project(f.x + ox, f.y + oy, f.z + oz);
+        if (first) { ctx.moveTo(px, py); first = false; }
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgb(${Math.round(r * shade)},${Math.round(g * shade)},${Math.round(b * shade)})`;
+      ctx.fill();
+    }
+    if (this.note) {
+      ctx.fillStyle = cssColor("--muted");
+      ctx.font = `${11 * dpr}px system-ui`;
+      ctx.textAlign = "left";
+      ctx.fillText(this.note, 8 * dpr, H - 8 * dpr);
+    }
+  }
+}
+
+function makeCamera() {
+  const cam = { yaw: -0.7, pitch: 0.45, zoom: 1, viewers: [], pending: false };
+  cam.requestRender = () => {
+    if (cam.pending) return;
+    cam.pending = true;
+    requestAnimationFrame(() => {
+      cam.pending = false;
+      for (const v of cam.viewers) v.render();
+    });
+  };
+  return cam;
+}
+
+// ---------------------------------------------------------------------------
+// Result rendering
+// ---------------------------------------------------------------------------
+const FIELD_ORDER = ["spacetime", "background", "defect"];
+let view = null; // current decoded fields + per-dim state
+
+function panelFigure(parent, caption, kind) {
+  const fig = document.createElement("figure");
+  const canvas = document.createElement("canvas");
+  canvas.className = kind;
+  const cap = document.createElement("figcaption");
+  cap.textContent = caption;
+  fig.appendChild(canvas);
+  fig.appendChild(cap);
+  parent.appendChild(fig);
+  return canvas;
+}
+
+function compareValue(kind, expectedRaw, actual) {
+  if (expectedRaw === "" || expectedRaw === "nan" || expectedRaw === null || expectedRaw === undefined) {
+    return { ok: actual === null || actual === undefined, diff: "" };
+  }
+  if (kind === "str") return { ok: String(actual) === String(expectedRaw), diff: "" };
+  const exp = Number(expectedRaw), act = Number(actual);
+  if (kind === "int") return { ok: exp === act, diff: exp === act ? "" : String(act - exp) };
+  if (exp === act) return { ok: true, diff: "0" };
+  const denom = Math.max(Math.abs(exp), Math.abs(act));
+  const rel = denom ? Math.abs(exp - act) / denom : 0;
+  return { ok: Math.abs(exp - act) <= ABS_TOL || rel <= REL_TOL, diff: rel.toExponential(1) };
+}
+function fmt(value) {
+  if (value === null || value === undefined) return "—";
+  const num = Number(value);
+  if (!isNaN(num) && String(value).indexOf(".") >= 0) return num.toFixed(6);
+  return String(value);
+}
+
+function renderVerdict(rec) {
+  const key = `${rec.rule}|${rec.seed}|${rec.horizon}`;
+  const expected = expectedRows ? expectedRows[key] : null;
+  const table = $("compare");
+  table.innerHTML = "";
+  if (expected) {
+    let allOk = true;
+    let html = "<thead><tr><th>Column</th><th class='num'>Committed (paper)</th><th class='num'>Your browser</th><th class='num'>Rel. diff</th><th>Match</th></tr></thead><tbody>";
+    for (const [column, kind] of COMPARE_COLUMNS) {
+      const { ok, diff } = compareValue(kind, expected[column], rec[column]);
+      allOk = allOk && ok;
+      html += `<tr><td><code>${column}</code></td>` +
+        `<td class="num">${fmt(expected[column])}</td>` +
+        `<td class="num">${fmt(rec[column])}</td>` +
+        `<td class="num">${diff || "—"}</td>` +
+        `<td class="${ok ? "match" : "mismatch"}">${ok ? "✓" : "✗"}</td></tr>`;
+    }
+    html += "</tbody>";
+    table.innerHTML = html;
+    $("compare-wrap").style.display = "";
+    $("verdict-line").innerHTML = allOk
+      ? `<span class="badge rounded-pill text-bg-success">REPRODUCED</span> Your browser regenerated the committed row for
+         <strong>${rec.rule}</strong>, seed ${rec.seed}, T=${rec.horizon} — every selection column matches
+         (floats to 1e-9 relative tolerance).`
+      : `<span class="badge rounded-pill text-bg-danger">MISMATCH</span> One or more columns differ from the committed row —
+         see the table below. (This would be a genuine reproducibility finding; please report it.)`;
+  } else {
+    $("compare-wrap").style.display = "none";
+    $("verdict-line").innerHTML =
+      `<span class="badge rounded-pill text-bg-warning">EXPLORATION</span> No committed row exists for
+       <strong>${rec.rule}</strong>, seed ${rec.seed}, T=${rec.horizon}, so there is nothing to
+       compare against — the result below is a fresh run of the same pipeline.`;
+  }
+}
+
+function renderPanels(res) {
+  const panels = $("panels");
+  panels.innerHTML = "";
+  $("voxel-help").style.display = "none";
+  $("time-card").style.display = "none";
+  const dim = res.dimension;
+  const fields = view.fields;
+  const T = fields.spacetime.shape[0];
+
+  if (dim === 1) {
+    // Full space–time diagrams — nothing sliced away in 1D.
+    const captions = ["Observed space–time U (time ↓)", "Selected domain template B*", "Defect mask M = U ⊕ B*"];
+    FIELD_ORDER.forEach((name, i) => {
+      const f = fields[name];
+      const canvas = panelFigure(panels, captions[i], "flat");
+      drawFlat(canvas, f.data, 0, f.shape[0], f.shape[1], name === "defect");
+    });
+    return;
+  }
+
+  // dims 2 and 3 get a time slider
+  $("time-card").style.display = "";
+  const slider = $("tslider");
+  slider.max = T - 1;
+  slider.value = T - 1;
+  $("tmax").textContent = `of ${T - 1}`;
+  $("tval").textContent = T - 1;
+
+  if (dim === 2) {
+    const [_, Hh, Ww] = fields.spacetime.shape;
+    const captions = ["Frame of space–time U", "Frame of domain template B*", "Frame of defect mask M"];
+    const flatCanvases = FIELD_ORDER.map((name, i) => panelFigure(panels, captions[i], "flat"));
+    view.drawFrame = (t) => {
+      FIELD_ORDER.forEach((name, i) => {
+        drawFlat(flatCanvases[i], fields[name].data, t * Hh * Ww, Hh, Ww, name === "defect");
+      });
+    };
+    view.drawFrame(T - 1);
+
+    // 3D world-tube inspection of the defect mask: time increases upward.
+    $("voxel-help").style.display = "";
+    const cam = makeCamera();
+    view.camera = cam;
+    const canvas = panelFigure(panels, "Defect world-tubes M — time increases upward; drag to rotate", "voxel");
+    const viewer = new VoxelViewer(canvas, {
+      color: hexToRgb(cssColor("--cell-defect")), camera: cam, heightPx: 420,
+    });
+    const d = fields.defect;
+    let stride = 1;
+    const totalDefects = res.defects_per_frame.reduce((a, b) => a + b, 0);
+    while (totalDefects / stride > MAX_WORLDTUBE_VOXELS) stride++;
+    const Ts = Math.floor((T + stride - 1) / stride);
+    viewer.note = stride > 1 ? `time downsampled ×${stride} to stay interactive` : "";
+    viewer.setVolume([Ts, Hh, Ww], (i0, i1, i2) => d.data[(i0 * stride) * Hh * Ww + i1 * Ww + i2]);
+    return;
+  }
+
+  // dim === 3: fully rotatable voxel views of U, B*, and M at the chosen t.
+  $("voxel-help").style.display = "";
+  const [__, Sz, Sy, Sx] = fields.spacetime.shape;
+  const frameSize = Sz * Sy * Sx;
+  const cam = makeCamera();
+  view.camera = cam;
+  const captions = ["Observed U at t", "Domain template B* at t", "Defect mask M at t"];
+  const one = hexToRgb(cssColor("--cell-one"));
+  const red = hexToRgb(cssColor("--cell-defect"));
+  const viewers = FIELD_ORDER.map((name, i) => {
+    const canvas = panelFigure(panels, captions[i], "voxel");
+    return new VoxelViewer(canvas, {
+      color: name === "defect" ? red : one, camera: cam, heightPx: 300,
+    });
+  });
+  view.drawFrame = (t) => {
+    FIELD_ORDER.forEach((name, i) => {
+      const f = fields[name];
+      const base = t * frameSize;
+      viewers[i].setVolume([Sz, Sy, Sx], (i0, i1, i2) => f.data[base + i0 * Sy * Sx + i1 * Sx + i2]);
+    });
+  };
+  view.drawFrame(T - 1);
+}
+
+$("tslider").addEventListener("input", () => {
+  const t = parseInt($("tslider").value, 10);
+  $("tval").textContent = t;
+  if (view && view.drawFrame) view.drawFrame(t);
+});
+
+function drawSpark(canvas, series) {
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height, pad = 6;
+  ctx.clearRect(0, 0, W, H);
+  if (!series || series.length < 2) return;
+  const maxV = Math.max(1, ...series);
+  ctx.strokeStyle = cssColor("--cell-defect");
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  series.forEach((v, i) => {
+    const x = pad + (i / (series.length - 1)) * (W - 2 * pad);
+    const y = H - pad - (v / maxV) * (H - 2 * pad);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.fillStyle = cssColor("--fg");
+  ctx.font = "11px system-ui";
+  ctx.fillText(`max ${maxV} defect sites/frame · final ${series[series.length - 1]}`, pad + 2, 12);
+}
+
+function render(res) {
+  $("results").style.display = "";
+  const rec = res.record;
+  view = { fields: {} };
+  for (const name of FIELD_ORDER) view.fields[name] = decodeField(res.fields[name]);
+
+  renderVerdict(rec);
+
+  const shiftLabel = res.dimension === 1 ? "displacement s" : "displacement vector";
+  const kv = [
+    ["Selected period p", rec.selected_period],
+    [shiftLabel, rec.selected_shift_str],
+    ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
+    ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
+    ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
+    ["Status", rec.status],
+  ];
+  $("selection-kv").innerHTML = kv
+    .map(([k, v]) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`)
+    .join("");
+  $("run-meta").textContent =
+    `${res.case_name} · search grid "${res.search_label}" · ${res.n_candidates} candidates · ` +
+    `${res.runtime_s}s in-browser` + (res.lz4_shimmed ? " · lz4 shimmed (cosmetic)" : "");
+
+  renderPanels(res);
+  drawSpark($("spark"), res.defects_per_frame);
+
+  let html = "<thead><tr><th class='num'>Rank</th><th class='num'>Period</th><th>Best displacement</th>" +
+    "<th class='num'>NML bits</th><th class='num'>NLL bits</th><th class='num'>Complexity</th>" +
+    "<th class='num'>Defect rate</th></tr></thead><tbody>";
+  for (const row of res.period_summary) {
+    html += `<tr><td class="num">${row.period_rank}</td><td class="num">${row.period}</td>` +
+      `<td>${row.best_shift_str}</td>` +
+      `<td class="num">${Number(row.nml_bits).toFixed(2)}</td>` +
+      `<td class="num">${Number(row.nll_bits).toFixed(2)}</td>` +
+      `<td class="num">${Number(row.nml_complexity).toFixed(2)}</td>` +
+      `<td class="num">${(Number(row.defect_rate) * 100).toFixed(3)}%</td></tr>`;
+  }
+  html += "</tbody>";
+  $("periods").innerHTML = html;
+}
+
+// Test hook: lets automated checks feed a synthetic result through the full
+// rendering path (no Pyodide needed).
+window.__testRender = render;
+</script>
+</body>
+</html>
