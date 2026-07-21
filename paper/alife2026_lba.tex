@@ -11,13 +11,11 @@
 %   - Reports new ideas / work in progress; reviewed for relevance and quality.
 %   - Accepted late-breaking abstracts are presented as posters and are NOT
 %     included in the proceedings.
-%   - Submission deadline 20 July 2026 (AoE); notification 27 July 2026.
-%   - Images <= 300 dpi at 100% scale; embedded fonts; active links; <5 MB.
 %
-% This file follows the accepted-submission format (alifeconf style, numbered
-% natbib citations) shown in the ALIFE 2025 examples supplied by the author.
-% If the late-breaking track is double-blind, remove the author block below and
-% refer to prior work by the authors in the third person before submitting.
+% This version follows the "Detecting Periodic Domains" submission wording:
+% tool- and algorithm-focused (formal theorems dropped in favour of a
+% discussion of the algorithm and why its complexity penalty has the shape it
+% does), with the modern bibliography integrated and the reference lists merged.
 % ============================================================================
 \documentclass[letterpaper]{article}
 
@@ -34,9 +32,9 @@
 \newcommand{\bD}{\mathbf{D}}
 \newcommand{\NML}{\operatorname{NML}}
 \newcommand{\NLL}{\operatorname{NLL}}
+\newcommand{\Hb}{H_b}
 
-\title{The Exact Boundary of Period Inflation: A Machine-Checked
-  Characterization for the Winnower Cellular-Automaton Background Detector}
+\title{Winnower: Detecting Periodic Domains in Cellular Automata}
 
 % Remove/anonymize this block if the late-breaking track is double-blind.
 \author{Joshua Herman$^{1}$ \\
@@ -48,138 +46,241 @@ zitterbewegung@gmail.com}
 \maketitle
 
 \begin{abstract}
-A recurring task in artificial life is separating a life-like pattern from
-the periodic domain it lives in: a glider is a glider only relative to its
-background. \emph{Winnower} is an open-source tool that performs this split
-on a cellular-automaton (CA) spacetime, fitting a drifting periodic
-\emph{background} by majority vote and returning the \emph{residual mask} of
-cells the background cannot explain. Like every fit-based detector it faces
-\emph{period inflation}: a longer-period candidate has more parameters and
-can never fit worse, so a selector scoring by fit alone drifts to the largest
-model. We report a result that pins down exactly when this pressure exists.
-For two constant-velocity candidates, five natural conditions --- velocity-matched
-divisibility, orbit-partition refinement, model-class nesting, universal
-residual improvement, and universal likelihood improvement --- are all
-equivalent, and divisibility is \emph{necessary}, not merely sufficient:
-whenever it fails, some spacetime makes the longer candidate strictly worse.
-The full equivalence, including the previously open necessity direction, is
-now machine-checked in Lean~4 under public continuous integration, with an
-exhaustive finite-window test as a cross-check. The characterization is the
-precise justification for Winnower's complexity penalty, and it is
-reproducible and inspectable in the tool's live web companion.
+Cellular automata often produce space-time patterns comprising broad periodic
+domains, together with defects, particles, and interfaces. We introduce
+\emph{Winnower}, a software tool and a model-selection framework for detecting
+these domains from finite observations. Each candidate period/shift pair
+induces a relative-periodic orbit partition, is fitted to its nearest binary
+background by an orbit-wise majority vote, and is scored against the other
+candidates using the Bernoulli normalized maximum likelihood (NML) criterion.
+The resulting outputs are a selected periodic background and a residual mask
+that isolates structured departures from that background. Experiments in one,
+two, and three dimensions are consistent with this picture: selected periods
+lock in after short transients, the complexity penalty prevents systematic
+period inflation, and residual masks identify rules with persistent structured
+defects. Winnower is intended as a global front end for artificial-life
+analysis; it proposes a compact domain hypothesis rapidly enough for large
+rule sweeps, leaving the residual for deeper particle or coherent-structure
+analysis. Data and code: \url{https://github.com/zitterbewegung/Winnower}.
 \end{abstract}
 
 \section{Introduction}
-Cellular automata routinely settle into broad periodic domains threaded with
-defects, interfaces, and particle-like activity. For artificial life those
-domains are not noise to be discarded but the \emph{reference frame} that
-makes coherent structure legible: gliders, spaceships, and their collisions
-are defined against the background they traverse
-\citep{hanson1992,crutchfield1997}. Extracting that background at scale is a
-prerequisite for cataloguing where life-like behaviour appears --- a concern
-squarely within the ALIFE 2026 theme of living and life-like complex adaptive
-systems.
+Cellular automata (CA) frequently generate space-time patterns in which large
+regular domains coexist with defects, particles, and interfaces. In artificial
+life these domains matter because they often provide the substrate on which
+information transmission, coherent structures, and emergent computation become
+visible \citep{hanson1992,crutchfield1997}. A practical question follows: given
+a finite CA space-time, what is the simplest global periodic organization that
+best explains it, and what structured residual remains once that organization
+is removed? This is squarely within the ALIFE 2026 theme of living and
+life-like complex adaptive systems.
 
-\emph{Winnower} is a fast global front end for this problem. Given a binary
-spacetime $U$ and a grid of \emph{candidates} $(p,\bs)$ --- ``the pattern
-repeats every $p$ steps, drifting sideways by $\bs$'' --- it groups the cells
-each candidate forces to be equal (its \emph{orbit classes}), takes a
-majority vote in each class to build the best-fitting background $B^{*}$, and
-records the residual mask $M = U \oplus B^{*}$. Each candidate costs one
-linear pass, so whole-catalogue 1D/2D/3D surveys are practical, and every
-reported number re-runs in a browser-based reproduction.
+Existing approaches optimize different objectives. Computational mechanics and
+local causal-state methods reconstruct local statistical structure and identify
+domains, particles, and interactions in detail
+\citep{crutchfield1997,hanson1992,rupe2018,shalizi2006,rupe2024}. Survey- and
+compression-based traditions classify rules both globally and by scale
+\citep{packard1985,boccara1999,zenil2010}, and recent work systematizes CA
+classification and its open problems
+\citep{vispoel2022,rollier2024,hudcova2021,alfaro2024,cisneros2023}. Winnower
+aims at a middle ground: a global, complexity-penalized selector for periodic
+space-time templates, fast enough for wide scans while still supporting a
+principled comparison between periodic explanations.
 
-A selector that scores candidates by fit alone carries a built-in bias. Call
-$(p_2,\bs_2)$ a \emph{velocity-matched multiple} of $(p_1,\bs_1)$ when
-$p_2 = m\,p_1$ and $\bs_2 = m\,\bs_1 \bmod \bD$: the same drift at a longer
-period. Such a multiple splits every orbit class into finer pieces, so its
-optimal residual count and its negative log-likelihood ($\NLL$) can only
-improve. Unpenalized selection therefore inflates the period whether or not
-extra structure is present. Winnower counters this with a Bernoulli
-normalized-maximum-likelihood (NML) complexity penalty
-\citep{shtarkov1987,grunwald2007}, but a penalty is well-motivated only if we
-know \emph{exactly} which comparisons carry the inflation pressure. This
-abstract reports that boundary and its machine-checked proof.
+\section{The Winnower Algorithm}
+The central idea is to represent each candidate period/shift pair through its
+relative-periodic orbit classes and to fit a background top-down: choose the
+best global periodic template, then analyze the residual mask for particles,
+defects, or other coherent departures.
 
-\section{An Exact Boundary}
-Fix a torus with spatial dimensions $\bD$ and temporal length $T$, and two
-candidates $c_1,c_2$ acting by spacetime translation. Write $\Pi_i$ for the
-orbit partition of $c_i$, $\mathcal{B}_i$ for the model class of fields
-constant on $\Pi_i$-classes, $d^{*}_U(c_i)$ for the minimum Hamming distance
-from $U$ to $\mathcal{B}_i$, and $\NLL_U(c_i)$ for the orbit-class Bernoulli
-negative log-likelihood. The following are equivalent:
-\emph{(i)}~$c_2$ is a velocity-matched multiple of $c_1$;
-\emph{(ii)}~$c_2$'s translation is a power of $c_1$'s;
-\emph{(iii)}~$\Pi_2$ refines $\Pi_1$;
-\emph{(iv)}~$\mathcal{B}_1 \subseteq \mathcal{B}_2$;
-\emph{(v)}~$d^{*}_U(c_2) \le d^{*}_U(c_1)$ for \emph{every} $U$;
-\emph{(vi)}~$\NLL_U(c_2) \le \NLL_U(c_1)$ for \emph{every} $U$.
+\paragraph{Model family and fit.}
+Given a binary spacetime $U$, a shift $\bs$, and a period $p$, Winnower
+considers backgrounds satisfying $B[t+p,\,\mathbf{x}+\bs \bmod \bD] = B[t,\mathbf{x}]$.
+The corresponding space-time translation partitions the observations into orbit
+classes $\{O_j\}$. For orbit class $O_j$ let $n_j^{(1)}$ and $n_j^{(0)}$ be the
+observed numbers of ones and zeros; the Hamming-optimal background assigns each
+class its majority symbol, giving a minimum residual count
+$\sum_j \min\!\big(n_j^{(0)}, n_j^{(1)}\big)$. This orbit-class reduction is the
+computational backbone: a seemingly global fitting problem becomes a collection
+of independent binary decisions, and each candidate costs a single linear pass
+over the observed sites (\cref{fig:algorithm}). For a scanned family of periods
+and shifts, Winnower returns the selected period and shift, the fitted
+background, the residual defect mask, and the per-candidate scores.
 
-The forward chain (i)$\Rightarrow\cdots\Rightarrow$(vi) is routine
-(cyclic-group structure; Jensen's inequality for the concavity of binary
-entropy). The content is \emph{necessity}: if divisibility fails, refinement
-fails, and a concrete adversarial spacetime --- constant on $\Pi_1$-classes but
-mixing two of them inside one $\Pi_2$-class --- makes $c_2$ strictly worse
-under both $d^{*}$ and $\NLL$. Closing the loop needs
-(iii)$\Rightarrow$(ii), that refinement \emph{forces} a power: on the torus
-orbits are cosets of the cyclic subgroup a translation generates, so
-refinement at the identity gives subgroup containment, and a translation is
-fixed by its value at one point. Divisibility is thus the exact frontier of
-the guaranteed-improvement regime --- on one side longer periods always win, on
-the other the data can always punish them --- and hence exactly the set of
-comparisons Winnower's penalty must neutralize.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{algorithm_detailed_tikz.pdf}
+    \caption{Winnower algorithm sketch. Each candidate period/shift pair
+    induces an orbit partition, is fitted by orbit-wise majority vote, and is
+    scored by Bernoulli NML. The output is a selected background together with
+    a residual mask.}
+    \label{fig:algorithm}
+\end{figure}
+
+\paragraph{Scoring, and why a complexity penalty is necessary.}
+To compare candidates, Winnower uses the Bernoulli NML score
+\begin{equation}
+\NML(p,\bs) \;=\; \underbrace{\sum_j n_j\,\Hb(\hat{\theta}_j)}_{\text{fit (NLL)}}
+\;+\; \underbrace{\tfrac{1}{2}\sum_j \log_2 n_j}_{\text{complexity}},
+\qquad \hat{\theta}_j = n_j^{(1)}/n_j,
+\label{eq:nml}
+\end{equation}
+where $\Hb$ is the binary entropy and $n_j = |O_j|$; the first term is the
+Bernoulli negative log-likelihood and the second is the asymptotic NML
+complexity for independent Bernoulli classes \citep{shtarkov1987,grunwald2007,yamanishi2023}.
+The penalty is not cosmetic. When a longer period is a velocity-matched
+multiple of a shorter one, its orbit partition \emph{refines} the shorter one,
+so it splits every class into finer pieces and can only lower the residual
+count and the NLL --- never raise them. A selector scoring by fit alone
+therefore inflates the period along every such chain, whether or not any extra
+structure is present. The complexity term in \cref{eq:nml} is what neutralizes
+that pressure. This boundary --- velocity-matched divisibility is exactly the
+condition under which one template universally refines another --- is the
+design rationale for the penalty, and its structural core is machine-checked in
+Lean~4 under public continuous integration \citep{achim2025}.
+
+\paragraph{Why selection stabilizes.}
+Once candidates settle to distinct per-site NLL rates, the linear-in-horizon
+fit gap between them overwhelms the logarithmic complexity penalty in
+\cref{eq:nml}, so the lowest-rate candidate is eventually selected and the
+choice locks. When a spacetime becomes exactly relative-periodic after a finite
+transient, the smallest period is recovered, because larger multiples pay a
+larger complexity penalty without improving the asymptotic fit rate.
+
+\section{Experiments}
+The empirical program asks three questions: does the selector stabilize across
+dimensions, is the complexity penalty necessary, and does the residual mask
+retain interesting structure once the background is removed?
+
+\paragraph{Cross-dimensional stabilization.}
+Winnower was evaluated on one-dimensional elementary CA (rules 30, 54, 110),
+broad Life-like and totalistic surveys in two dimensions, and a
+three-dimensional totalistic rule \citep{bays1987,bays2006}. Rule~54 locks
+immediately to period~4; the tested 3D rule (semitotalistic 5,6,7,8/5,6,7,8)
+locks immediately to period~1; and rules~110 and S24/B11 pass through short
+transients before settling (\cref{fig:stabilization}). In every case the
+winning margin \emph{grows} after the final transition. Across the detailed
+case studies, every tested rule made at most two period transitions before
+locking over the observed horizon range --- the finite-horizon signature of the
+stabilization behavior above.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.86\textwidth]{stabilization_summary_tikz.pdf}
+    \caption{Representative stabilization patterns across one, two, and three
+    dimensions. Top: selected period versus horizon. Bottom: NML margin to the
+    runner-up. Both immediate locking and short-transient locking appear.}
+    \label{fig:stabilization}
+\end{figure*}
+
+\paragraph{Why the complexity penalty matters.}
+The selector ablation is sharp. Scoring the same candidate families by raw
+residual count, by Bernoulli NLL, and by Bernoulli NML, only the NML selector
+avoids systematic period inflation (\cref{fig:ablation}). On 105 nontrivial
+Life-like rules at horizon $T{=}100$, plain NLL chooses the largest tested
+period in \emph{every} case and residual minimization also favors higher
+periods, whereas NML concentrates mass at period~1 (97 rules), with only a
+small minority selecting period~2 (7) or period~8 (1). This is the empirical
+face of the refinement argument above: once refinement guarantees monotone fit
+improvement, only a complexity penalty can prevent overfitting along
+divisibility chains.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.99\linewidth]{selector_ablation_tikz.pdf}
-    \caption{Why the boundary matters in practice. On the 105 non-degenerate
-    Life-like rules at horizon $T{=}100$, selecting by fit alone (raw residual
-    count, or plain $\NLL$) is pulled to the largest scanned period --- the
-    inflation the theorem predicts along every velocity-matched chain --- while
-    the complexity-penalized score (Bernoulli NML) concentrates at low period.
-    Plain $\NLL$ selects the maximum period for \emph{all} 105 rules.}
+    \caption{Selector ablation on 105 nontrivial Life-like rules at $T{=}100$.
+    Raw residual minimization and Bernoulli NLL are pulled toward larger
+    periods; Bernoulli NML prevents that inflation by balancing fit against
+    orbit-class complexity.}
     \label{fig:ablation}
 \end{figure}
 
-\section{Machine-Checked, and Reproducible in the Tool}
-We treat a claim as verified only when Lean's kernel accepts it. The full
-six-way equivalence, including the necessity direction (iii)$\Rightarrow$(ii)
-that earlier drafts left open, is proved in Lean~4 against a pinned Mathlib
-toolchain and rebuilt on every push by the project's public
-continuous-integration workflow, which additionally greps the built artifact
-for placeholder tactics. Independently, an exhaustive test enumerates all
-candidate pairs on a $6\times4$ space--time window and checks that refinement
-holds \emph{iff} velocity-matched divisibility holds --- a finite-window
-counterpart to the torus theorem and a guard against silent formalization
-drift.
+\paragraph{Residual structure.}
+The selected background is useful not only because it names a domain hypothesis
+but because the residual mask preserves structured departures from it. In 1D,
+an entropy-rate comparison shows that the periodic background captures the
+predictable component of space-time while the residual retains substantial but
+\emph{structured} uncertainty rather than pure noise (\cref{fig:entropy}),
+consistent with the domains-and-particles picture of computational mechanics
+\citep{crutchfield1997,rupe2024}. In 2D, rules such as S37/B11 exhibit residual
+populations that persist over long horizons and scale extensively with grid
+size --- exactly the localized activity that glider- and coherent-structure
+detectors target \citep{secktuohmora2023,shalizi2006}.
 
-The characterization is not a footnote to the tool; it is its justification,
-and it is inspectable where the tool lives. The Winnower web companion carries
-a dedicated late-breaking section stating the theorem in plain terms and
-linking the machine-checked Lean file and its CI runs; and the same in-browser
-reproduction that backs every other number reports, for any supported rule,
-seed, and horizon, the per-period fit ($\NLL$) and penalized ($\NML$) scores
-side by side --- so a visitor can watch the fit column improve monotonically
-along velocity-matched chains, exactly as the theorem dictates, while the
-penalized column resists (\cref{fig:ablation}).
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{entropy_rate_comparison_tikz.pdf}
+    \caption{Entropy-rate decomposition for rules 54, 110, and 30. The periodic
+    background captures nearly all of the predictable structure, while the
+    residual mask retains substantial but structured uncertainty.}
+    \label{fig:entropy}
+\end{figure}
 
-\section{Status and Future Work}
-This is work in progress. The empirical picture --- planted-ground-truth
-recovery at $1.00$ joint accuracy over $642$ runs, zero false positives on
-shuffled and random controls, and the ablation above --- is established in the
-companion full paper; the contribution here is the exact, machine-checked
-characterization explaining \emph{why} the penalty has the shape it does and
-\emph{exactly} where it is needed. Open threads include lifting the
-finite-window necessity direction (which currently carries one nondegeneracy
-hypothesis, $p_2 \le T-1$) into Lean alongside the torus form, and extending
-the analysis from pairwise comparisons to the full candidate lattice the
-scanner searches. The tool, the proofs, the tests, and the in-browser
-reproduction are public.
+\section{Discussion}
+The value of Winnower is that it provides a fast global hypothesis about domain
+organization. It does not replace local causal-state reconstruction
+\citep{rupe2018,rupe2024,rupe2025}, and it does not claim that the selected
+period is always a ``true'' background period. Instead it provides a compact
+domain hypothesis, a residual mask, and a principled way to compare periodic
+explanations across large rule families. This makes it useful in two settings:
+as a fast periodic-domain screen over many rules before deeper analysis, and as
+a front end for follow-on structure discovery, where the residual mask marks
+where particle, defect, or coherent-structure methods should focus. The same
+front-end role applies to modern continuous and learned substrates whose
+emergent patterns invite the same background/residual question
+\citep{hamon2024,plantec2025,niklasson2021}. The tool is modest by design: a
+scalable global front end, not a full semantic account of CA dynamics.
+
+\section{Conclusion}
+Winnower turns periodic-domain selection in CA space-time into a concrete
+model-selection problem. Relative-periodic orbit classes make background
+fitting fast, and the Bernoulli NML score explains why unpenalized selectors
+overfit and why the penalized selector locks once asymptotic rate differences
+emerge. Across one, two, and three dimensions the experiments reported here are
+consistent with that picture. The broader claim is that global periodic-domain
+selection can serve as a practical bridge between information-theoretic model
+selection and the study of emergent space-time organization in artificial life.
+
+\subsection*{Acknowledgements}
+We thank Editage (\url{www.editage.com}) for English-language editing. The
+algorithm and tooling were developed with assistance from ChatGPT and Claude
+Code, and Aristotle and Claude were used to help create and verify the Lean
+proofs; transcripts and code accompany the repository.
 
 \footnotesize
 \setlength{\bibsep}{2pt plus 0.3ex}
 \bibliographystyle{apalike}
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
+
+\bibitem[Achim et al., 2025]{achim2025}
+Achim, T. et~al. (2025).
+Aristotle: {IMO}-level automated theorem proving.
+\emph{arXiv:2510.01346}.
+
+\bibitem[Alfaro and Sanju{\'a}n, 2024]{alfaro2024}
+Alfaro, G. and Sanju{\'a}n, M. A.~F. (2024).
+Classification of cellular automata based on the {H}amming distance.
+\emph{Chaos}, 34(8):083129.
+
+\bibitem[Bays, 1987]{bays1987}
+Bays, C. (1987).
+Candidates for the game of life in three dimensions.
+\emph{Complex Systems}, 1(3):373--400.
+
+\bibitem[Bays, 2006]{bays2006}
+Bays, C. (2006).
+A note about the discovery of many new rules for the game of three-dimensional life.
+\emph{Complex Systems}, 16:381--386.
+
+\bibitem[Boccara and Roger, 1999]{boccara1999}
+Boccara, N. and Roger, M. (1999).
+Totalistic two-dimensional cellular automata exhibiting global periodic behavior.
+\emph{International Journal of Modern Physics C}, 10(6):1051--1066.
+
+\bibitem[Cisneros, 2023]{cisneros2023}
+Cisneros, H. (2023).
+\emph{Unsupervised Learning in Complex Systems}.
+PhD thesis; arXiv:2307.10993.
 
 \bibitem[Crutchfield and Hanson, 1997]{crutchfield1997}
 Crutchfield, J.~P. and Hanson, J.~E. (1997).
@@ -190,15 +291,85 @@ Computational mechanics of cellular automata: An example.
 Gr{\"u}nwald, P. (2007).
 \emph{The Minimum Description Length Principle}. MIT Press.
 
+\bibitem[Hamon et al., 2024]{hamon2024}
+Hamon, G., Etcheverry, M., Chan, B. W.-C., Moulin-Frier, C., and Oudeyer, P.-Y. (2024).
+Discovering sensorimotor agency in cellular automata using diversity search.
+\emph{Science Advances}, 10:eadp0834.
+
 \bibitem[Hanson and Crutchfield, 1992]{hanson1992}
 Hanson, J.~E. and Crutchfield, J.~P. (1992).
 The attractor-basin portrait of a cellular automaton.
 \emph{Journal of Statistical Physics}, 66:1415--1462.
 
+\bibitem[Hudcov{\'a} and Mikolov, 2021]{hudcova2021}
+Hudcov{\'a}, B. and Mikolov, T. (2021).
+Classification of discrete dynamical systems based on transients.
+\emph{Artificial Life}, 27(3--4):220--245.
+
+\bibitem[Niklasson et al., 2021]{niklasson2021}
+Niklasson, E., Mordvintsev, A., Randazzo, E., and Levin, M. (2021).
+Self-organising textures.
+\emph{Distill}, 6(2).
+
+\bibitem[Packard and Wolfram, 1985]{packard1985}
+Packard, N.~H. and Wolfram, S. (1985).
+Two-dimensional cellular automata.
+\emph{Journal of Statistical Physics}, 38:901--946.
+
+\bibitem[Plantec et al., 2025]{plantec2025}
+Plantec, E., Hamon, G., Etcheverry, M., Oudeyer, P.-Y., Moulin-Frier, C., and Chan, B. W.-C. (2025).
+Flow-{L}enia: Emergent evolutionary dynamics in mass conservative continuous cellular automata.
+\emph{Artificial Life}. arXiv:2506.08569.
+
+\bibitem[Rollier et al., 2024]{rollier2024}
+Rollier, M., Zielinski, K. M.~C., Daly, A.~J., Bruno, O.~M., and Baetens, J.~M. (2024).
+A comprehensive taxonomy of cellular automata.
+\emph{Communications in Nonlinear Science and Numerical Simulation}. arXiv:2401.08408.
+
+\bibitem[Rupe and Crutchfield, 2018]{rupe2018}
+Rupe, A. and Crutchfield, J.~P. (2018).
+Local causal states and discrete coherent structures.
+\emph{Chaos}, 28:075312.
+
+\bibitem[Rupe and Crutchfield, 2024]{rupe2024}
+Rupe, A. and Crutchfield, J.~P. (2024).
+On principles of emergent organization.
+\emph{Physics Reports}, 1071:1--47.
+
+\bibitem[Rupe et al., 2025]{rupe2025}
+Rupe, A., Kashinath, K., Kumar, N., and Crutchfield, J.~P. (2025).
+Unsupervised discovery of extreme weather events using universal
+representations of emergent organization.
+\emph{Chaos}, 35(8):083110.
+
+\bibitem[Seck-Tuoh-Mora et al., 2023]{secktuohmora2023}
+Seck-Tuoh-Mora, J.~C., Medina-Marin, J., Hern{\'a}ndez-Romero, N., and Mart{\'i}nez, G.~J. (2023).
+Mean-field analysis with random perturbations to detect gliders in cellular automata.
+\emph{Mathematics}, 11(20):4319.
+
+\bibitem[Shalizi et al., 2006]{shalizi2006}
+Shalizi, C.~R., Haslinger, R., Rouquier, J.-B., Klinkner, K.~L., and Moore, C. (2006).
+Automatic filters for the detection of coherent structure in spatiotemporal systems.
+\emph{Physical Review E}, 73:036104.
+
 \bibitem[Shtarkov, 1987]{shtarkov1987}
-Shtarkov, Y. (1987).
+Shtarkov, Y.~M. (1987).
 Universal sequential coding of single messages.
 \emph{Problems of Information Transmission}, 23:3--17.
+
+\bibitem[Vispoel et al., 2022]{vispoel2022}
+Vispoel, M., Daly, A.~J., and Baetens, J.~M. (2022).
+Progress, gaps and obstacles in the classification of cellular automata.
+\emph{Physica D}, 432:133074.
+
+\bibitem[Yamanishi, 2023]{yamanishi2023}
+Yamanishi, K. (2023).
+\emph{Learning with the Minimum Description Length Principle}. Springer.
+
+\bibitem[Zenil, 2010]{zenil2010}
+Zenil, H. (2010).
+Compression-based investigation of the dynamical properties of cellular automata and other systems.
+\emph{Complex Systems}, 19(1):1--28.
 
 \end{thebibliography}
 
