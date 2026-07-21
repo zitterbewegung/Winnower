@@ -44,6 +44,11 @@ set_option autoImplicit false
 
 noncomputable section
 
+-- The whole file lives in its own namespace: Theorem1.lean also declares
+-- top-level names like `ModelClass`, and both files must coexist in the
+-- default build.
+namespace RefinementEquivalence
+
 /-
 Check if ZMod is available and if Fintype instances work.
 -/
@@ -909,3 +914,5 @@ theorem Theorem2_Final (c₁ c₂ : Candidate n) :
   
   exact ⟨h12, h23_iff, h34_iff, h45_iff, h56_iff⟩
 
+
+end RefinementEquivalence
