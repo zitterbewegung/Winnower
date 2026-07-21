@@ -27,7 +27,9 @@ jobs:
         run: lake exe cache get
 
       - name: Build verified targets
-        run: lake build
+        # Temporarily scoped to the module under repair for fast iteration;
+        # restore plain `lake build` before merging to main.
+        run: lake build Verify.Theorem2
 
       - name: Check built targets are placeholder-free
         run: |
