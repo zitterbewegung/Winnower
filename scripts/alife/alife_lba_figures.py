@@ -144,20 +144,41 @@ def stabilization_figure(out_path: Path) -> None:
         ("3d-life", "3D Life (B5/S45)"),
     ]
     colors = [style.ACCENT_COLOR, style.TEXT_COLOR, style.SECONDARY_COLOR, "#8a6d3b"]
-    fig, ax = plt.subplots(2, 4, figsize=(11, 4.0))
+    # Shared log y-limits so margins are visually comparable across panels
+    # (observed range across all four rules is ~84-17,900 bits).
+    margin_ylim = (60, 30000)
+    fig, ax = plt.subplots(2, 4, figsize=(11, 4.2))
     style.apply_figure_theme(fig, facecolor="white")
     for j, (key, title) in enumerate(rules):
         d = df[df.rule == key].sort_values("T")
         horizons = d["T"].values
+        margins = d["margin"].values
         for r in (0, 1):
             style.apply_axis_theme(ax[r, j], facecolor="white")
         ax[0, j].plot(horizons, d["best_period"].values, marker="o", color=colors[j], lw=2, ms=5)
         ax[0, j].set_title(title, fontsize=11, fontweight="bold")
         ax[0, j].set_ylim(0, 8.6)
         ax[0, j].set_yticks([1, 2, 4, 7, 8])
-        ax[1, j].plot(horizons, d["margin"].values, marker="s", color=colors[j], lw=2, ms=4)
+        ax[1, j].plot(horizons, margins, marker="s", color=colors[j], lw=2, ms=4)
         ax[1, j].set_yscale("log")
+        ax[1, j].set_ylim(*margin_ylim)
         ax[1, j].set_xlabel("horizon T", fontsize=10)
+        # Mark the horizon where the selected period changes: the margin dips
+        # toward zero right at a transition (near-tied candidates), then
+        # climbs again once the new winner pulls ahead.
+        periods = d["best_period"].values
+        for k in range(1, len(periods)):
+            if periods[k] != periods[k - 1]:
+                ax[1, j].annotate(
+                    "period changes",
+                    xy=(horizons[k], margins[k]),
+                    xytext=(8, 22),
+                    textcoords="offset points",
+                    ha="left",
+                    fontsize=7.5,
+                    color=style.SECONDARY_COLOR,
+                    arrowprops=dict(arrowstyle="-", color=style.SECONDARY_COLOR, lw=0.8),
+                )
         if j == 0:
             ax[0, j].set_ylabel("selected period", fontsize=10)
             ax[1, j].set_ylabel("margin (bits)", fontsize=10)
