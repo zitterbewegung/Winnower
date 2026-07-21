@@ -78,17 +78,15 @@ or coherent-structure analysis. Data and code:
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.90\textwidth]{lba_results.png}
-    \caption{Representative Winnower runs. \emph{Left:} decompositions
-    (observed~/ domain template~/ defect mask) for 1D ECA-54 (period-4
-    template; defects trace particle world-lines), 2D S24/B11 (period-2
-    template, defect rate $0.008$ at $T{=}600$), and voxel views of 3D Life
-    B5/S45 \citep{bays1987} (period-1 template of persistent still lifes;
-    defects are the decaying soup). \emph{Right:} selected period and
-    runner-up margin (shared log scale) versus horizon $T$. Periods lock
-    immediately (ECA-54, 3D Life) or after one marked transition (ECA-110
-    $1\!\to\!7$, S24/B11 $1\!\to\!2$); the margin dips where two periods are
-    nearly tied, then grows.}
+    \includegraphics[width=0.98\textwidth]{lba_results.png}
+    \caption{Winnower on the elementary CAs ECA-54 (top) and ECA-110
+    (bottom). \emph{Left three columns:} observed space--time, the selected
+    shift-0 domain template, and the defect mask. ECA-54 selects a period-4
+    template; ECA-110 selects the period-7 Ether domain, whose defect mask
+    traces the propagating particles. \emph{Right two columns:} selected
+    period and runner-up margin (log scale) versus horizon $T$ from the
+    exact-NML sweep. ECA-54 locks immediately; ECA-110 locks after one
+    transition ($1\!\to\!7$, marked), the margin growing thereafter.}
     \label{fig:results}
 \end{figure*}
 
@@ -136,9 +134,10 @@ shortest equivalent candidate is recovered when it is in the search set.
 
 \section{Preliminary Results}
 We tested ECAs 30, 54, and 110; 2D Life-like and totalistic rules; and 3D
-Life B5/S45 \citep{bays1987,bays2006}. \Cref{fig:results} shows the
-decompositions and horizon sweep ($T$ up to $800$ at seed~11 in 1D/2D; up to
-$50$ at seed~42 in 3D, where the soup decays toward the quiescent domain).
+Life B5/S45 \citep{bays1987,bays2006}. \Cref{fig:results} pairs the
+decomposition and horizon sweep for the two elementary rules ECA-54 and
+ECA-110 (seed~11); 2D runs use seed~11 and 3D seed~42 with $T\le50$, where the
+soup decays toward the quiescent domain.
 Selection settled immediately for ECA-54 (period~4, margin 681 to 2318 bits)
 and 3D Life (period~1, 3324 to 7403 bits), and after one transition for
 ECA-110 ($1\!\to\!7$, the Ether domain) and S24/B11 ($1\!\to\!2$); margins

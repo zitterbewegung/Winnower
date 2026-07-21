@@ -193,6 +193,144 @@ def stabilization_figure(out_path: Path) -> None:
     plt.close(fig)
 
 
+
+def results_3d_figure(out_path: Path) -> None:
+    """3D-only results figure: voxel decomposition row above the 3D horizon sweep."""
+    import numpy as np
+    from PIL import Image
+
+    # --- sweep row: 3d-life only (selected period | margin) ---
+    csv_path = ROOT / "outputs" / "convergence" / "convergence_all_dims.csv"
+    df = pd.read_csv(csv_path)
+    d = df[df.rule == "3d-life"].sort_values("T")
+    horizons, periods, margins = d["T"].values, d["best_period"].values, d["margin"].values
+    fig, ax = plt.subplots(1, 2, figsize=(8.6, 2.5))
+    style.apply_figure_theme(fig, facecolor="white")
+    for a in ax:
+        style.apply_axis_theme(a, facecolor="white")
+    ax[0].plot(horizons, periods, marker="o", color=style.ACCENT_COLOR, lw=2, ms=5)
+    ax[0].set_ylim(0, 4.4)
+    ax[0].set_yticks([1, 2, 3, 4])
+    ax[0].set_title("selected period", fontsize=11)
+    ax[1].plot(horizons, margins, marker="s", color=style.TEXT_COLOR, lw=2, ms=4)
+    ax[1].set_yscale("log")
+    ax[1].set_ylim(1000, 30000)
+    ax[1].set_title("margin over runner-up (bits)", fontsize=11)
+    for a in ax:
+        a.set_xlabel("horizon T", fontsize=10)
+    fig.tight_layout()
+    sweep_path = OUT_DIR / "lba_sweep_3d.png"
+    fig.savefig(sweep_path, dpi=DPI, facecolor="white")
+    plt.close(fig)
+
+    # --- stitch: voxel decomposition row above the sweep row ---
+    def load_trim(path, pad=8):
+        a = np.array(Image.open(path).convert("RGB"))
+        keep_r = np.where(~np.all(a > 250, axis=2).all(axis=1))[0]
+        keep_c = np.where(~np.all(a > 250, axis=2).all(axis=0))[0]
+        return a[max(0, keep_r.min() - pad):keep_r.max() + pad,
+                 max(0, keep_c.min() - pad):keep_c.max() + pad]
+
+    top = load_trim(OUT_DIR / "lba_row_3d.png")
+    bot = load_trim(sweep_path)
+    W = 2600
+
+    def to_w(a, W):
+        im = Image.fromarray(a)
+        h = round(im.height * W / im.width)
+        return np.array(im.resize((W, h), Image.LANCZOS))
+
+    top, bot = to_w(top, W), to_w(bot, W)
+    gap = np.full((30, W, 3), 255, np.uint8)
+    combined = np.vstack([top, gap, bot])
+    Image.fromarray(combined).save(out_path)
+    print(f"3D results figure -> {out_path} "
+          f"({combined.shape[1]}x{combined.shape[0]}, w/h={combined.shape[1]/combined.shape[0]:.2f})")
+
+
+def combined_eca_figure(out_path: Path) -> None:
+    """One figure: ECA-54 and ECA-110, each row = decomposition + line graphs.
+
+    Columns: observed / domain template / defect mask / selected period(T) /
+    margin(T).  Decompositions are fresh runs (seed 11); the line graphs read
+    the horizon sweep from convergence_all_dims.csv.
+    """
+    from matplotlib.gridspec import GridSpec
+    from relative_symmetry_repair.alife_style import BINARY_CMAP, DEFECT_CMAP
+
+    df = pd.read_csv(ROOT / "outputs" / "convergence" / "convergence_all_dims.csv")
+    cases = [
+        ("ECA-54", 54, 144, style.ACCENT_COLOR),
+        ("ECA-110", 110, 200, style.TEXT_COLOR),
+    ]
+
+    fig = plt.figure(figsize=(11, 5.0))
+    style.apply_figure_theme(fig, facecolor="white")
+    gs = GridSpec(2, 5, figure=fig, width_ratios=[1, 1, 1, 1.25, 1.25],
+                  wspace=0.42, hspace=0.30)
+    col_titles = ["observed", "domain template", "defect mask",
+                  "selected period", "margin (bits)"]
+
+    for i, (name, rule, steps, color) in enumerate(cases):
+        initial = random_initial_state(width=192, density=0.5, seed=11)
+        spacetime = simulate_eca(rule=rule, initial=initial, steps=steps)
+        # Fit at shift 0 to match the horizon sweep (which scans shift 0),
+        # so the decomposition period agrees with the line graph.
+        result = select_period(spacetime, shifts=[0], periods=range(1, 11))
+        fit = result.best_fit
+
+        # --- decomposition images ---
+        panels = [
+            (spacetime, BINARY_CMAP, f"$p{{=}}{fit.period}$, $s{{=}}{fit.shift}$"),
+            (fit.background, BINARY_CMAP, ""),
+            (fit.defect_mask.astype(int), DEFECT_CMAP,
+             f"rate {fit.defect_rate:.3f}"),
+        ]
+        for c, (img, cmap, sub) in enumerate(panels):
+            ax = fig.add_subplot(gs[i, c])
+            style.apply_axis_theme(ax, facecolor="white")
+            ax.imshow(img, aspect="auto", interpolation="nearest",
+                      cmap=cmap, vmin=0, vmax=1)
+            ax.set_xticks([]); ax.set_yticks([])
+            if i == 0:
+                ax.set_title(col_titles[c], fontsize=10)
+            if sub:
+                ax.set_xlabel(sub, fontsize=8)
+            if c == 0:
+                ax.set_ylabel(f"{name}\n(time down)", fontsize=10, fontweight="bold")
+
+        # --- line graphs from the sweep ---
+        key = name  # convergence CSV uses ECA-54 / ECA-110 verbatim
+        d = df[df.rule == key].sort_values("T")
+        T, P, M = d["T"].values, d["best_period"].values, d["margin"].values
+
+        axp = fig.add_subplot(gs[i, 3])
+        style.apply_axis_theme(axp, facecolor="white")
+        axp.plot(T, P, marker="o", color=color, lw=2, ms=4)
+        axp.set_ylim(0, 8.6); axp.set_yticks([1, 2, 4, 7])
+        if i == 0:
+            axp.set_title(col_titles[3], fontsize=10)
+        axp.set_xlabel("horizon T", fontsize=8)
+
+        axm = fig.add_subplot(gs[i, 4])
+        style.apply_axis_theme(axm, facecolor="white")
+        axm.plot(T, M, marker="s", color=color, lw=2, ms=3.5)
+        axm.set_yscale("log"); axm.set_ylim(150, 30000)
+        if i == 0:
+            axm.set_title(col_titles[4], fontsize=10)
+        axm.set_xlabel("horizon T", fontsize=8)
+        for k in range(1, len(P)):
+            if P[k] != P[k - 1]:
+                axm.annotate("period\nchanges", xy=(T[k], M[k]), xytext=(6, 16),
+                             textcoords="offset points", fontsize=7,
+                             color=style.SECONDARY_COLOR,
+                             arrowprops=dict(arrowstyle="-",
+                                             color=style.SECONDARY_COLOR, lw=0.7))
+
+    fig.savefig(out_path, dpi=DPI, facecolor="white", bbox_inches="tight")
+    plt.close(fig)
+    print(f"combined ECA figure -> {out_path}")
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     PAPER_FIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -206,6 +344,8 @@ def main() -> None:
     stitch_rows(paths, composite)
     print(f"composite -> {composite}")
     stabilization_figure(PAPER_FIG_DIR / "stabilization_real.png")
+    combined_eca_figure(PAPER_FIG_DIR / "lba_results.png")
+    results_3d_figure(PAPER_FIG_DIR / "lba_results_3d.png")
     print(f"stabilization -> {PAPER_FIG_DIR / 'stabilization_real.png'}")
 
 
