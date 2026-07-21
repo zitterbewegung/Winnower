@@ -96,7 +96,7 @@ theorem hamming_dist_decomposition (U B : I → Bool) (S : Setoid I) :
     simp +decide only [Finset.card_filter, Fintype.card_subtype];
     -- By definition of equivalence classes, every element in $I$ belongs to exactly one equivalence class.
     have h_partition : ∀ x : I, ∃! c : Set I, c ∈ S.classes ∧ x ∈ c := by
-      exact?;
+      exact fun x => Setoid.classes_eqv_classes x;
     choose f hf hf' using h_partition;
     have h_partition : ∑ x : I, (if U x ≠ B x then 1 else 0) = ∑ c ∈ S.classes.toFinset, ∑ x ∈ Finset.univ.filter (fun x => f x = c), (if U x ≠ B x then 1 else 0) := by
       rw [ ← Finset.sum_biUnion ];
@@ -222,8 +222,10 @@ theorem unique_minimizer_iff (U : I → Bool) (S : Setoid I) :
             have h_orbit_eq : ∀ c' ∈ S.classes, i ∈ c' ↔ j ∈ c' := by
               rintro c' hc';
               obtain ⟨ k, hk ⟩ := hc';
-              simp +decide [ hk, h_orbit i j hi hj ];
-              exact ⟨ fun h => by exact? , fun h => by exact? ⟩;
+              subst hk;
+              simp only [Set.mem_setOf_eq];
+              exact ⟨ fun h => Setoid.trans (Setoid.symm (h_orbit i j hi hj)) h,
+                      fun h => Setoid.trans (h_orbit i j hi hj) h ⟩;
             grind;
           · intro c' hc';
             refine' ⟨ _, _, _ ⟩;
@@ -245,7 +247,7 @@ theorem unique_minimizer_iff (U : I → Bool) (S : Setoid I) :
             exact False.elim ( hj' ( by exact Setoid.trans hj ( Setoid.symm hi ) |> Setoid.trans <| hi' ) );
           · -- Since $d$ and $c$ are both classes in $S.classes$, they must be equal because $S$ is an equivalence relation.
             have h_eq_classes : d = c := by
-              exact?;
+              exact Setoid.eq_of_mem_classes hd hj hc hj';
             aesop;
           · exact hB₁.1.1 d hd i j hi hj;
         · intro d hd;
@@ -255,7 +257,7 @@ theorem unique_minimizer_iff (U : I → Bool) (S : Setoid I) :
               rw [ Set.disjoint_left ];
               intro i hi hj;
               refine' hcd _;
-              exact?;
+              exact Setoid.eq_of_mem_classes hc hi hd hj;
             simp_all +decide [ Set.disjoint_left ];
             grind;
       have h_neq : B₁ ≠ B₂ := by
@@ -285,7 +287,7 @@ theorem unique_minimizer_iff (U : I → Bool) (S : Setoid I) :
             use c, hc, hi, h_gt
             intro h_lt i hi x hx hx_i
             have h_eq : x = c := by
-              exact?
+              exact Setoid.eq_of_mem_classes hx hx_i hc hi
             rw [h_eq]
             exact le_of_lt h_lt;
         refine' ⟨ B, hB, _ ⟩;
