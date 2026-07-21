@@ -33,3 +33,6 @@ venv/
 
 # Portable single-file review site (large; rebuild with --embed-images)
 review_site/index_portable.html
+
+# Editor backup files
+*~

@@ -2,34 +2,7 @@
 
 ## Abstract
 
-We prove that, within a fixed finite candidate set, Bernoulli NML model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes eventually excludes every can# Theorem 5: Identifiability for Eventually Exactly Periodic Backgrounds
-
-## Prompt for "Direct Aristotle in English"
-
-Formalize and prove Theorem 5 from the attached paper (Section 2.7).
-
-The setting: A CA spacetime U has true background period p₀ with shift s, meaning there exists a transient time T₀ such that U[t + p₀, x + s mod D] = U[t, x] for all t ≥ T₀. Consider a velocity-matched strict multiple p = m·p₀ (m > 1) with shift m·s mod D.
-
-Prove:
-
-(i) The per-site NLL rates are equal: λ_p = λ_{p₀} = 0.
-
-(ii) The NLL difference satisfies NLL(p, T) - NLL(p₀, T) = O(1).
-
-(iii) The NML score difference satisfies NML(p, T) - NML(p₀, T) = (m-1)·k_{p₀}/2 · log₂ T + O(1) → +∞.
-
-(iv) Therefore NML selects p₀ over p for all sufficiently large T.
-
-PROVIDED SOLUTION:
-
-(i): After T₀, the spacetime is exactly (p₀, s)-periodic, so every (p₀, s)-orbit class is pure outside the finite prefix t < T₀. Hence λ_{p₀} = 0. The same exact periodicity implies exact (p, m·s)-periodicity, so λ_p = 0.
-
-(ii): Only orbit classes intersecting the finite transient prefix t < T₀ contribute nonzero NLL. There are finitely many such classes. For each, splitting from p₀ to p = m·p₀ creates m sub-classes, but the total transient disagreements stay fixed. The NLL change is bounded by a constant independent of T.
-
-(iii): The complexity difference is COMP(p,T) - COMP(p₀,T) = (m·k_{p₀}/2)·log₂(T/(m·p₀)) - (k_{p₀}/2)·log₂(T/p₀) + O(1) = (m-1)·k_{p₀}/2 · log₂ T + O(1).
-
-(iv): Combining (ii) and (iii), the score difference tends to +∞, so the higher-period model is eventually worse.
-didate whose asymptotic per-site NLL rate exceeds the minimum; the proof specializes classical MDL/NML rate-separation logic to this model family (Theorem 3). When the rate-minimizing candidate is unique — which holds in all cases we test — the selected model locks to a single winner. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem 1), velocity-matched divisibility is exactly characterized as the condition under which partition refinement, model nesting, and universal monotonicity of both Hamming residuals and Bernoulli NLL all hold (Theorem 2), and the Bernoulli NML criterion's $O(\log T)$ complexity penalty is eventually dominated by $\Theta(T)$ data-fit gaps between candidates with distinct rates. We also show by explicit construction that background period recovery is impossible in general without additional assumptions (Theorem 4), while recovery of the smallest period is restored for eventually exactly periodic backgrounds after a finite transient (Theorem 5). The theory applies identically to 1D, 2D, and 3D automata.
+We prove that, within a fixed finite candidate set, Bernoulli NML model selection over relative-periodic backgrounds of cellular automaton (CA) spacetimes eventually excludes every candidate whose asymptotic per-site NLL rate exceeds the minimum; the proof specializes classical MDL/NML rate-separation logic to this model family (Theorem 3). When the rate-minimizing candidate is unique — which holds in all cases we test — the selected model locks to a single winner. The argument rests on a dimension-agnostic *orbit-class reduction*: fitting a relative-periodic background to a binary spacetime decomposes into independent majority voting on orbit classes (Theorem 1), velocity-matched divisibility is exactly characterized as the condition under which partition refinement, model nesting, and universal monotonicity of both Hamming residuals and Bernoulli NLL all hold (Theorem 2), and the Bernoulli NML criterion's $O(\log T)$ complexity penalty is eventually dominated by $\Theta(T)$ data-fit gaps between candidates with distinct rates. We also show by explicit construction that background period recovery is impossible in general without additional assumptions (Theorem 4), while recovery of the smallest period is restored for eventually exactly periodic backgrounds after a finite transient (Theorem 5). The theory applies identically to 1D, 2D, and 3D automata.
 
 Cross-dimensional experiments are consistent with the stabilization prediction: selected periods lock for 1D elementary CA (rules 30, 54, 110), 2D totalistic rules (from a survey of 773 range-threshold candidates and all 106 named Life-like rules from the LifeWiki), and a 3D totalistic rule — with margins growing after the selected period locks. A baseline comparison of three selectors (residual minimization, NLL, and NML) isolates the effect of the complexity penalty: without it, NLL selects the maximum available period for every nontrivial rule. A finite-horizon stabilization sweep across 9 rules in 1D/2D/3D shows that all tested rules make at most 2 period transitions before locking, with post-stabilization margins growing monotonically. An entropy-rate comparison shows that the periodic background captures the same regular structure identified by computational mechanics (the "Ether" domain), while the projection residual concentrates the genuinely unpredictable component — with significant internal structure remaining, consistent with particle dynamics. As an application, the framework identifies 2D rules with persistent structured projection residuals, including one (S37/B11) exhibiting extensive residual scaling verified at 400 steps, across multiple seeds, and at grid sizes up to 192×192.
 
