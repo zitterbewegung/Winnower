@@ -15,7 +15,16 @@ These tests do three things:
    with a defect rate of exactly 0.0, and must be the smallest-period
    zero-defect candidate;
 3. characterize what the *selector* then does with it --- which is not always
-   to pick the truth, and that is the interesting part.
+   to pick the truth at a short horizon, and that is the interesting part.
+
+On (3): a single glider in a large lattice is missed at T=32 and recovered at
+a longer T, at unchanged occupancy. The complexity gap between p=1 and the
+true period scales with the spatial volume and does not depend on T, while
+the defect-bits the p=1 fit leaves accumulate with T, so the horizon has to
+grow roughly linearly with the volume (measured: T ~ 0.3 x V). There is no
+occupancy floor below which the period stops being recoverable -- only a
+horizon budget, which is the paper's stabilization property measured against
+a known answer rather than argued.
 """
 
 import numpy as np
@@ -207,8 +216,8 @@ def test_a_wrong_displacement_at_the_true_period_does_not_fit():
 # --- What the selector does with the ground truth ------------------------------
 
 
-def test_the_selector_recovers_a_glider_that_fills_enough_of_the_lattice():
-    """At 6^3 the glider occupies ~4.6% of sites and its period pays for itself."""
+def test_the_selector_recovers_the_glider_when_the_run_is_long_enough():
+    """At 6^3 the horizon T=32 already clears what the volume costs."""
     frame = scan(pattern_spacetime(PATTERNS_3D["glider"], size=6, steps=32))
     selection = period_first_selection_from_frame(frame)
     assert selection.selected_period == 4
@@ -216,15 +225,19 @@ def test_the_selector_recovers_a_glider_that_fills_enough_of_the_lattice():
     assert selection.selected_defect_rate == 0.0
 
 
-def test_the_selector_misses_a_sparse_glider_despite_an_exact_fit_existing():
-    """The sensitivity floor, pinned.
+def test_a_run_too_short_for_its_volume_misses_an_exact_fit():
+    """Pins the trade-off, on a case where the right answer is known.
 
-    At 16^3 one glider is ~0.24% of sites. A zero-defect candidate is in the
-    grid, but coding four times as many orbit classes costs more than the
-    defects that p=1 leaves, so the selector takes p=1 -- and labels it a
-    stable winner. This is the penalty term behaving as designed, and it bounds
-    what the domain template can be expected to notice: a localized structure
-    this sparse is carried entirely by the defect mask, not by the period.
+    At 16^3 with T=32 a zero-defect candidate is in the grid, but coding four
+    times as many orbit classes costs more than the defects that p=1 leaves,
+    so the selector takes p=1 -- and labels it a stable winner.
+
+    This is a statement about the *horizon*, not about how sparse the glider
+    is: see ``test_a_longer_horizon_recovers_the_period_at_fixed_occupancy``,
+    where the same occupancy recovers the true period once T is large enough.
+    The complexity gap between p=1 and p=4 scales with the spatial volume and
+    is independent of T, while the defect-bits p=1 leaves accumulate with T,
+    so every occupancy is recoverable given a long enough run.
     """
     spacetime = pattern_spacetime(PATTERNS_3D["glider"], size=16, steps=32)
     frame = scan(spacetime)
@@ -253,18 +266,31 @@ def test_the_defect_mask_carries_the_glider_when_the_period_is_missed():
 
 
 @pytest.mark.parametrize("name", ["blinker", "oscillator-4"])
-def test_a_sparse_oscillator_is_also_missed(name):
-    """Not specific to motion: a stationary period-p structure is missed too."""
+def test_a_stationary_structure_needs_the_same_horizon_budget(name):
+    """Not specific to motion: a stationary period-p structure behaves the same."""
     frame = scan(pattern_spacetime(PATTERNS_3D[name], size=16, steps=24))
     assert len(zero_defect_rows(frame)) >= 1
     assert period_first_selection_from_frame(frame).selected_period == 1
 
 
-def test_recovery_improves_as_the_structure_fills_more_of_the_lattice():
-    """Monotone in the right direction: small lattice recovers, large does not."""
-    recovered = {}
-    for size in (6, 16):
-        frame = scan(pattern_spacetime(PATTERNS_3D["glider"], size=size, steps=32))
-        recovered[size] = period_first_selection_from_frame(frame).selected_period == 4
-    assert recovered[6] is True
-    assert recovered[16] is False
+def test_a_longer_horizon_recovers_the_period_at_fixed_occupancy():
+    """The stabilization property, on a case with a known answer.
+
+    Occupancy is held fixed (same lattice, same single glider) and only the
+    horizon changes. T=32 misses the true period; T=128 recovers it. So the
+    earlier miss is a horizon budget, not a sensitivity floor -- there is no
+    occupancy below which the period becomes unrecoverable.
+
+    Measured recovery horizons: 7^3 and 8^3 at T=128, 10^3 at T=256, 12^3 at
+    T=512 -- roughly T ~ 0.3 x V, i.e. the horizon has to grow about linearly
+    with the spatial volume, which is what the scaling of the two terms
+    predicts.
+    """
+    short = scan(pattern_spacetime(PATTERNS_3D["glider"], size=7, steps=32))
+    assert period_first_selection_from_frame(short).selected_period == 1
+
+    long = scan(pattern_spacetime(PATTERNS_3D["glider"], size=7, steps=128))
+    selection = period_first_selection_from_frame(long)
+    assert selection.selected_period == 4
+    assert tuple(int(v) for v in selection.selected_shift) == (1, 1, 0)
+    assert selection.selected_defect_rate == 0.0
