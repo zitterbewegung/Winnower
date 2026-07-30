@@ -67,7 +67,10 @@ from .experiment_core import (
     space_shuffled_control,
     bernoulli_iid_control,
     make_null_controls,
+    HorizonSweepTask,
     ResumeTable,
+    map_horizon_sweep_tasks,
+    resolve_workers,
     _record_base,
     _add_selection_metrics,
     _grouped_summary,
@@ -609,6 +612,7 @@ def run_lifewiki_horizon_sweep_suite(
     limit_rules: int | None = None,
     resume: bool = True,
     nml_mode: str = "hybrid",
+    workers: int = 1,
 ) -> dict[str, Any]:
     started = time.time()
     output_dir = ensure_output_dir(Path(output_root) / "lifewiki_horizon_sweep")
@@ -625,6 +629,7 @@ def run_lifewiki_horizon_sweep_suite(
         resume=resume,
     )
 
+    tasks: list[HorizonSweepTask] = []
     for rule_entry in rules:
         case = _rulestring_case_from_lifewiki(rule_entry)
         for seed in seed_values:
@@ -635,16 +640,22 @@ def run_lifewiki_horizon_sweep_suite(
             ]
             if not pending_horizons:
                 continue
-            spacetime = simulate_case(case, steps=max_horizon, seed=seed)
-            batch: list[dict[str, Any]] = []
-            for horizon in pending_horizons:
-                outcome = scan_case_spacetime(case, spacetime[: int(horizon)], search=case.search, nml_mode=nml_mode)
-                record = _record_base(case, seed=seed, horizon=int(horizon))
-                record["rulestring"] = rule_entry["rulestring"]
-                _add_selection_metrics(record, outcome.selection)
-                batch.append(record)
-            table.extend(batch)
-            table.flush()
+            tasks.append(
+                HorizonSweepTask(
+                    case=case,
+                    seed=seed,
+                    horizons=tuple(int(h) for h in pending_horizons),
+                    max_horizon=max_horizon,
+                    nml_mode=nml_mode,
+                    search=case.search,
+                    # Set before the selection metrics, preserving column order.
+                    extra=(("rulestring", rule_entry["rulestring"]),),
+                )
+            )
+
+    for batch in map_horizon_sweep_tasks(tasks, workers=workers):
+        table.extend(batch)
+        table.flush()
 
     runs = table.flush()
 
@@ -765,6 +776,7 @@ def run_eca_atlas_suite(
     resume: bool = True,
     nml_mode: str = "hybrid",
     search: SearchConfig = DEFAULT_SEARCH_1D,
+    workers: int = 1,
 ) -> dict[str, Any]:
     started = time.time()
     output_dir = ensure_output_dir(Path(output_root) / "eca_atlas")
@@ -781,24 +793,28 @@ def run_eca_atlas_suite(
         resume=resume,
     )
 
-    for case in cases:
-        for seed in seed_values:
-            pending_horizons = [
+    tasks = [
+        HorizonSweepTask(
+            case=case,
+            seed=seed,
+            horizons=tuple(pending),
+            max_horizon=max_horizon,
+            nml_mode=nml_mode,
+            search=search,
+        )
+        for case in cases
+        for seed in seed_values
+        if (
+            pending := [
                 horizon
                 for horizon in horizon_values
                 if not table.has_key({"rule": case.name, "seed": seed, "horizon": int(horizon)})
             ]
-            if not pending_horizons:
-                continue
-            spacetime = simulate_case(case, steps=max_horizon, seed=seed)
-            batch: list[dict[str, Any]] = []
-            for horizon in pending_horizons:
-                outcome = scan_case_spacetime(case, spacetime[: int(horizon)], search=search, nml_mode=nml_mode)
-                record = _record_base(case, seed=seed, horizon=int(horizon))
-                _add_selection_metrics(record, outcome.selection)
-                batch.append(record)
-            table.extend(batch)
-            table.flush()
+        )
+    ]
+    for batch in map_horizon_sweep_tasks(tasks, workers=workers):
+        table.extend(batch)
+        table.flush()
 
     runs = table.flush()
 
@@ -1458,8 +1474,10 @@ def run_all_suite(
     generate_paper_markdown: bool = True,
     lifewiki_limit: int | None = None,
     eca_limit: int | None = None,
+    workers: int = 1,
 ) -> dict[str, Any]:
     started = time.time()
+    workers = resolve_workers(workers)
     output_root = ensure_output_dir(Path(output_root))
 
     manifests: dict[str, Any] = {}
@@ -1487,6 +1505,7 @@ def run_all_suite(
             base_seed=base_seed,
             resume=resume,
             limit_rules=lifewiki_limit,
+            workers=workers,
         )
     if run_eca_atlas:
         manifests["eca_atlas"] = run_eca_atlas_suite(
@@ -1494,6 +1513,7 @@ def run_all_suite(
             base_seed=base_seed,
             resume=resume,
             limit_rules=eca_limit,
+            workers=workers,
         )
     if run_3d_survey:
         manifests["survey_3d"] = run_3d_survey_suite(
@@ -1516,6 +1536,7 @@ def run_all_suite(
         "output_root": output_root,
         "base_seed": base_seed,
         "resume": resume,
+        "workers": workers,
         "flags": {
             "run_null_controls": run_null_controls,
             "run_seed_stability": run_seed_stability,

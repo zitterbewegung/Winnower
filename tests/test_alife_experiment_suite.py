@@ -229,3 +229,97 @@ def test_resume_report_is_quiet_when_everything_was_computed() -> None:
     })
     assert summary["suites_that_recomputed_nothing"] == []
     assert "WARNING" not in format_resume_report(summary)
+
+
+# --- Parallel sweeps must not change results ----------------------------------
+#
+# The LifeWiki and ECA-atlas sweeps are the expensive half of the suite (~6.5h
+# and ~40min serial) and their units are independent, so they parallelise. The
+# only thing that matters is that they produce exactly what a serial run
+# produces: Executor.map yields in submission order, and the tables are
+# key-sorted on flush, so order is pinned twice over.
+
+
+def _eca_tasks(n: int = 4):
+    from relative_symmetry_repair.experiment_core import HorizonSweepTask, eca_case
+
+    return [
+        HorizonSweepTask(
+            case=eca_case(rule, width=48),
+            seed=11,
+            horizons=(20, 40),
+            max_horizon=40,
+        )
+        for rule in (30, 54, 110, 90)[:n]
+    ]
+
+
+def test_horizon_sweep_task_produces_one_record_per_horizon() -> None:
+    from relative_symmetry_repair.experiment_core import run_horizon_sweep_task
+
+    records = run_horizon_sweep_task(_eca_tasks(1)[0])
+    assert [r["horizon"] for r in records] == [20, 40]
+    assert all(r["rule"] == "ECA-30" and r["seed"] == 11 for r in records)
+    assert all("selected_period" in r for r in records)
+
+
+def test_extra_columns_land_before_the_selection_metrics() -> None:
+    """CSV column order must not depend on how a record was assembled."""
+    from relative_symmetry_repair.experiment_core import (
+        HorizonSweepTask,
+        eca_case,
+        run_horizon_sweep_task,
+    )
+
+    task = HorizonSweepTask(
+        case=eca_case(30, width=48), seed=11, horizons=(20,), max_horizon=20,
+        extra=(("rulestring", "B3/S23"),),
+    )
+    keys = list(run_horizon_sweep_task(task)[0])
+    assert keys.index("rulestring") < keys.index("selected_period")
+
+
+def test_serial_mapping_preserves_task_order() -> None:
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    tasks = _eca_tasks()
+    got = [b[0]["rule"] for b in map_horizon_sweep_tasks(tasks, workers=1)]
+    assert got == [t.case.name for t in tasks]
+
+
+def test_parallel_and_serial_sweeps_agree_exactly() -> None:
+    """The guarantee the speedup rests on."""
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    tasks = _eca_tasks()
+    serial = [r for batch in map_horizon_sweep_tasks(tasks, workers=1) for r in batch]
+    parallel = [r for batch in map_horizon_sweep_tasks(tasks, workers=2) for r in batch]
+    assert parallel == serial
+
+
+def test_progress_is_reported_once_per_task() -> None:
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    seen: list[tuple[int, int]] = []
+    tasks = _eca_tasks()
+    list(map_horizon_sweep_tasks(tasks, workers=1, progress=lambda d, t: seen.append((d, t))))
+    assert seen == [(i + 1, len(tasks)) for i in range(len(tasks))]
+
+
+def test_empty_task_list_is_a_no_op() -> None:
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    assert list(map_horizon_sweep_tasks([], workers=4)) == []
+
+
+def test_resolve_workers_semantics() -> None:
+    import os
+
+    from relative_symmetry_repair.experiment_core import resolve_workers
+
+    cpus = os.cpu_count() or 1
+    assert resolve_workers(1) == 1
+    assert resolve_workers(None) == max(1, cpus - 2)   # leave headroom
+    assert resolve_workers(0) == max(1, cpus - 2)
+    assert resolve_workers(-1) == cpus                 # all cores
+    assert resolve_workers(10_000) == cpus             # capped

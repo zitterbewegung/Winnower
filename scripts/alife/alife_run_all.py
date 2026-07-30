@@ -20,6 +20,12 @@ def main() -> None:
     parser.add_argument("--base-seed", type=int, default=11)
     parser.add_argument("--lifewiki-limit", type=int, default=None)
     parser.add_argument("--eca-limit", type=int, default=None)
+    parser.add_argument(
+        "--workers", type=int, default=1,
+        help="Processes for the LifeWiki and ECA-atlas sweeps, whose units are "
+             "independent. 0 = CPU count minus two, negative = all cores. "
+             "Results are identical to a serial run.",
+    )
     parser.add_argument("--skip-null-controls", action="store_true")
     parser.add_argument("--skip-seed-stability", action="store_true")
     parser.add_argument("--skip-candidate-range-robustness", action="store_true")
@@ -61,6 +67,7 @@ def main() -> None:
         generate_paper_markdown=not args.skip_paper_reports,
         lifewiki_limit=args.lifewiki_limit,
         eca_limit=args.eca_limit,
+        workers=args.workers,
     )
     print(f"Wrote ALIFE suite outputs to {Path(manifest['output_root']).resolve()}")
     resume_summary = manifest.get("resume_summary")
