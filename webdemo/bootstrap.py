@@ -173,6 +173,7 @@ from relative_symmetry_repair.experiment_core import (  # noqa: E402
     rule3d_general_case,
     simulate_case,
 )
+from relative_symmetry_repair.reading import build_reading  # noqa: E402
 from relative_symmetry_repair.repair import scan_relative_periodicity  # noqa: E402
 from relative_symmetry_repair.repair_nd import scan_relative_periodicity_nd  # noqa: E402
 
@@ -314,11 +315,25 @@ def run_repro(family: str, rule, seed: int, horizon: int, progress=None) -> dict
     period_summary = selection.period_summary[
         ["period_rank", "period", "best_shift_str", "nml_bits", "nll_bits", "nml_complexity", "defect_rate"]
     ].to_dict("records")
+    defects_per_frame = [int(v) for v in defect.reshape(defect.shape[0], -1).sum(axis=1)]
+
+    # Every interpretive decision the page shows is made here, by the same
+    # module and the same thresholds the experiment suite uses -- the page
+    # renders this payload rather than re-deriving it in JavaScript.
+    reading = build_reading(
+        record=record,
+        period_summary=period_summary,
+        defects_per_frame=defects_per_frame,
+        shape=spacetime.shape,
+        n_candidates=int(len(full_frame)),
+        dimension=case.dimension,
+    )
 
     return {
         "record": _py(record),
         "period_summary": _py(period_summary),
-        "defects_per_frame": [int(v) for v in defect.reshape(defect.shape[0], -1).sum(axis=1)],
+        "defects_per_frame": defects_per_frame,
+        "reading": _py(reading),
         "fields": fields,
         "dimension": case.dimension,
         "case_name": case.name,
