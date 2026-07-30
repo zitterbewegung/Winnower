@@ -7,6 +7,13 @@ on:
       - claude/scientific-evaluation-interface-awe5sw
     paths:
       - "scripts/build_review_site.py"
+      # The live demo's own source. build_review_site.py copies reproduce.html
+      # and repro_worker.js into the site verbatim, and bundles the package
+      # below into winnower_src.zip, so a change to either changes the site
+      # without touching anything else listed here. Both were missing until
+      # 2026-07-30, when a demo-only change merged and silently did not deploy.
+      - "webdemo/**"
+      - "src/relative_symmetry_repair/**"
       - "outputs/alife_2026/**"
       - "paper/paper_alife2026.pdf"
       - "paper/paper_alife2026.tex"
