@@ -102,6 +102,14 @@ td.mismatch { color: var(--err); font-weight: 700; }
 .kv .k { font-size: .78rem; color: var(--muted); }
 .kv .v { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .note { font-family: system-ui, sans-serif; font-size: .85rem; color: var(--muted); }
+.reading-head { font-family: system-ui, sans-serif; font-size: .95rem;
+  font-weight: 700; margin: 0 0 .6rem; }
+#reading-line { font-family: system-ui, sans-serif; font-size: .92rem; }
+ul.reading { font-family: system-ui, sans-serif; font-size: .88rem;
+  margin: 0 0 .8rem; padding-left: 1.15rem; }
+ul.reading li { margin-bottom: .45rem; }
+ul.reading li:last-child { margin-bottom: 0; }
+.check-fail { color: var(--err); font-weight: 700; }
 #error { display: none; }
 #error.visible { display: block; }
 #spark { width: 100%; height: 90px; border: 1px solid var(--line);
@@ -120,8 +128,9 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
       This page runs the actual <em>Winnower</em> pipeline
       (<code>relative_symmetry_repair</code>, WebAssembly Python) on a
       space&ndash;time it simulates from your chosen rule, seed, and horizon —
-      infers the periodic domain template and defect mask, and compares the
-      result against the committed row in the paper's result CSVs.
+      infers the periodic domain template and defect mask, compares the result
+      against the committed row in the paper's result CSVs, and reads back what
+      the selected template says about the run.
       &larr; <a href="index.html">Back to the reviewer guide</a>
     </p>
   </div>
@@ -164,7 +173,48 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
       </div>
     </div>
     <p class="hint mt-2 mb-0" id="estimate"></p>
-    <p class="hint mb-0">Committed comparison rows exist for all 256 ECA rules
+    <details class="mt-3" id="search-block">
+      <summary class="reading-head mb-0" style="cursor:pointer">
+        Find rules worth running &mdash; search a rule family
+      </summary>
+      <p class="hint mt-2">
+        Picking rules by hand is how a dead one gets reported: <code>3d-life</code>
+        is extinct from t&nbsp;=&nbsp;49 and <code>clouds</code> freezes into a static
+        blob from t&nbsp;=&nbsp;10, and a dead or frozen lattice is exactly
+        relative-periodic under <code>p&nbsp;=&nbsp;1, s&nbsp;=&nbsp;0</code> at zero
+        defect rate. This screens a sample of a rule family for rules that are
+        still <em>doing</em> something at the horizon &mdash; each at its own best
+        initial density &mdash; then runs the real selector on some of the survivors
+        and ranks them by defect rate.
+      </p>
+      <div class="controls row g-3 align-items-end">
+        <div class="col-auto">
+          <label class="form-label" for="search-space">Rule family</label>
+          <select id="search-space" class="form-select"></select>
+        </div>
+        <div class="col-auto">
+          <label class="form-label" for="search-budget">Rules to screen</label>
+          <input id="search-budget" class="form-control narrow" type="number"
+                 min="10" max="5000" step="10" value="300">
+        </div>
+        <div class="col-auto">
+          <label class="form-label" for="search-evals">Selector runs</label>
+          <input id="search-evals" class="form-control narrow" type="number"
+                 min="1" max="50" value="10">
+        </div>
+        <div class="col-auto">
+          <button id="search-run" type="button" class="btn btn-outline-primary px-4" disabled>
+            Search
+          </button>
+        </div>
+      </div>
+      <p class="hint mt-2 mb-0" id="search-estimate"></p>
+      <p class="note mb-0 mt-2" id="search-summary"></p>
+      <div class="table-responsive tbl-wrap mt-2" id="search-wrap" style="display:none">
+        <table id="search-table" class="table table-sm table-striped"></table>
+      </div>
+    </details>
+    <p class="hint mb-0 mt-3">Committed comparison rows exist for all 256 ECA rules
       (seeds 11&ndash;15, T &isin; {50, 100, 200, 400, 800}), ECA 30/54/110 (seeds 11&ndash;20,
       plus T = 600), and Diamoeba (seeds 11&ndash;15). Custom rules and other
       configurations run in exploration mode. The candidate search grid is the
@@ -202,6 +252,11 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
       <div class="table-responsive tbl-wrap" id="compare-wrap">
         <table id="compare" class="table table-sm table-striped"></table>
       </div>
+      <hr class="my-4">
+      <h3 class="reading-head">Reading the selected domain template</h3>
+      <p id="reading-line"></p>
+      <ul id="reading-list" class="reading"></ul>
+      <p class="note mb-0" id="reading-caveat"></p>
     </div>
   </div>
 
@@ -312,10 +367,19 @@ worker.onmessage = (event) => {
       `numpy ${payload.numpy} · scipy ${payload.scipy} · pandas ${payload.pandas}` +
       (payload.lz4 ? "" : " · lz4 unavailable (zlib shim; cosmetic column only)");
   }
+  else if (type === "spaces") { renderSpaces(payload); }
   else if (type === "ready") {
     workerReady = true;
     setStatus("Ready — pick a configuration and press Run.", 0);
     $("run").disabled = false;
+    $("search-run").disabled = false;
+  }
+  else if (type === "search-progress") { setStatus(payload.text, payload.frac); }
+  else if (type === "search-result") {
+    $("run").disabled = false;
+    $("search-run").disabled = false;
+    setStatus(`Rule search done in ${payload.runtime_s}s.`, 1);
+    renderSearch(payload);
   }
   else if (type === "result") {
     $("run").disabled = false;
@@ -425,6 +489,150 @@ $("run").addEventListener("click", () => {
     horizon: parseInt($("horizon").value, 10),
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule search
+//
+// Screening and ranking happen in Python (relative_symmetry_repair.rule_search),
+// against the same simulator and the same selector as every other run on this
+// page; this section only builds the request and renders the reply. "Useful"
+// means the rule is still changing at the horizon and the selector finds a
+// domain with a sparse defect mask — it is not a judgement about the rule.
+// ---------------------------------------------------------------------------
+const SPACE_LABELS = {
+  eca: "1D elementary CA",
+  life_range: "2D survive/birth ranges",
+  lifewiki: "2D named LifeWiki rules",
+  rule3d: "3D survive/birth ranges",
+};
+let ruleSpaces = {};
+
+function renderSpaces(spaces) {
+  ruleSpaces = spaces || {};
+  const select = $("search-space");
+  select.innerHTML = "";
+  for (const [name, meta] of Object.entries(ruleSpaces)) {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = `${SPACE_LABELS[name] || name} (${grp(meta.size)} rules)`;
+    select.appendChild(opt);
+  }
+  select.value = ruleSpaces.rule3d ? "rule3d" : Object.keys(ruleSpaces)[0];
+  refreshSearchEstimate();
+}
+
+// Seconds per screened rule and per selector run, measured under the demo's
+// own vectorized kernels (no numba under WebAssembly). 3D screening costs most
+// because it runs to T=80 over a five-density ladder.
+const SEARCH_COST = {
+  eca:        { screen: 0.009, evaluate: 0.05 },
+  life_range: { screen: 0.05,  evaluate: 0.5 },
+  lifewiki:   { screen: 0.05,  evaluate: 0.5 },
+  rule3d:     { screen: 0.10,  evaluate: 0.9 },
+};
+
+function refreshSearchEstimate() {
+  const budget = parseInt($("search-budget").value, 10) || 0;
+  const evals = parseInt($("search-evals").value, 10) || 0;
+  const space = $("search-space").value;
+  const size = (ruleSpaces[space] || {}).size || 0;
+  const cost = SEARCH_COST[space] || SEARCH_COST.rule3d;
+  const seconds = Math.round(budget * cost.screen + evals * cost.evaluate);
+  $("search-estimate").textContent =
+    `Screens ${grp(budget)} of ${grp(size)} rules (a random sample when the ` +
+    `family is larger), then runs the selector on up to ${evals} survivors. ` +
+    `Rough estimate: ${seconds < 60 ? `${seconds}s` : `${Math.round(seconds / 60)} min`}.`;
+}
+for (const id of ["search-budget", "search-evals", "search-space"]) {
+  $(id).addEventListener("input", refreshSearchEstimate);
+  $(id).addEventListener("change", refreshSearchEstimate);
+}
+
+$("search-run").addEventListener("click", () => {
+  $("error").classList.remove("visible");
+  $("search-run").disabled = true;
+  $("run").disabled = true;
+  setStatus("Screening rules…", 0);
+  worker.postMessage({
+    type: "search",
+    space: $("search-space").value,
+    budget: parseInt($("search-budget").value, 10),
+    maxEvaluations: parseInt($("search-evals").value, 10),
+  });
+});
+
+function renderSearch(res) {
+  const c = res.counts || {};
+  const screened = res.screened || 0;
+  const pctOf = (n) => (screened ? `${Math.round((n / screened) * 100)}%` : "0%");
+  $("search-summary").innerHTML =
+    `Screened <strong>${grp(screened)}</strong> of ${grp(res.space_size)} rules ` +
+    `in the family: <strong>${grp(c.active || 0)}</strong> still active at the ` +
+    `horizon (${pctOf(c.active || 0)}), ${grp(c.extinct || 0)} extinct, ` +
+    `${grp(c.frozen || 0)} frozen, ${grp(c.saturated || 0)} saturated. ` +
+    (res.active_not_evaluated
+      ? `The selector was run on ${grp(res.evaluated)} of them; ` +
+        `<strong>${grp(res.active_not_evaluated)} active rules were left unscored</strong> ` +
+        `by the selector budget, so this ranking is a sample, not the family's best.`
+      : `The selector was run on all ${grp(res.evaluated)}.`);
+
+  const rows = res.results || [];
+  const wrap = $("search-wrap");
+  if (!rows.length) {
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "";
+  const head = ["#", "rule", "density", "p", "s", "defect rate", "bits/site", "status", ""];
+  const html = [`<thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>`];
+  rows.forEach((r, i) => {
+    const label = r.rule.label;
+    const shift = `(${r.selected_shift.join(", ")})`;
+    html.push(
+      `<tr><td>${i + 1}</td><td><code>${label}</code></td>` +
+      `<td>${Number(r.screen.density).toFixed(2)}</td>` +
+      `<td>${r.selected_period}</td><td>${shift}</td>` +
+      `<td>${pct(r.defect_rate, 3)}</td>` +
+      `<td>${Number(r.bits_per_site).toFixed(3)}</td>` +
+      `<td>${r.status}</td>` +
+      `<td><button type="button" class="btn btn-sm btn-outline-secondary" ` +
+      `data-search-load="${i}">Load</button></td></tr>`
+    );
+  });
+  html.push("</tbody>");
+  $("search-table").innerHTML = html.join("");
+
+  $("search-table").querySelectorAll("[data-search-load]").forEach((button) => {
+    button.addEventListener("click", () => loadFoundRule(rows[Number(button.dataset.searchLoad)]));
+  });
+}
+
+// Put a found rule into the main controls above, so it can be run in full and
+// inspected like any other configuration.
+function loadFoundRule(row) {
+  const spec = row.rule;
+  if (spec.family === "eca") {
+    caseSelect.value = "eca";
+    $("rule").value = spec.rule_number;
+  } else if (spec.family === "life_rulestring") {
+    caseSelect.value = "custom2d";
+    $("rulestring").value = spec.rulestring;
+  } else if (spec.family === "life_range") {
+    // The 2D range family has no rulestring input; express it as one.
+    const [sLo, sHi] = spec.survive, [bLo, bHi] = spec.birth;
+    const span = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, k) => lo + k).join("");
+    caseSelect.value = "custom2d";
+    $("rulestring").value = `B${span(bLo, bHi)}/S${span(sLo, sHi)}`;
+  } else if (spec.family === "rule3d" || spec.family === "rule3d_general") {
+    caseSelect.value = "custom3d";
+    $("rulestring3d").value = spec.rulestring
+      || `B${spec.birth[0]}-${spec.birth[1]}/S${spec.survive[0]}-${spec.survive[1]}`;
+    $("dens3").value = Number(row.screen.density).toFixed(2);
+  }
+  refreshControls();
+  caseSelect.scrollIntoView({ behavior: "smooth", block: "center" });
+  setStatus(`Loaded ${spec.label} into the controls — press Run.`, 0);
+}
 
 // ---------------------------------------------------------------------------
 // Field decoding
@@ -724,6 +932,381 @@ function renderVerdict(rec) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Reading the selected domain template
+//
+// The comparison table answers "did this browser regenerate the committed
+// row?". This answers the question a reader actually came with: what does the
+// selected template say about the run?
+//
+// Every decision shown here — which kind of domain won, what the margin is
+// worth, what the defect mask did over time — is made in Python by
+// relative_symmetry_repair.reading, against the same thresholds
+// experiment_core.py uses for the paper's own tables, and arrives ready-made
+// on res.reading. This section formats that payload and nothing else: no
+// threshold is restated here and no run is re-classified here, so the page
+// cannot drift from the pipeline. The logic is covered by
+// tests/test_reading.py; the wiring by tests/test_webdemo_bootstrap.py.
+// ---------------------------------------------------------------------------
+
+const grp = (v) => Number(v).toLocaleString("en-US");
+const bits = (v) => Number(v).toLocaleString("en-US",
+  { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const pct = (v, d = 2) => `${(Number(v) * 100).toFixed(d)}%`;
+const plural = (n, word) => `${grp(n)} ${word}${Math.abs(Number(n)) === 1 ? "" : "s"}`;
+
+// s = 3 / s = (1, -2), as the prose spells it.
+const shiftText = (dim, shift) =>
+  (dim === 1 ? `s = ${shift[0]}` : `s = (${shift.join(", ")})`);
+// 3 / (1, -2), as selected_shift_str spells it.
+const shiftLiteral = (dim, shift) =>
+  (dim === 1 ? String(shift[0]) : `(${shift.join(", ")})`);
+const oneDp = (v) => Number(v).toFixed(1);
+
+function templateItem(reading) {
+  const t = reading.template;
+  const dim = reading.dimension;
+  const p = t.period;
+  const sTxt = shiftText(dim, t.shift);
+  const sDesc = dim === 1
+    ? `${plural(Math.abs(t.shift[0]), "cell")} to the ${t.shift[0] < 0 ? "left" : "right"}`
+    : `(${t.shift.join(", ")}) cells`;
+  const velTxt = dim === 1
+    ? `${Number(t.velocity[0]).toFixed(3)} cells per step`
+    : `(${t.velocity.map((v) => Number(v).toFixed(2)).join(", ")}) cells per step`;
+
+  switch (t.kind) {
+    case "static_period_1":
+      return "<strong>Period-1 template.</strong> The winner is <code>p = 1</code>" +
+        (t.shift_identified
+          ? ", <code>s = 0</code> — one frame, repeated. That is the coarsest " +
+            "candidate in the grid: the longest orbits, so the fewest orbit models " +
+            "to pay for. "
+          : `, but ${t.shift_tie_count} displacements score identically, ` +
+            `so on score alone this page cannot separate a static frame from a ` +
+            `drifting one. `) +
+        "No scanned periodicity paid for its own complexity here, so every " +
+        "time-varying structure in this run is carried by the defect mask rather " +
+        "than by the domain.";
+
+    case "rigid_drift":
+      return `<strong>Rigid drift.</strong> <code>p = 1</code> with <code>${sTxt}</code>: ` +
+        `a single frame translated by ${sDesc} every step ` +
+        `(<code>B[t+1, x+s] = B[t, x]</code>) — a domain with a velocity but no ` +
+        `internal phase.`;
+
+    case "static_periodic":
+      return `<strong>Periodic domain, period ${p}.</strong> ` +
+        `<code>B[t+${p}, x+s] = B[t, x]</code>` + (t.shift_identified
+          ? ` with <code>s = 0</code>: the domain returns to itself every ${p} ` +
+            `steps in place`
+          : `, with ${t.shift_tie_count} displacements scoring ` +
+            `identically at this period — the reported ` +
+            `<code>${shiftLiteral(dim, t.shift)}</code> is a tie-break, so read the ` +
+            `period, not the displacement`) +
+        `. Sites ${p} steps apart along the candidate's translation share one ` +
+        `orbit, and the template is each orbit's majority state.`;
+
+    default:
+      return `<strong>Drifting periodic domain.</strong> ` +
+        `<code>B[t+${p}, x+s] = B[t, x]</code> with <code>${sTxt}</code>: the domain ` +
+        `repeats every ${p} steps only after sliding ${sDesc} — a domain velocity of ` +
+        `${velTxt}.`;
+  }
+}
+
+function confidenceItems(reading) {
+  const c = reading.confidence;
+  const th = reading.thresholds;
+  const items = [];
+
+  switch (c.kind) {
+    case "no_alternative":
+      items.push("<strong>No alternative to compare.</strong> Only one period was " +
+        "scanned, so the margin is undefined and the selection carries no evidence " +
+        "against a competitor.");
+      break;
+    case "stable_winner":
+      items.push(`<strong>Clear winner within the grid.</strong> The best ` +
+        `alternative (period ${c.runner_up_period}) costs ${bits(c.margin_bits)} bits ` +
+        `more, clear of the ${oneDp(th.near_tie_bits)}-bit threshold the pipeline ` +
+        `uses to label a run <code>stable_winner</code>. That is a ` +
+        `description-length gap over the whole block under this code, not a ` +
+        `calibrated significance test.`);
+      break;
+    case "near_tie":
+      items.push(`<strong>Near tie — read the period with caution.</strong> Period ` +
+        `${c.runner_up_period} is only ${bits(c.margin_bits)} bits behind` +
+        (c.below_very_small_margin
+          ? `, below even the ${oneDp(th.very_small_margin_bits)}-bit "very small ` +
+            `margin" mark`
+          : "") +
+        `. Under ${oneDp(th.near_tie_bits)} bits the pipeline labels the run ` +
+        `<code>near_tie</code>: two candidates are separated by less than the width ` +
+        `of the tie band, so the period reported here is not settled. The paper's ` +
+        `argument is that a per-site fit-rate difference eventually outgrows the ` +
+        `logarithmic penalty gap, so a longer T tends to separate them — worth ` +
+        `re-running.`);
+      break;
+    default:
+      items.push(`<strong>Unresolved.</strong> The margin is ${bits(c.margin_bits)} ` +
+        `bits: ${c.period_tie_count} periods score identically to within ` +
+        `${th.tie_tolerance_bits} bits, so the winner comes from the tie-break order ` +
+        `(lowest period, then smallest displacement) and not from evidence. Treat ` +
+        `the period as arbitrary within the tied set.`);
+  }
+
+  if (!c.shift_identified) {
+    items.push(`<strong>Displacement is not identified.</strong> ${c.shift_tie_count} ` +
+      `displacements score identically (to ${th.tie_tolerance_bits} bits) at period ` +
+      `${reading.template.period}, so the score does not pin <code>s</code> down; the ` +
+      `reported <code>${shiftLiteral(reading.dimension, reading.template.shift)}</code> ` +
+      `is simply the first of them in scan order (the most negative). Equal scores do ` +
+      `not by themselves mean equal templates — compare the panels below if the ` +
+      `displacement matters to you.`);
+  }
+  return items;
+}
+
+function costItem(reading) {
+  const k = reading.cost;
+  const compressed = k.compresses
+    ? `below the 1.000 bits per site it takes to store the raw field, so this ` +
+      `template codes the observation more cheaply than storing it`
+    : `at or above the 1.000 bits per site it takes to store the raw field, so ` +
+      `this template does not pay for itself as a code`;
+  return `<strong>Coverage and cost.</strong> The template reproduces ` +
+    `${pct(k.coverage)} of the ${grp(k.n_sites)} observed sites (${k.frames} frames ` +
+    `× ${grp(k.cells_per_frame)} cells, transient included); the remaining ` +
+    `${pct(k.defect_rate)} (${grp(k.defect_sites)} sites) are the defect mask — see ` +
+    `the defect series below for how that splits over time. Description length ` +
+    `${bits(k.nml_bits)} bits = ${bits(k.nll_bits)} fit + ${bits(k.complexity_bits)} ` +
+    `model complexity; add ${oneDp(k.index_bits)} bits to name which of the ` +
+    `${k.n_candidates} candidates the search picked and the total is ` +
+    `${Number(k.bits_per_site).toFixed(3)} bits per site — ${compressed}.`;
+}
+
+function penaltyItem(reading) {
+  const x = reading.complexity;
+  if (!x) return null;
+  const th = reading.thresholds;
+
+  let text = `<strong>What the complexity term did.</strong> Ranked by fit alone ` +
+    `(NLL), period ${x.best_nll_period} wins` +
+    (x.best_nll_is_max_period ? " — the largest period scanned" : "") +
+    `; with the Shtarkov complexity term added, period ${x.selected_period} wins`;
+  if (x.fit_agrees) text += " as well — fit and penalized fit agree here";
+  text += ". ";
+
+  const p1 = `the best period-1 template (displacement ` +
+    `<code>${x.period_1_shift_str}</code>)`;
+  if (x.gain_kind === "clear") {
+    text += `The selected domain codes ${bits(x.period_1_gain_bits)} bits cheaper ` +
+      `than ${p1}, so within this grid the extra orbits pay for themselves.`;
+  } else if (x.gain_kind === "thin") {
+    text += `But the selected domain codes only ${bits(x.period_1_gain_bits)} bits ` +
+      `cheaper than ${p1}: that gap is the entire case for the periodicity, and it ` +
+      `is thinner than the ${oneDp(th.near_tie_bits)}-bit tie band.`;
+  } else if (x.gain_kind === "negative") {
+    text += `${p1.charAt(0).toUpperCase() + p1.slice(1)} is not beaten on these ` +
+      `numbers (${bits(-x.period_1_gain_bits)} bits), which should not happen for a ` +
+      `rank-1 winner — please report it.`;
+  } else if (x.selected_period === 1 && x.runner_up_period) {
+    text += `No longer period beat period 1: the closest, period ` +
+      `${x.runner_up_period}, costs ${bits(x.margin_bits)} bits more.`;
+  }
+
+  if (reading.dimension === 2) {
+    text += ` (In the paper's sweep of 105 non-degenerate Life-like rules at ` +
+      `T = 100, NLL selects the largest scanned period for every rule while NML ` +
+      `selects period 1 for 97.)`;
+  }
+  return text;
+}
+
+// Formats the defect-dynamics classification computed in reading.py. The
+// thresholds quoted in this prose (±25% trend band, dense-mask share) come
+// from the payload, so changing them in Python changes what the page says.
+function defectNarrative(reading) {
+  const d = reading.defects;
+  const th = reading.thresholds;
+  const T = d.frames;
+  const thirdsTxt = d.thirds.map((v) => oneDp(v)).join(" → ");
+  // change is null when the window opens empty (an unbounded rise).
+  const changeTxt = (d.change === null || Math.abs(d.change) > 9.99)
+    ? ((d.change === null || d.change > 0) ? "+>999%" : "-100%")
+    : `${d.change > 0 ? "+" : ""}${(d.change * 100).toFixed(0)}%`;
+  const trail = `Peak ${plural(d.peak, "site")} at t = ${d.peak_at}; final frame ` +
+    `${plural(d.final_count, "site")}.`;
+  const band = `±${(th.trend_band * 100).toFixed(0)}%`;
+  const settled = d.settled
+    ? ` after decaying from ${oneDp(d.thirds[0])} earlier in the run`
+    : "";
+  const last = d.last_defect_index;
+
+  switch (d.kind) {
+    case "no_series":
+      return {
+        short: "no per-frame defect counts were returned",
+        html: "<strong>No defect series.</strong> The run returned no per-frame " +
+          "defect counts, so the mask cannot be read over time.",
+      };
+
+    case "exact":
+      return {
+        short: "the defect mask is empty — the template reproduces the run exactly",
+        html: "<strong>Exact domain.</strong> Not one site disagrees with the " +
+          "template: the observation is exactly relative-periodic under the " +
+          "selected candidate.",
+      };
+
+    case "transient":
+      return {
+        short: `the defect mask empties after t = ${last}`,
+        html: `<strong>Defects are transient.</strong> The last disagreement is at ` +
+          `t = ${last}; over the observed suffix from t = ${last + 1} to ` +
+          `t = ${T - 1} every site matches the template, so the domain is exact ` +
+          `after a ${last + 1}-step transient (nothing is claimed past ` +
+          `t = ${T - 1}). ${trail}`,
+      };
+
+    case "near_exact":
+      return {
+        short: `the defect mask is all but empty by the end of the run ` +
+          `(${Number(d.end_level).toFixed(2)} sites per frame)`,
+        html: `<strong>Near-exact domain.</strong> Over the last ${d.end_frames} ` +
+          `frames the mask averages ${Number(d.end_level).toFixed(2)} sites per ` +
+          `frame${settled}, and ${d.empty_end_frames} of those ${d.end_frames} ` +
+          `frames carry no defect at all — under one site per frame either way. ` +
+          `${trail}`,
+      };
+
+    case "growing":
+      return {
+        short: `the defect count trends upward across the second half of the run`,
+        html: `<strong>Defect count trending up.</strong> Block means over the ` +
+          `second half of the run rise ${thirdsTxt} sites per frame ` +
+          `(${changeTxt} end to end): the template covers a shrinking share of the ` +
+          `run as it goes on, so the mask has not settled over the window observed. ` +
+          `Re-run at a longer horizon to see whether it levels off. ${trail}`,
+      };
+
+    case "decaying":
+      return {
+        short: `the defect count trends downward across the second half of the run`,
+        html: `<strong>Defect count trending down.</strong> Block means over the ` +
+          `second half of the run fall ${thirdsTxt} sites per frame ` +
+          `(${changeTxt} end to end): defects are decaying but had not vanished by ` +
+          `t = ${T - 1}. A longer horizon may show the domain becoming exact. ` +
+          `${trail}`,
+      };
+
+    case "too_short":
+      return {
+        short: `the defect mask still holds ~${grp(Math.round(d.level))} sites per ` +
+          `frame at the end of the run`,
+        html: `<strong>Defects present, run too short to call a trend.</strong> Over ` +
+          `the second half (${d.window_frames} frames) the mask averages ` +
+          `${oneDp(d.level)} sites per frame, ${pct(d.tail_share, 2)} of a frame. ` +
+          `${d.window_frames} frames cannot separate a trend from fluctuation — ` +
+          `re-run at a longer horizon before reading persistence into this. ${trail}`,
+      };
+
+    case "dense":
+      return {
+        short: `the mask stays dense — ${pct(d.tail_share, 1)} of a frame on average ` +
+          `(~${grp(Math.round(d.level))} sites) through the second half`,
+        html: `<strong>Dense defect mask, no trend.</strong> Block means over the ` +
+          `second half of the run are ${thirdsTxt} sites per frame — averaging ` +
+          `${pct(d.tail_share, 2)} of a frame, with no monotone move beyond the ` +
+          `${band} band this page checks. A mask that dense is not sparse departures ` +
+          `from a domain — whatever it contains, the template is capturing only a ` +
+          `coarse component of this run. ${trail}`,
+      };
+
+    default:
+      return {
+        short: `the defect mask holds a steady ~${grp(Math.round(d.level))} sites ` +
+          `per frame through the second half`,
+        html: `<strong>Persistent defect population.</strong> Block means over the ` +
+          `second half of the run hold at ${thirdsTxt} sites per frame ` +
+          `(${pct(d.tail_share, 2)} of a frame) with no monotone move beyond the ` +
+          `${band} band this page checks, while the rest of each frame follows the ` +
+          `domain. That is the paper's candidate signature for localized structures ` +
+          `or domain interfaces — but this page counts defect sites and does not ` +
+          `measure where they sit, so use the mask panels below to judge whether ` +
+          `they are localized. ${trail}`,
+      };
+  }
+}
+
+function renderReading(res) {
+  const reading = res.reading;
+  const rec = res.record;
+  if (!reading) {
+    // An older payload without a reading: say so rather than half-rendering.
+    $("reading-line").innerHTML =
+      `<span class="badge rounded-pill text-bg-secondary me-1">NO READING</span> ` +
+      `This result carries no reading payload — the comparison table above is ` +
+      `unaffected.`;
+    $("reading-list").innerHTML = "";
+    $("reading-caveat").innerHTML = "";
+    return;
+  }
+
+  const t = reading.template;
+  const d = reading.defects;
+  const k = reading.cost;
+  const narrative = defectNarrative(reading);
+
+  const badges = [[d.badge_class, d.badge_label]];
+  if (reading.confidence.kind === "near_tie") {
+    badges.push(["text-bg-warning", "NEAR TIE"]);
+  } else if (reading.confidence.kind === "unresolved") {
+    badges.push(["text-bg-warning", "UNRESOLVED"]);
+  }
+
+  const sTxt = t.shift_identified
+    ? shiftText(reading.dimension, t.shift)
+    : "displacement not identified";
+  $("reading-line").innerHTML =
+    badges.map(([cls, label]) =>
+      `<span class="badge rounded-pill ${cls} me-1">${label}</span>`).join("") +
+    ` Winnower selected <strong>period ${t.period}, ${sTxt}</strong> for ` +
+    `${res.case_name} (seed ${rec.seed}, T = ${rec.horizon}): the template accounts ` +
+    `for ${pct(k.coverage)} of the ${grp(k.n_sites)} observed sites, and ` +
+    `${narrative.short}.`;
+
+  const items = [templateItem(reading)];
+  items.push(...confidenceItems(reading));
+  items.push(costItem(reading));
+  const penalty = penaltyItem(reading);
+  if (penalty) items.push(penalty);
+  items.push(narrative.html);
+  $("reading-list").innerHTML = items.map((html) => `<li>${html}</li>`).join("");
+
+  // Invariant, checked in reading.py: the mask drawn on this page must carry
+  // exactly the defect rate that was scored. Any disagreement means the
+  // rendered fields and the selection record came from different fits.
+  const cc = reading.consistency;
+  const g = reading.grid;
+  const gridNote = (g.min_period !== null && g.max_period !== null)
+    ? `periods ${g.min_period}–${g.max_period}, ${g.n_candidates} candidates, ` +
+      `grid "${res.search_label}"`
+    : `${g.n_candidates} candidates, grid "${res.search_label}"`;
+  $("reading-caveat").innerHTML =
+    `This is one run. The template is the best candidate in the scanned grid ` +
+    `(${gridNote}), not a proof that the system has no other symmetry, and defect ` +
+    `sites are candidate departures from the domain — not identified particles. ` +
+    (cc.ok
+      ? `Consistency check: the rendered mask holds ${grp(cc.defect_sites)} sites = ` +
+        `<code>selected_defect_rate</code> × N ✓`
+      : `<span class="check-fail">Consistency check failed: the rendered mask ` +
+        `holds ${grp(cc.defect_sites)} sites (rate ` +
+        `${Number(cc.implied_rate).toExponential(6)}) but the record reports ` +
+        `${Number(cc.recorded_rate).toExponential(6)} — please report this.</span>`);
+}
+
 function renderPanels(res) {
   const panels = $("panels");
   panels.innerHTML = "";
@@ -839,6 +1422,7 @@ function render(res) {
   for (const name of FIELD_ORDER) view.fields[name] = decodeField(res.fields[name]);
 
   renderVerdict(rec);
+  renderReading(res);
 
   const shiftLabel = res.dimension === 1 ? "displacement s" : "displacement vector";
   const kv = [

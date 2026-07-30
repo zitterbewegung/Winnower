@@ -655,6 +655,21 @@ def make_null_controls(spacetime: np.ndarray, *, seed: int) -> dict[str, np.ndar
 
 
 class ResumeTable:
+    """An append-only results table that can continue an interrupted sweep.
+
+    Resuming is the default, and it is silent by construction: rows whose keys
+    are already present are skipped, so a re-run over a complete table does no
+    work and still exits successfully. That is the intended behaviour for a
+    sweep that died halfway, and a trap for anyone re-running to check
+    reproducibility -- ``outputs/alife_2026``'s null-control and
+    seed-stability tables sat four months out of date behind it, through
+    re-runs that reported success while recomputing nothing.
+
+    So the table counts what it reused. :attr:`preexisting_rows` is what was
+    loaded from disk, :attr:`added_rows` what this run actually computed, and
+    :meth:`resume_stats` reports both so callers can say so out loud.
+    """
+
     def __init__(
         self,
         path: Path | str,
@@ -674,6 +689,18 @@ class ResumeTable:
         else:
             self._frame = pd.DataFrame()
         self._keys = self._build_keys(self._frame)
+        self.preexisting_rows = len(self._keys)
+        self.added_rows = 0
+
+    def resume_stats(self) -> dict[str, Any]:
+        """What this run reused versus recomputed."""
+        return {
+            "resume": self.resume,
+            "path": str(self.path),
+            "preexisting_rows": int(self.preexisting_rows),
+            "added_rows": int(self.added_rows),
+            "recomputed_nothing": bool(self.resume and self.preexisting_rows and not self.added_rows),
+        }
 
     def _build_keys(self, frame: pd.DataFrame) -> set[tuple[Any, ...]]:
         if frame.empty:
@@ -695,6 +722,7 @@ class ResumeTable:
             return False
         self._keys.add(key)
         self._pending.append(record)
+        self.added_rows += 1
         return True
 
     def extend(self, records: Iterable[dict[str, Any]]) -> int:
@@ -722,6 +750,104 @@ class ResumeTable:
         self._frame = frame
         self._pending = []
         return frame
+
+
+@dataclass(frozen=True, slots=True)
+class HorizonSweepTask:
+    """One independent unit of a horizon sweep: a case at a seed.
+
+    The spacetime is simulated once at ``max_horizon`` and scanned at each
+    requested horizon, which is what makes ``(case, seed)`` -- rather than
+    ``(case, seed, horizon)`` -- the natural unit: the horizons of one seed
+    share a simulation.
+
+    Units are independent and seeded deterministically, so results do not
+    depend on evaluation order and the sweep parallelises exactly.
+    """
+
+    case: ALifeCase
+    seed: int
+    horizons: tuple[int, ...]
+    max_horizon: int
+    nml_mode: str = "hybrid"
+    search: SearchConfig | None = None
+    #: Extra columns merged into every record *before* the selection metrics,
+    #: preserving CSV column order (the LifeWiki sweep adds ``rulestring``).
+    extra: tuple[tuple[str, Any], ...] = ()
+
+
+def run_horizon_sweep_task(task: HorizonSweepTask) -> list[dict[str, Any]]:
+    """Execute one sweep unit. Must stay importable at module level (pickling)."""
+    spacetime = simulate_case(task.case, steps=int(task.max_horizon), seed=int(task.seed))
+    search = task.search or task.case.search
+    records: list[dict[str, Any]] = []
+    for horizon in task.horizons:
+        outcome = scan_case_spacetime(
+            task.case, spacetime[: int(horizon)], search=search, nml_mode=task.nml_mode
+        )
+        record = _record_base(task.case, seed=int(task.seed), horizon=int(horizon))
+        record.update(dict(task.extra))
+        _add_selection_metrics(record, outcome.selection)
+        records.append(record)
+    return records
+
+
+def map_horizon_sweep_tasks(
+    tasks: Sequence[HorizonSweepTask],
+    *,
+    workers: int = 1,
+    progress: Any = None,
+) -> Iterable[list[dict[str, Any]]]:
+    """Run sweep units, optionally across processes, yielding results in order.
+
+    Order is preserved regardless of ``workers`` (``Executor.map`` yields in
+    submission order), so the CSV a parallel run writes is identical to the
+    one a serial run writes -- the tables are also key-sorted on flush, giving
+    a second guarantee. ``workers=1`` stays in-process, which keeps the
+    single-threaded path free of any executor overhead.
+
+    Caller requirement with ``workers > 1``: process start-up is ``spawn`` on
+    macOS and Windows, so the child re-imports ``__main__``. Any script that
+    calls this must guard its entry point with ``if __name__ == "__main__":``
+    -- otherwise the child re-executes the script's top level. Piping a script
+    via stdin (``python - <<EOF``) cannot work at all, because the child has
+    no file to re-import.
+    """
+    tasks = list(tasks)
+    if not tasks:
+        return
+    if int(workers) <= 1:
+        for index, task in enumerate(tasks):
+            yield run_horizon_sweep_task(task)
+            if progress is not None:
+                progress(index + 1, len(tasks))
+        return
+
+    from concurrent.futures import ProcessPoolExecutor
+
+    with ProcessPoolExecutor(max_workers=int(workers)) as executor:
+        for index, records in enumerate(
+            executor.map(run_horizon_sweep_task, tasks, chunksize=1)
+        ):
+            yield records
+            if progress is not None:
+                progress(index + 1, len(tasks))
+
+
+def resolve_workers(workers: int | None) -> int:
+    """Turn a ``--workers`` value into a concrete count.
+
+    ``None`` or ``0`` means "leave two cores for the rest of the machine";
+    negative means all of them. Capped at the CPU count.
+    """
+    import os
+
+    cpus = os.cpu_count() or 1
+    if workers is None or int(workers) == 0:
+        return max(1, cpus - 2)
+    if int(workers) < 0:
+        return cpus
+    return max(1, min(int(workers), cpus))
 
 
 def _record_base(case: ALifeCase, *, seed: int, horizon: int | None = None) -> dict[str, Any]:

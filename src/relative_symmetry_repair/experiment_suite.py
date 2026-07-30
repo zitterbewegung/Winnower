@@ -67,7 +67,10 @@ from .experiment_core import (
     space_shuffled_control,
     bernoulli_iid_control,
     make_null_controls,
+    HorizonSweepTask,
     ResumeTable,
+    map_horizon_sweep_tasks,
+    resolve_workers,
     _record_base,
     _add_selection_metrics,
     _grouped_summary,
@@ -249,6 +252,7 @@ def run_null_controls_suite(
             "rule_level_rows": int(len(rule_level)),
             "summary_rows": int(len(summary)),
         },
+        "resume": table.resume_stats(),
         "runtime_seconds": time.time() - started,
     }
     manifest_path = write_json_manifest(output_dir / "manifest.json", manifest)
@@ -412,6 +416,7 @@ def run_seed_stability_suite(
             "run_rows": int(len(runs)),
             "summary_rows": int(len(summary)),
         },
+        "resume": table.resume_stats(),
         "runtime_seconds": time.time() - started,
     }
     manifest_path = write_json_manifest(output_dir / "manifest.json", manifest)
@@ -546,6 +551,7 @@ def run_candidate_range_robustness_suite(
             "run_rows": int(len(runs)),
             "summary_rows": int(len(summary)),
         },
+        "resume": table.resume_stats(),
         "runtime_seconds": time.time() - started,
     }
     manifest_path = write_json_manifest(output_dir / "manifest.json", manifest)
@@ -606,6 +612,7 @@ def run_lifewiki_horizon_sweep_suite(
     limit_rules: int | None = None,
     resume: bool = True,
     nml_mode: str = "hybrid",
+    workers: int = 1,
 ) -> dict[str, Any]:
     started = time.time()
     output_dir = ensure_output_dir(Path(output_root) / "lifewiki_horizon_sweep")
@@ -622,6 +629,7 @@ def run_lifewiki_horizon_sweep_suite(
         resume=resume,
     )
 
+    tasks: list[HorizonSweepTask] = []
     for rule_entry in rules:
         case = _rulestring_case_from_lifewiki(rule_entry)
         for seed in seed_values:
@@ -632,16 +640,22 @@ def run_lifewiki_horizon_sweep_suite(
             ]
             if not pending_horizons:
                 continue
-            spacetime = simulate_case(case, steps=max_horizon, seed=seed)
-            batch: list[dict[str, Any]] = []
-            for horizon in pending_horizons:
-                outcome = scan_case_spacetime(case, spacetime[: int(horizon)], search=case.search, nml_mode=nml_mode)
-                record = _record_base(case, seed=seed, horizon=int(horizon))
-                record["rulestring"] = rule_entry["rulestring"]
-                _add_selection_metrics(record, outcome.selection)
-                batch.append(record)
-            table.extend(batch)
-            table.flush()
+            tasks.append(
+                HorizonSweepTask(
+                    case=case,
+                    seed=seed,
+                    horizons=tuple(int(h) for h in pending_horizons),
+                    max_horizon=max_horizon,
+                    nml_mode=nml_mode,
+                    search=case.search,
+                    # Set before the selection metrics, preserving column order.
+                    extra=(("rulestring", rule_entry["rulestring"]),),
+                )
+            )
+
+    for batch in map_horizon_sweep_tasks(tasks, workers=workers):
+        table.extend(batch)
+        table.flush()
 
     runs = table.flush()
 
@@ -726,6 +740,7 @@ def run_lifewiki_horizon_sweep_suite(
             "transition_rows": int(len(transition_summary)),
             "period_distribution_rows": int(len(final_distribution)),
         },
+        "resume": table.resume_stats(),
         "runtime_seconds": time.time() - started,
     }
     manifest_path = write_json_manifest(output_dir / "manifest.json", manifest)
@@ -761,6 +776,7 @@ def run_eca_atlas_suite(
     resume: bool = True,
     nml_mode: str = "hybrid",
     search: SearchConfig = DEFAULT_SEARCH_1D,
+    workers: int = 1,
 ) -> dict[str, Any]:
     started = time.time()
     output_dir = ensure_output_dir(Path(output_root) / "eca_atlas")
@@ -777,24 +793,28 @@ def run_eca_atlas_suite(
         resume=resume,
     )
 
-    for case in cases:
-        for seed in seed_values:
-            pending_horizons = [
+    tasks = [
+        HorizonSweepTask(
+            case=case,
+            seed=seed,
+            horizons=tuple(pending),
+            max_horizon=max_horizon,
+            nml_mode=nml_mode,
+            search=search,
+        )
+        for case in cases
+        for seed in seed_values
+        if (
+            pending := [
                 horizon
                 for horizon in horizon_values
                 if not table.has_key({"rule": case.name, "seed": seed, "horizon": int(horizon)})
             ]
-            if not pending_horizons:
-                continue
-            spacetime = simulate_case(case, steps=max_horizon, seed=seed)
-            batch: list[dict[str, Any]] = []
-            for horizon in pending_horizons:
-                outcome = scan_case_spacetime(case, spacetime[: int(horizon)], search=search, nml_mode=nml_mode)
-                record = _record_base(case, seed=seed, horizon=int(horizon))
-                _add_selection_metrics(record, outcome.selection)
-                batch.append(record)
-            table.extend(batch)
-            table.flush()
+        )
+    ]
+    for batch in map_horizon_sweep_tasks(tasks, workers=workers):
+        table.extend(batch)
+        table.flush()
 
     runs = table.flush()
 
@@ -872,6 +892,7 @@ def run_eca_atlas_suite(
             "run_rows": int(len(runs)),
             "summary_rows": int(len(summary)),
         },
+        "resume": table.resume_stats(),
         "runtime_seconds": time.time() - started,
     }
     manifest_path = write_json_manifest(output_dir / "manifest.json", manifest)
@@ -977,6 +998,7 @@ def run_3d_survey_suite(
             "run_rows": int(len(runs)),
             "summary_rows": int(len(summary)),
         },
+        "resume": table.resume_stats(),
         "runtime_seconds": time.time() - started,
     }
     manifest_path = write_json_manifest(output_dir / "manifest.json", manifest)
@@ -1390,6 +1412,52 @@ def run_counterexample_stress_suite(
     return manifest
 
 
+def summarize_resume(manifests: dict[str, Any]) -> dict[str, Any]:
+    """Roll up what a run reused versus recomputed, per sub-suite.
+
+    Resuming is silent by construction: a re-run over complete tables does no
+    work and exits successfully, which is right for continuing an interrupted
+    sweep and wrong for anyone re-running to verify reproducibility. This
+    turns that into something the caller can print.
+    """
+    per_suite: dict[str, Any] = {}
+    for name, manifest in manifests.items():
+        stats = (manifest or {}).get("resume")
+        if stats:
+            per_suite[name] = stats
+    reused_only = sorted(n for n, s in per_suite.items() if s["recomputed_nothing"])
+    return {
+        "per_suite": per_suite,
+        "suites_that_recomputed_nothing": reused_only,
+        "total_added_rows": sum(s["added_rows"] for s in per_suite.values()),
+        "total_preexisting_rows": sum(s["preexisting_rows"] for s in per_suite.values()),
+    }
+
+
+def format_resume_report(summary: dict[str, Any]) -> str:
+    """Human-readable resume report, including an explicit no-op warning."""
+    lines = ["Resume report (rows reused from existing CSVs vs computed now):"]
+    for name, stats in sorted(summary["per_suite"].items()):
+        flag = "  <-- recomputed NOTHING" if stats["recomputed_nothing"] else ""
+        lines.append(
+            f"  {name:28s} reused {stats['preexisting_rows']:>6d}  "
+            f"computed {stats['added_rows']:>6d}{flag}"
+        )
+    stale = summary["suites_that_recomputed_nothing"]
+    if stale:
+        lines += [
+            "",
+            f"WARNING: {len(stale)} sub-suite(s) reused every row and recomputed nothing:",
+            f"         {', '.join(stale)}",
+            "         Their CSVs are whatever was already on disk -- possibly produced by",
+            "         an older version of this code. This run did NOT verify them.",
+            "         Re-run with --no-resume (or `make data-fresh`) to recompute from scratch.",
+        ]
+    elif summary["total_added_rows"] == 0:
+        lines.append("  (nothing to do: no sub-suite reported resumable tables)")
+    return "\n".join(lines)
+
+
 def run_all_suite(
     *,
     output_root: Path | str = ALIFE_OUTPUT_ROOT,
@@ -1406,8 +1474,10 @@ def run_all_suite(
     generate_paper_markdown: bool = True,
     lifewiki_limit: int | None = None,
     eca_limit: int | None = None,
+    workers: int = 1,
 ) -> dict[str, Any]:
     started = time.time()
+    workers = resolve_workers(workers)
     output_root = ensure_output_dir(Path(output_root))
 
     manifests: dict[str, Any] = {}
@@ -1435,6 +1505,7 @@ def run_all_suite(
             base_seed=base_seed,
             resume=resume,
             limit_rules=lifewiki_limit,
+            workers=workers,
         )
     if run_eca_atlas:
         manifests["eca_atlas"] = run_eca_atlas_suite(
@@ -1442,6 +1513,7 @@ def run_all_suite(
             base_seed=base_seed,
             resume=resume,
             limit_rules=eca_limit,
+            workers=workers,
         )
     if run_3d_survey:
         manifests["survey_3d"] = run_3d_survey_suite(
@@ -1464,6 +1536,7 @@ def run_all_suite(
         "output_root": output_root,
         "base_seed": base_seed,
         "resume": resume,
+        "workers": workers,
         "flags": {
             "run_null_controls": run_null_controls,
             "run_seed_stability": run_seed_stability,
@@ -1479,6 +1552,7 @@ def run_all_suite(
             "eca_limit": eca_limit,
         },
         "manifests": manifests,
+        "resume_summary": summarize_resume(manifests),
         "runtime_seconds": time.time() - started,
     }
     root_manifest_path = write_json_manifest(output_root / "results_manifest.json", root_manifest)

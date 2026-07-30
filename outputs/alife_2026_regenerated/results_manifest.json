@@ -1,0 +1,435 @@
+{
+  "base_seed": 11,
+  "experiment": "alife_run_all",
+  "flags": {
+    "generate_paper_markdown": true,
+    "run_3d_survey": true,
+    "run_candidate_range_robustness": false,
+    "run_counterexample_stress": true,
+    "run_eca_atlas": true,
+    "run_lifewiki_horizon_sweep": false,
+    "run_null_controls": false,
+    "run_seed_stability": false
+  },
+  "limits": {
+    "eca_limit": null,
+    "lifewiki_limit": null
+  },
+  "manifests": {
+    "counterexample_stress": {
+      "counts": {
+        "candidate_range_instability": 13,
+        "nonunique_winners": 400,
+        "null_control_false_positives": 1,
+        "suspicious_repeated_ties": 16,
+        "very_small_margins": 0
+      },
+      "experiment": "alife_counterexample_stress",
+      "files": {
+        "report_json": "outputs/alife_2026/counterexample_stress/counterexample_stress_report.json",
+        "summary_markdown": "outputs/alife_2026/counterexample_stress/counterexample_stress_summary.md"
+      },
+      "manifest_path": "outputs/alife_2026/counterexample_stress/manifest.json",
+      "output_dir": "outputs/alife_2026/counterexample_stress",
+      "runtime_seconds": 0.013937950134277344
+    },
+    "eca_atlas": {
+      "base_seed": 11,
+      "counts": {
+        "run_rows": 6400,
+        "summary_rows": 256
+      },
+      "experiment": "alife_eca_atlas",
+      "files": {
+        "period_plot": "outputs/alife_2026/eca_atlas/eca_atlas_periods.png",
+        "runs_csv": "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
+        "stability_plot": "outputs/alife_2026/eca_atlas/eca_atlas_stability.png",
+        "summary_csv": "outputs/alife_2026/eca_atlas/eca_atlas_summary.csv"
+      },
+      "horizons": [
+        50,
+        100,
+        200,
+        400,
+        800
+      ],
+      "limit_rules": null,
+      "manifest_path": "outputs/alife_2026/eca_atlas/manifest.json",
+      "n_seeds": 5,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/eca_atlas",
+      "resume": {
+        "added_rows": 6400,
+        "path": "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
+        "preexisting_rows": 0,
+        "recomputed_nothing": false,
+        "resume": false
+      },
+      "runtime_seconds": 194.4399528503418,
+      "search": {
+        "label": "default_1d",
+        "periods": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "shift_ranges": [
+          [
+            -6,
+            -5,
+            -4,
+            -3,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        ]
+      }
+    },
+    "paper_reports": {
+      "paper_summary": "paper/alife_experiment_summary.md",
+      "paper_tables": "paper/alife_table_snippets.md"
+    },
+    "survey_3d": {
+      "base_seed": 11,
+      "cases": [
+        {
+          "birth": [
+            5,
+            5
+          ],
+          "density": 0.2,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "3d-life",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "3d_life",
+          "survive": [
+            4,
+            5
+          ]
+        },
+        {
+          "birth": [
+            13,
+            14
+          ],
+          "density": 0.6,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "clouds",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "clouds",
+          "survive": [
+            13,
+            26
+          ]
+        },
+        {
+          "birth": [
+            1,
+            3
+          ],
+          "density": 0.1,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "crystal",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "crystal",
+          "survive": [
+            1,
+            1
+          ]
+        },
+        {
+          "birth": [
+            5,
+            8
+          ],
+          "density": 0.5,
+          "dimension": 3,
+          "family": "rule3d",
+          "horizons": [
+            10,
+            20,
+            40,
+            60,
+            80
+          ],
+          "name": "diamoeba3d",
+          "rule_number": null,
+          "rulestring": null,
+          "search": {
+            "label": "default_3d",
+            "periods": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "shift_ranges": [
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ],
+              [
+                -2,
+                -1,
+                0,
+                1,
+                2
+              ]
+            ]
+          },
+          "size": [
+            16,
+            16,
+            16
+          ],
+          "slug": "diamoeba3d",
+          "survive": [
+            5,
+            8
+          ]
+        }
+      ],
+      "counts": {
+        "run_rows": 20,
+        "summary_rows": 4
+      },
+      "experiment": "alife_3d_survey",
+      "files": {
+        "runs_csv": "outputs/alife_2026/survey_3d/alife_3d_survey_runs.csv",
+        "summary_csv": "outputs/alife_2026/survey_3d/alife_3d_survey_summary.csv",
+        "summary_plot": "outputs/alife_2026/survey_3d/alife_3d_survey.png"
+      },
+      "manifest_path": "outputs/alife_2026/survey_3d/manifest.json",
+      "n_seeds": 5,
+      "nml_mode": "hybrid",
+      "output_dir": "outputs/alife_2026/survey_3d",
+      "resume": {
+        "added_rows": 20,
+        "path": "outputs/alife_2026/survey_3d/alife_3d_survey_runs.csv",
+        "preexisting_rows": 0,
+        "recomputed_nothing": false,
+        "resume": false
+      },
+      "runtime_seconds": 102.06758332252502,
+      "search": {
+        "label": "default_3d",
+        "periods": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "shift_ranges": [
+          [
+            -2,
+            -1,
+            0,
+            1,
+            2
+          ],
+          [
+            -2,
+            -1,
+            0,
+            1,
+            2
+          ],
+          [
+            -2,
+            -1,
+            0,
+            1,
+            2
+          ]
+        ]
+      }
+    }
+  },
+  "output_root": "outputs/alife_2026",
+  "resume": false,
+  "resume_summary": {
+    "per_suite": {
+      "eca_atlas": {
+        "added_rows": 6400,
+        "path": "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
+        "preexisting_rows": 0,
+        "recomputed_nothing": false,
+        "resume": false
+      },
+      "survey_3d": {
+        "added_rows": 20,
+        "path": "outputs/alife_2026/survey_3d/alife_3d_survey_runs.csv",
+        "preexisting_rows": 0,
+        "recomputed_nothing": false,
+        "resume": false
+      }
+    },
+    "suites_that_recomputed_nothing": [],
+    "total_added_rows": 6420,
+    "total_preexisting_rows": 0
+  },
+  "runtime_seconds": 296.53235816955566,
+  "workers": 16
+}

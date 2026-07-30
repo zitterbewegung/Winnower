@@ -126,3 +126,200 @@ def test_resume_table_loads_existing_csv_keys(tmp_path: Path) -> None:
     )
 
     assert table.has_key({"rule": "ECA-30", "seed": 11, "control_type": "original"})
+
+
+# --- Resume must not be silent ------------------------------------------------
+#
+# Resuming is the default, so a re-run over complete tables recomputes nothing
+# and still exits successfully. That is correct for continuing an interrupted
+# sweep and a trap for anyone re-running to verify reproducibility: two tables
+# in outputs/alife_2026 sat four months out of date behind exactly this. The
+# table now counts what it reused so callers can report it.
+
+
+def test_resume_table_counts_preexisting_rows(tmp_path: Path) -> None:
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=True)
+    stats = table.resume_stats()
+    assert stats["preexisting_rows"] == 1
+    assert stats["added_rows"] == 0
+    assert stats["resume"] is True
+
+
+def test_a_resumed_run_that_recomputes_nothing_says_so(tmp_path: Path) -> None:
+    """The exact silent-success case that hid four-month-old CSVs."""
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=True)
+    # Re-offering the same row is a no-op, as it would be on a complete table.
+    assert table.add(
+        {"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}
+    ) is False
+    assert table.resume_stats()["recomputed_nothing"] is True
+
+
+def test_new_rows_are_counted_and_clear_the_no_op_flag(tmp_path: Path) -> None:
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=True)
+    table.add({"rule": "ECA-54", "seed": 11, "control_type": "original", "value": 2.0})
+    stats = table.resume_stats()
+    assert stats["added_rows"] == 1
+    assert stats["preexisting_rows"] == 1
+    assert stats["recomputed_nothing"] is False
+
+
+def test_no_resume_treats_every_row_as_new(tmp_path: Path) -> None:
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=False)
+    assert table.resume_stats()["preexisting_rows"] == 0
+    assert table.add(
+        {"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}
+    ) is True
+    assert table.resume_stats()["recomputed_nothing"] is False
+
+
+def test_resume_report_warns_about_suites_that_did_no_work() -> None:
+    from relative_symmetry_repair.experiment_suite import (
+        format_resume_report,
+        summarize_resume,
+    )
+
+    summary = summarize_resume({
+        "null_controls": {"resume": {
+            "resume": True, "path": "a.csv", "preexisting_rows": 48,
+            "added_rows": 0, "recomputed_nothing": True}},
+        "eca_atlas": {"resume": {
+            "resume": True, "path": "b.csv", "preexisting_rows": 0,
+            "added_rows": 6400, "recomputed_nothing": False}},
+    })
+    assert summary["suites_that_recomputed_nothing"] == ["null_controls"]
+    assert summary["total_added_rows"] == 6400
+
+    report = format_resume_report(summary)
+    assert "WARNING" in report
+    assert "null_controls" in report
+    assert "--no-resume" in report
+
+
+def test_resume_report_is_quiet_when_everything_was_computed() -> None:
+    from relative_symmetry_repair.experiment_suite import (
+        format_resume_report,
+        summarize_resume,
+    )
+
+    summary = summarize_resume({
+        "eca_atlas": {"resume": {
+            "resume": False, "path": "b.csv", "preexisting_rows": 0,
+            "added_rows": 10, "recomputed_nothing": False}},
+    })
+    assert summary["suites_that_recomputed_nothing"] == []
+    assert "WARNING" not in format_resume_report(summary)
+
+
+# --- Parallel sweeps must not change results ----------------------------------
+#
+# The LifeWiki and ECA-atlas sweeps are the expensive half of the suite (~6.5h
+# and ~40min serial) and their units are independent, so they parallelise. The
+# only thing that matters is that they produce exactly what a serial run
+# produces: Executor.map yields in submission order, and the tables are
+# key-sorted on flush, so order is pinned twice over.
+
+
+def _eca_tasks(n: int = 4):
+    from relative_symmetry_repair.experiment_core import HorizonSweepTask, eca_case
+
+    return [
+        HorizonSweepTask(
+            case=eca_case(rule, width=48),
+            seed=11,
+            horizons=(20, 40),
+            max_horizon=40,
+        )
+        for rule in (30, 54, 110, 90)[:n]
+    ]
+
+
+def test_horizon_sweep_task_produces_one_record_per_horizon() -> None:
+    from relative_symmetry_repair.experiment_core import run_horizon_sweep_task
+
+    records = run_horizon_sweep_task(_eca_tasks(1)[0])
+    assert [r["horizon"] for r in records] == [20, 40]
+    assert all(r["rule"] == "ECA-30" and r["seed"] == 11 for r in records)
+    assert all("selected_period" in r for r in records)
+
+
+def test_extra_columns_land_before_the_selection_metrics() -> None:
+    """CSV column order must not depend on how a record was assembled."""
+    from relative_symmetry_repair.experiment_core import (
+        HorizonSweepTask,
+        eca_case,
+        run_horizon_sweep_task,
+    )
+
+    task = HorizonSweepTask(
+        case=eca_case(30, width=48), seed=11, horizons=(20,), max_horizon=20,
+        extra=(("rulestring", "B3/S23"),),
+    )
+    keys = list(run_horizon_sweep_task(task)[0])
+    assert keys.index("rulestring") < keys.index("selected_period")
+
+
+def test_serial_mapping_preserves_task_order() -> None:
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    tasks = _eca_tasks()
+    got = [b[0]["rule"] for b in map_horizon_sweep_tasks(tasks, workers=1)]
+    assert got == [t.case.name for t in tasks]
+
+
+def test_parallel_and_serial_sweeps_agree_exactly() -> None:
+    """The guarantee the speedup rests on."""
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    tasks = _eca_tasks()
+    serial = [r for batch in map_horizon_sweep_tasks(tasks, workers=1) for r in batch]
+    parallel = [r for batch in map_horizon_sweep_tasks(tasks, workers=2) for r in batch]
+    assert parallel == serial
+
+
+def test_progress_is_reported_once_per_task() -> None:
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    seen: list[tuple[int, int]] = []
+    tasks = _eca_tasks()
+    list(map_horizon_sweep_tasks(tasks, workers=1, progress=lambda d, t: seen.append((d, t))))
+    assert seen == [(i + 1, len(tasks)) for i in range(len(tasks))]
+
+
+def test_empty_task_list_is_a_no_op() -> None:
+    from relative_symmetry_repair.experiment_core import map_horizon_sweep_tasks
+
+    assert list(map_horizon_sweep_tasks([], workers=4)) == []
+
+
+def test_resolve_workers_semantics() -> None:
+    import os
+
+    from relative_symmetry_repair.experiment_core import resolve_workers
+
+    cpus = os.cpu_count() or 1
+    assert resolve_workers(1) == 1
+    assert resolve_workers(None) == max(1, cpus - 2)   # leave headroom
+    assert resolve_workers(0) == max(1, cpus - 2)
+    assert resolve_workers(-1) == cpus                 # all cores
+    assert resolve_workers(10_000) == cpus             # capped
