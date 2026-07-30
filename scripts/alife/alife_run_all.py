@@ -10,7 +10,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from relative_symmetry_repair.experiment_suite import run_all_suite
+from relative_symmetry_repair.experiment_suite import format_resume_report, run_all_suite
 
 
 def main() -> None:
@@ -28,9 +28,23 @@ def main() -> None:
     parser.add_argument("--skip-3d-survey", action="store_true")
     parser.add_argument("--skip-counterexample-stress", action="store_true")
     parser.add_argument("--skip-paper-reports", action="store_true")
-    parser.add_argument("--no-resume", dest="resume", action="store_false")
+    parser.add_argument(
+        "--no-resume", dest="resume", action="store_false",
+        help="Recompute every row instead of reusing existing CSVs. Use this to "
+             "verify reproducibility: the default resumes, which means a re-run "
+             "over complete tables recomputes nothing and still exits 0.",
+    )
     parser.set_defaults(resume=True)
     args = parser.parse_args()
+
+    if args.resume:
+        print(
+            "NOTE: resuming (the default). Rows already present in the output CSVs "
+            "are reused, not recomputed.\n"
+            "      Pass --no-resume (or run `make data-fresh`) to regenerate from "
+            "scratch.\n",
+            flush=True,
+        )
 
     manifest = run_all_suite(
         output_root=args.output_root,
@@ -49,6 +63,10 @@ def main() -> None:
         eca_limit=args.eca_limit,
     )
     print(f"Wrote ALIFE suite outputs to {Path(manifest['output_root']).resolve()}")
+    resume_summary = manifest.get("resume_summary")
+    if resume_summary:
+        print()
+        print(format_resume_report(resume_summary))
 
 
 if __name__ == "__main__":

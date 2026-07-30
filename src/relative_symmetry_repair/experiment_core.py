@@ -655,6 +655,21 @@ def make_null_controls(spacetime: np.ndarray, *, seed: int) -> dict[str, np.ndar
 
 
 class ResumeTable:
+    """An append-only results table that can continue an interrupted sweep.
+
+    Resuming is the default, and it is silent by construction: rows whose keys
+    are already present are skipped, so a re-run over a complete table does no
+    work and still exits successfully. That is the intended behaviour for a
+    sweep that died halfway, and a trap for anyone re-running to check
+    reproducibility -- ``outputs/alife_2026``'s null-control and
+    seed-stability tables sat four months out of date behind it, through
+    re-runs that reported success while recomputing nothing.
+
+    So the table counts what it reused. :attr:`preexisting_rows` is what was
+    loaded from disk, :attr:`added_rows` what this run actually computed, and
+    :meth:`resume_stats` reports both so callers can say so out loud.
+    """
+
     def __init__(
         self,
         path: Path | str,
@@ -674,6 +689,18 @@ class ResumeTable:
         else:
             self._frame = pd.DataFrame()
         self._keys = self._build_keys(self._frame)
+        self.preexisting_rows = len(self._keys)
+        self.added_rows = 0
+
+    def resume_stats(self) -> dict[str, Any]:
+        """What this run reused versus recomputed."""
+        return {
+            "resume": self.resume,
+            "path": str(self.path),
+            "preexisting_rows": int(self.preexisting_rows),
+            "added_rows": int(self.added_rows),
+            "recomputed_nothing": bool(self.resume and self.preexisting_rows and not self.added_rows),
+        }
 
     def _build_keys(self, frame: pd.DataFrame) -> set[tuple[Any, ...]]:
         if frame.empty:
@@ -695,6 +722,7 @@ class ResumeTable:
             return False
         self._keys.add(key)
         self._pending.append(record)
+        self.added_rows += 1
         return True
 
     def extend(self, records: Iterable[dict[str, Any]]) -> int:

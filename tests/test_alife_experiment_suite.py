@@ -126,3 +126,106 @@ def test_resume_table_loads_existing_csv_keys(tmp_path: Path) -> None:
     )
 
     assert table.has_key({"rule": "ECA-30", "seed": 11, "control_type": "original"})
+
+
+# --- Resume must not be silent ------------------------------------------------
+#
+# Resuming is the default, so a re-run over complete tables recomputes nothing
+# and still exits successfully. That is correct for continuing an interrupted
+# sweep and a trap for anyone re-running to verify reproducibility: two tables
+# in outputs/alife_2026 sat four months out of date behind exactly this. The
+# table now counts what it reused so callers can report it.
+
+
+def test_resume_table_counts_preexisting_rows(tmp_path: Path) -> None:
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=True)
+    stats = table.resume_stats()
+    assert stats["preexisting_rows"] == 1
+    assert stats["added_rows"] == 0
+    assert stats["resume"] is True
+
+
+def test_a_resumed_run_that_recomputes_nothing_says_so(tmp_path: Path) -> None:
+    """The exact silent-success case that hid four-month-old CSVs."""
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=True)
+    # Re-offering the same row is a no-op, as it would be on a complete table.
+    assert table.add(
+        {"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}
+    ) is False
+    assert table.resume_stats()["recomputed_nothing"] is True
+
+
+def test_new_rows_are_counted_and_clear_the_no_op_flag(tmp_path: Path) -> None:
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=True)
+    table.add({"rule": "ECA-54", "seed": 11, "control_type": "original", "value": 2.0})
+    stats = table.resume_stats()
+    assert stats["added_rows"] == 1
+    assert stats["preexisting_rows"] == 1
+    assert stats["recomputed_nothing"] is False
+
+
+def test_no_resume_treats_every_row_as_new(tmp_path: Path) -> None:
+    path = tmp_path / "runs.csv"
+    pd.DataFrame(
+        [{"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}]
+    ).to_csv(path, index=False)
+
+    table = ResumeTable(path, key_columns=("rule", "seed", "control_type"), resume=False)
+    assert table.resume_stats()["preexisting_rows"] == 0
+    assert table.add(
+        {"rule": "ECA-30", "seed": 11, "control_type": "original", "value": 1.0}
+    ) is True
+    assert table.resume_stats()["recomputed_nothing"] is False
+
+
+def test_resume_report_warns_about_suites_that_did_no_work() -> None:
+    from relative_symmetry_repair.experiment_suite import (
+        format_resume_report,
+        summarize_resume,
+    )
+
+    summary = summarize_resume({
+        "null_controls": {"resume": {
+            "resume": True, "path": "a.csv", "preexisting_rows": 48,
+            "added_rows": 0, "recomputed_nothing": True}},
+        "eca_atlas": {"resume": {
+            "resume": True, "path": "b.csv", "preexisting_rows": 0,
+            "added_rows": 6400, "recomputed_nothing": False}},
+    })
+    assert summary["suites_that_recomputed_nothing"] == ["null_controls"]
+    assert summary["total_added_rows"] == 6400
+
+    report = format_resume_report(summary)
+    assert "WARNING" in report
+    assert "null_controls" in report
+    assert "--no-resume" in report
+
+
+def test_resume_report_is_quiet_when_everything_was_computed() -> None:
+    from relative_symmetry_repair.experiment_suite import (
+        format_resume_report,
+        summarize_resume,
+    )
+
+    summary = summarize_resume({
+        "eca_atlas": {"resume": {
+            "resume": False, "path": "b.csv", "preexisting_rows": 0,
+            "added_rows": 10, "recomputed_nothing": False}},
+    })
+    assert summary["suites_that_recomputed_nothing"] == []
+    assert "WARNING" not in format_resume_report(summary)
