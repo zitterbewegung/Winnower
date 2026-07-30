@@ -52,6 +52,13 @@ def _run_encoded(family, rule, seed, horizon, progress):
     for field in res['fields'].values():
         field['data'] = base64.b64encode(field['data']).decode()
     return json.dumps(res)
+
+def _search_encoded(space, budget, max_evals, progress):
+    return json.dumps(bootstrap.run_rule_search(
+        space, int(budget), max_evaluations=int(max_evals), progress=progress))
+
+def _rule_spaces():
+    return json.dumps(bootstrap.rule_spaces())
 `);
   post("env", {
     pyodide: PYODIDE_VERSION,
@@ -61,6 +68,7 @@ def _run_encoded(family, rule, seed, horizon, progress):
     pandas: pyodide.runPython("import pandas; pandas.__version__"),
     lz4: lz4Loaded,
   });
+  post("spaces", JSON.parse(pyodide.runPython("_rule_spaces()")));
 }
 
 self.onmessage = async (event) => {
@@ -85,6 +93,20 @@ self.onmessage = async (event) => {
         "_run_encoded(p_family, p_rule, p_seed, p_horizon, js_progress)"
       );
       post("result", JSON.parse(resultJson));
+      return;
+    }
+    if (msg.type === "search") {
+      if (!initPromise) initPromise = init();
+      await initPromise;
+      const progress = (frac, text) => post("search-progress", { frac, text });
+      pyodide.globals.set("js_progress", progress);
+      pyodide.globals.set("s_space", msg.space);
+      pyodide.globals.set("s_budget", msg.budget);
+      pyodide.globals.set("s_evals", msg.maxEvaluations);
+      const json = pyodide.runPython(
+        "_search_encoded(s_space, s_budget, s_evals, js_progress)"
+      );
+      post("search-result", JSON.parse(json));
       return;
     }
   } catch (err) {

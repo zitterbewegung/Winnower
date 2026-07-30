@@ -20,8 +20,8 @@
 \newcommand{\NLL}{\operatorname{NLL}}
 \newcommand{\Hb}{H_b}
 
-\title{Winnower: A Fast Tool for Splitting Cellular Automaton Spacetimes
-  into a Periodic Background and a Residual Mask}
+\title{Winnower: A Fast Tool for Splitting Cellular Automaton
+  Space--Times into a Periodic Domain Template and a Defect Mask}
 
 % NOTE: re-anonymize before submitting to a double-blind venue.
 \author{Joshua Herman$^{1}$ \\
@@ -35,17 +35,17 @@ zitterbewegung@gmail.com}
 \begin{abstract}
 Cellular automata often form broad periodic domains together with
 interfaces, defects, and particle-like activity. Winnower is an
-open-source tool that splits a finite CA spacetime into two parts: a
-\emph{background} --- the best-fitting periodic pattern, possibly drifting
-sideways over time --- and a \emph{residual mask} marking every cell the
-background fails to explain. The tool scans a grid of candidate
+open-source tool that splits a finite CA space--time into two parts: a
+\emph{domain template} --- the best-fitting periodic pattern, possibly
+drifting sideways over time --- and a \emph{defect mask} marking every
+cell the template fails to explain. The tool scans a grid of candidate
 periodicities, fits each one in a single linear pass by majority vote,
 and picks between them with a complexity-aware score (Bernoulli
 normalized maximum likelihood, NML) so that bigger candidates do not win
 just by having more parameters. On planted ground truth the selector
 recovers the true period and drift essentially always at realistic noise
 levels, and on shuffled and random controls of a representative rule panel it
-never reports periodic structure. Across 1D, 2D, and 3D rules the resulting residual masks
+never reports periodic structure. Across 1D, 2D, and 3D rules the resulting defect masks
 isolate particle-like activity --- for example in Diamoeba, Maze with
 Mice, and S37/B11 --- cheaply enough for whole-catalog surveys. Every
 number and figure in this paper regenerates from a deterministic public
@@ -59,12 +59,12 @@ exists.
 \section{Introduction}
 %======================================================================
 
-Cellular automata (CA) frequently produce spacetime patterns in which
+Cellular automata (CA) frequently produce space--time patterns in which
 broad regular domains coexist with defects, interfaces, and
 particle-rich activity. For ALIFE work those domains matter because they
 are the canvas against which coherent structures become visible: a
 glider is only a glider relative to the background it moves through.
-A practical question follows immediately: given a finite spacetime,
+A practical question follows immediately: given a finite space--time,
 which global periodic organization best explains it, and what remains
 once that organization is removed?
 
@@ -77,26 +77,26 @@ rule catalogs and low-cost global summaries
 \citep{packard1985,boccara1999,zenil2010,zenil2018}. Winnower sits between the
 two. It does not replace local structure reconstruction; it is a cheap
 global \emph{front end} that can be applied across hundreds of rules,
-handing back a compact background hypothesis plus a residual mask that
+handing back a compact domain hypothesis plus a defect mask that
 shows where richer local analysis is likely to pay off. The need for
 this kind of fast triage has only grown as newer substrates --- Lenia,
-neural cellular automata --- generate large volumes of spacetime data
+neural cellular automata --- generate large volumes of space--time data
 \citep{chan2019,mordvintsev2020}.
 
 \paragraph{What the tool does, in plain terms.}
-Winnower takes a binary spacetime $U$ (a $T \times \text{space}$ array)
+Winnower takes a binary space--time $U$ (a $T \times \text{space}$ array)
 and a grid of \emph{candidates}. A candidate is a pair $(p, \bs)$: ``the
 pattern repeats every $p$ time steps, shifted sideways by $\bs$ cells.''
 For each candidate the tool groups cells that the candidate says must be
 equal (the \emph{orbit classes}), takes a majority vote inside each
-group to build the best-fitting background $B^*(p,\bs)$, and records the
-\emph{residual mask} $M = U \oplus B^*$ --- the cells where the
-observation disagrees with its background. Candidates are then ranked by
+group to build the best-fitting domain template $B^*(p,\bs)$, and records
+the \emph{defect mask} $M = U \oplus B^*$ --- the cells where the
+observation disagrees with its template. Candidates are then ranked by
 a score that adds a complexity penalty to the raw disagreement, and the
 winner is reported together with its margin over the runner-up. Each
 candidate costs one linear pass over the data, which is what makes
 whole-catalog surveys practical: scanning the default 130-candidate 1D
-grid on an $800 \times 192$ ($T \times \text{space}$) ECA spacetime
+grid on an $800 \times 192$ ($T \times \text{space}$) ECA space--time
 takes a few seconds single-threaded, and about half a second at
 $T{=}200$ --- per-run timings ship in the released benchmark CSVs ---
 while the same pipeline handles 2D and 3D volumes unchanged.
@@ -105,30 +105,30 @@ This paper contributes, in order of importance: (i) the tool itself,
 open source with a deterministic experiment pipeline and an in-browser
 reproduction of every reported number; (ii) evidence that the selector
 is accurate --- it recovers planted ground truth, reports nothing on
-shuffled and random controls, and its choices match known CA backgrounds
+shuffled and random controls, and its choices match known CA domains
 where those exist; (iii) surveys across 1D, 2D, and 3D rule catalogs
-showing that the background-plus-residual split isolates particle-like
+showing that the template-plus-defect split isolates particle-like
 structure at survey scale; and (iv) two supporting mathematical
 properties, stated informally here with formal versions in the
 repository, that explain \emph{why} the complexity penalty is necessary
 and why selections stabilize as the observation window grows. The first
 of these is now an exact characterization --- velocity-matched
 divisibility is necessary as well as sufficient for one candidate to fit
-at least as well on \emph{every} spacetime --- with a machine-checked
+at least as well on \emph{every} space--time --- with a machine-checked
 Lean proof in the repository's public CI.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.92\textwidth]{algorithm_detailed.pdf}
-    \caption{The Winnower pipeline on a small 1D example. (1)~The
-    observed spacetime $U$ (time running downward). (2)~A candidate
-    $(p,\bs)$ groups cells into orbit classes: cells with the same
+    \includegraphics[width=0.92\textwidth]{algorithm_nml.png}
+    \caption{The Winnower pipeline on a small example. (1)~The observed
+    space--time $U$ (time running downward). (2)~A candidate $(p,\bs)$
+    partitions cells into translation orbits: cells with the same
     number must be equal if the candidate is right. (3)~A majority vote
-    inside each class produces the background $B^*(p,\bs)$; cells that
-    lost their vote form the residual mask $M = U \oplus B^*$. (4)~Each
-    candidate is scored by fit (Bernoulli negative log-likelihood, NLL)
-    plus a complexity penalty; the candidate with the lowest total
-    (Bernoulli NML) wins.}
+    inside each orbit produces the minimum-Hamming domain template
+    $B^*(p,\bs)$; cells that lost their vote form the defect mask
+    $M = U \oplus B^*$. (4)~Each candidate is scored by fit (Bernoulli
+    negative log-likelihood, NLL) plus a complexity penalty; the
+    candidate with the lowest total (Bernoulli NML) wins.}
     \label{fig:algorithm}
 \end{figure*}
 
@@ -139,15 +139,17 @@ Lean proof in the repository's public CI.
 \paragraph{Vocabulary.}
 Throughout: the \emph{horizon} $T$ is the number of observed time steps;
 a \emph{candidate} $(p,\bs)$ is a hypothesized temporal period $p$ and
-spatial shift vector $\bs$; the \emph{background} $B^*$ is the
-best-fitting field that repeats with that periodicity; the
-\emph{residual mask} $M$ marks cells where $U$ and $B^*$ disagree (the
-code and released data tables call this the \emph{defect} mask, e.g.\
-column \texttt{defect\_rate}); the \emph{margin} is the score difference
-in bits between the winning candidate and the runner-up.
+spatial displacement vector $\bs$; the \emph{domain template} $B^*$ is
+the best-fitting field that repeats with that periodicity; the
+\emph{defect mask} $M$ marks cells where $U$ and $B^*$ disagree
+(matching the code and released data tables, e.g.\ column
+\texttt{defect\_rate}; earlier drafts called $B^*$ the
+\emph{background} and $M$ the \emph{residual mask}); the \emph{margin}
+is the score difference in bits between the winning candidate and the
+runner-up.
 
 \paragraph{Candidates and orbit classes.}
-For a binary spacetime $U \in \{0,1\}^{T \times D_1 \times \cdots \times
+For a binary space--time $U \in \{0,1\}^{T \times D_1 \times \cdots \times
 D_n}$, a candidate $(p, \bs)$ with $p \geq 1$ and $\bs \in \mathbb{Z}^n$
 describes the set of fields $B$ satisfying
 \[
@@ -162,10 +164,10 @@ class.
 
 \begin{proposition}[Majority vote is optimal]
 \label{prop:projection}
-For a fixed candidate $(p,\bs)$, the background that minimizes the
-number of residual cells is obtained by taking a majority vote within
+For a fixed candidate $(p,\bs)$, the template that minimizes the
+number of defect cells is obtained by taking a majority vote within
 each orbit class. Writing $n_j^{(1)}$ and $n_j^{(0)}$ for the ones and
-zeros in class $O_j$, the minimum residual count is
+zeros in class $O_j$, the minimum defect count is
 $\sum_j \min(n_j^{(0)}, n_j^{(1)})$.
 \end{proposition}
 
@@ -192,30 +194,32 @@ the asymptotic expansion $C(n) \approx \tfrac{1}{2}\log_2(\pi n / 2)$
 above that cutoff (the \texttt{hybrid} mode); this is the score used in
 every experiment below, and at survey horizons most orbit classes fall
 in the exact regime. The default search grids are: 1D, periods 1--10
-and shifts $-6..6$ (130 candidates); 2D, periods 1--8 and shifts
-$\pm 2$ per axis; 3D, periods 1--4 and shifts $\pm 2$ per axis. The selector is \emph{period-first}: it takes the
-best-scoring shift at each period, ranks periods by that best score,
-and reports the winning period, its shift, and the \emph{margin} ---
-the score gap in bits to the runner-up period. All ties are broken
-deterministically (smaller period, then smaller shift; majority votes
-break toward ones), and every observed tie and near-tie in our
-experiments is enumerated in a released stress report.
+and displacements $-6..6$ (130 candidates); 2D, periods 1--8 and
+displacements $\pm 2$ per axis; 3D, periods 1--4 and displacements
+$\pm 2$ per axis. The selector is \emph{period-first}: it takes the
+best-scoring displacement at each period, ranks periods by that best
+score, and reports the winning period, its displacement, and the
+\emph{margin} --- the score gap in bits to the runner-up period. All
+ties are broken deterministically (smaller period, then smaller
+displacement; majority votes break toward ones), and every observed tie
+and near-tie in our experiments is enumerated in a released stress
+report.
 
 \paragraph{Why the penalty is necessary (informal).}
 Call $(p_2,\bs_2)$ a \emph{velocity-matched multiple} of $(p_1,\bs_1)$
 when $p_2 = m p_1$ and $\bs_2 = m \bs_1 \bmod \bD$ --- the same drift
 velocity expressed with a longer period. A velocity-matched multiple
 splits every orbit class of the smaller candidate into finer pieces, so
-its optimal residual count and its NLL can only stay equal or improve.
+its optimal defect count and its NLL can only stay equal or improve.
 Unpenalized selection therefore drifts toward the largest available
 candidate whether or not extra periodic structure exists. This is not
 hypothetical: in the ablation of
 Figure~\ref{fig:ablation}, plain NLL picks the largest scanned period
 for \emph{every} rule tested. The relationship is in fact exact:
 velocity-matched divisibility, orbit-partition refinement,
-model-class nesting, universal residual improvement, and universal NLL
-improvement are all \emph{equivalent} --- for any candidate pair
-violating the divisibility condition there is a spacetime on which the
+model-class nesting, universal defect-count improvement, and universal
+NLL improvement are all \emph{equivalent} --- for any candidate pair
+violating the divisibility condition there is a space--time on which the
 larger candidate fits strictly worse, so divisibility is the precise
 boundary of the guaranteed-improvement regime. The full equivalence,
 including this necessity direction, is proved in the repository's
@@ -230,11 +234,11 @@ logarithmically with the horizon. So if one candidate has a strictly
 better asymptotic per-cell fit rate, it eventually beats every other
 candidate, and the selection locks in with a growing margin. In
 practice this is visible as ``margin grows after locking'' in
-Figure~\ref{fig:stabilization}. For an exactly periodic background and
+Figure~\ref{fig:stabilization}. For an exactly periodic domain and
 its velocity-matched multiples --- candidates with identical asymptotic
 rates --- the complexity term provably breaks the tie toward the smaller
 period. (Equal-rate candidates at the \emph{same} period but different
-shifts have identical complexity, so no tie-break exists there; the
+displacements have identical complexity, so no tie-break exists there; the
 released stress report tracks every such tie we observed.) Formal
 statements and proof notes for these claims ship with the repository,
 together with Lean~4 artifacts at documented levels of completeness
@@ -256,13 +260,13 @@ is interpretable: does it find periodicity that is really there, and
 does it stay silent when none exists?
 
 \paragraph{Planted ground truth.}
-We generate spacetimes that are exactly relative-periodic by
+We generate space--times that are exactly relative-periodic by
 construction --- a random base tile extended by the candidate relation
 --- with known $(p, \bs)$, then corrupt them with i.i.d.\ bit flips at
 rate $\varepsilon$ and ask the shipped selector (default search grids,
 no tuning) to recover the truth.
 Table~\ref{tab:groundtruth} summarizes the result: the selector recovers
-the planted period \emph{and} shift in all 642 runs --- every dimension,
+the planted period \emph{and} displacement in all 642 runs --- every dimension,
 every planted $(p,\bs)$ in the scanned grid, and every tested noise level
 (up to $\varepsilon = 0.2$ in 1D, $\varepsilon = 0.1$ in 2D and 3D). Noise does not cause errors at these levels; it
 shows up as a shrinking decision margin (in 1D, from a mean of
@@ -275,10 +279,10 @@ probability.
 
 \begin{table}[t]
 \centering
-\caption{Ground-truth recovery on planted relative-periodic spacetimes
+\caption{Ground-truth recovery on planted relative-periodic space--times
 with bit-flip noise $\varepsilon$ (642 runs; shipped selector, default
 search grids). Joint accuracy requires recovering both the period and
-the shift exactly.}
+the displacement exactly.}
 \label{tab:groundtruth}
 \small
 \begin{tabular}{lcccc}
@@ -297,12 +301,12 @@ For every rule in the representative panel we also ran the selector on
 three destructive controls: time-shuffled frames, space-shuffled cells,
 and density-matched i.i.d.\ Bernoulli noise. Every single control run
 --- across 1D, 2D, and 3D --- selects period~1, i.e.\ no periodic
-organization, while the original spacetimes in the same panel select
+organization, while the original space--times in the same panel select
 periods up to~4. In 2D the separation is stark: originals leave a mean
-residual rate of 1.4\%, versus 38\% for space-shuffled and Bernoulli
-controls of the same density. The same holds for residual
+defect rate of 1.4\%, versus 38\% for space-shuffled and Bernoulli
+controls of the same density. The same holds for defect-mask
 \emph{structure}, not just selection: the mask-organization statistic
-introduced in the structured-residuals subsection scores every Bernoulli
+introduced in the structured-defects subsection scores every Bernoulli
 control at exactly its shuffled baseline. The tool does not hallucinate
 structure in noise.
 
@@ -312,24 +316,25 @@ structure in noise.
   \centering
   \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{alife_representative_rules.png}
   \caption{Representative decompositions across 1D, 2D, and 3D: observed
-  spacetime $U$, selected background $B^*$, and residual mask $M$ for
-  each rule; in 1D panels time runs downward and space is horizontal.
-  Each panel's sidebar reports the winning candidate (best $p$, best
-  $\bs$), its margin over the runner-up in bits, and the residual rate
-  (the fraction of cells in $M$). In the focal 2D
-  cases the residual stays sparse but visibly organized rather than
-  collapsing to featureless noise.}
+  space--time $U$, selected domain template $B^*$, and defect mask $M$
+  for each rule; in 1D panels time runs downward and space is
+  horizontal. (Panel labels use the earlier draft names
+  \emph{background} and \emph{residual} for $B^*$ and $M$.) Each panel's
+  sidebar reports the winning candidate (best $p$, best $\bs$), its
+  margin over the runner-up in bits, and the defect rate (the fraction
+  of cells in $M$). In the focal 2D cases the defect mask stays sparse
+  but visibly organized rather than collapsing to featureless noise.}
   \label{fig:representative}
 \end{figure*}
 
 Figure~\ref{fig:representative} shows the main empirical use case:
-across dimensions, the selector removes the broad regular background and
-leaves behind exactly the defects and interfaces the background cannot
+across dimensions, the selector removes the broad regular domain and
+leaves behind exactly the defects and interfaces the template cannot
 explain. In the 2D named rules most relevant to ALIFE interpretation,
 Diamoeba (B35678/S5678) and Maze with Mice (B37/S12345) produce
-low-period backgrounds with concentrated residual masks, while S37/B11
-retains a visibly organized residual population after background
-removal. (Named LifeWiki rules use B/S rulestring notation; rules such
+low-period templates with concentrated defect masks, while S37/B11
+retains a visibly organized defect population after template
+subtraction. (Named LifeWiki rules use B/S rulestring notation; rules such
 as S37/B11 come from a separate range-rule scan and are named
 S$\langle$survive range$\rangle$/B$\langle$birth range$\rangle$.) The
 Diamoeba panel shows a run on the period-2 side of a near-boundary
@@ -338,18 +343,18 @@ selection; across seeds its modal period is 1
 such boundary cases explicit).
 
 In 1D the tool's choices can be checked against fifty years of ECA
-analysis. Rule~54, whose regular background and particle interactions
+analysis. Rule~54, whose regular domain and particle interactions
 are the canonical example in the computational-mechanics literature
-\citep{hanson1992,crutchfield1997}, locks to a period-4, shift-0
-background in 10 of 10 seeds by $T=200$, and the resulting residual mask
-collapses onto the familiar particle world-lines. Rule~110 is genuinely
-more ambiguous and the tool reports that ambiguity rather than hiding
-it: at $T=800$, five of ten seeds select a period-7, zero-shift
-candidate --- recovering the temporal period of the Rule~110 ether
-\citep{cook2004} --- while four select a period-4, shift~$-2$
-alternative. Rule~30, as
+\citep{hanson1992,crutchfield1997}, locks to a period-4,
+displacement-0 template in 10 of 10 seeds by $T=200$, and the resulting
+defect mask collapses onto the familiar particle world-lines. Rule~110
+is genuinely more ambiguous and the tool reports that ambiguity rather
+than hiding it: at $T=800$, five of ten seeds select a period-7,
+zero-displacement candidate --- recovering the temporal period of the
+Rule~110 ether \citep{cook2004} --- while four select a period-4,
+displacement~$-2$ alternative. Rule~30, as
 expected for an effectively aperiodic rule, stays at period~1 with
-near-arbitrary shift. A direct quantitative comparison against local
+near-arbitrary displacement. A direct quantitative comparison against local
 causal-state domain filters on shared examples is natural future work.
 
 \begin{figure}[t]
@@ -369,7 +374,8 @@ causal-state domain filters on shared examples is natural future work.
     \includegraphics[width=0.98\linewidth]{selector_ablation_tikz.pdf}
     \caption{Selector ablation on the 105 non-degenerate Life-like
     rules at $T=100$ (single seed). Bars count rules by the period each
-    criterion selects. Raw residual minimization and plain Bernoulli
+    criterion selects. Raw defect-count minimization (the axis label
+    \emph{Residual} keeps the earlier draft name) and plain Bernoulli
     NLL are pulled toward the largest scanned period; Bernoulli NML
     concentrates selections at low period.}
     \label{fig:ablation}
@@ -381,7 +387,7 @@ Life-like rules that neither die out nor freeze (the survey's
 triviality filter), so its counts differ slightly from
 Table~\ref{tab:lifewiki}'s five-seed modal counts. At $T=100$, plain
 NLL selects the largest tested period for every single rule --- exactly
-the failure mode predicted above --- and raw residual minimization
+the failure mode predicted above --- and raw defect-count minimization
 shows the same upward pull (81 of 105 rules at period $\geq 4$).
 Bernoulli NML instead selects period~1 for 97 rules, period~2 for 7,
 and period~8 for 1. The penalty is doing real work: it prevents the
@@ -391,7 +397,7 @@ structure.
 \subsection{Cross-Dimensional Behavior and 2D Surveys}
 
 We surveyed all 106 named Life-like rules from the LifeWiki on a
-$64 \times 64$ torus with periods 1--8 and shifts $\pm 2$ per axis,
+$64 \times 64$ torus with periods 1--8 and displacements $\pm 2$ per axis,
 running five seeds per rule at horizons $T \in \{100, 200, 400, 800\}$
 and reporting each rule's modal (across-seed majority) period.
 Table~\ref{tab:lifewiki} shows the distribution: the large majority of
@@ -427,7 +433,7 @@ $p=8$ & 1 & 1 & 1 & 1 \\
 \end{table}
 
 The same stabilization picture appears across dimensions with different
-transients. In 2D persistent-residual rules, longer horizons can reveal
+transients. In 2D persistent-defect rules, longer horizons can reveal
 additional periodic structure before the selector locks. In 3D
 diamoeba3d, an initial period-6 selection is a small-sample artifact and
 period~1 takes over by $T=40$ with growing margin. Selections change
@@ -436,7 +442,7 @@ strong enough to beat the logarithmic complexity cost.
 
 \begin{table}[t]
 \centering
-\caption{Compact cross-dimensional summary of selected backgrounds.}
+\caption{Compact cross-dimensional summary of selected domain templates.}
 \label{tab:summary}
 \small
 \begin{tabular}{p{0.21\linewidth}p{0.67\linewidth}}
@@ -444,13 +450,13 @@ strong enough to beat the logarithmic complexity cost.
 Setting & Main observation \\
 \midrule
 1D ECA 30/54/110 & Rule~54 locks to period~4 (10/10 seeds); Rule~110
-splits between period~7 (5/10) and period~4 with shift $-2$ (4/10) at
+splits between period~7 (5/10) and period~4 with displacement $-2$ (4/10) at
 $T=800$; Rule~30 stays at period~1. \\
 2D Life-like survey & At $T=800$, 93 of 106 named rules keep modal
 period~1; 13 show periodic organization (11 at $p{=}2$, one each at
 $p{=}4$ and $p{=}8$). \\
-2D focal persistent-residual rules & By $T{=}800$, S24/B11 and S37/B11
-move to period~2 and S11/B37 to period~4; all retain organized residual
+2D focal persistent-defect rules & By $T{=}800$, S24/B11 and S37/B11
+move to period~2 and S11/B37 to period~4; all retain organized defect
 structure after subtraction. \\
 3D diamoeba3d & A short small-sample transient favors period~6; the
 selector stabilizes to period~1 by $T=40$. \\
@@ -458,33 +464,33 @@ selector stabilizes to period~1 by $T=40$. \\
 \end{tabular}
 \end{table}
 
-\subsection{Structured Residuals as the ALIFE Payoff}
+\subsection{Structured Defects as the ALIFE Payoff}
 
-The value of the split is not the period number itself. The background
-acts as a domain hypothesis, and the residual mask highlights where
+The value of the split is not the period number itself. The template
+acts as a domain hypothesis, and the defect mask highlights where
 particles, interfaces, and other coherent departures live. In Diamoeba
-and Maze with Mice the residual is sparse and clearly localized. The
+and Maze with Mice the defect mask is sparse and clearly localized. The
 focal range rules (S24/B11, S11/B37, S37/B11) were themselves
 \emph{found by} an earlier screening pass of this decomposition over
 773 totalistic range rules --- the tool surfacing its own best examples
 is precisely the intended survey workflow, and we state it plainly so
 the reader does not mistake them for an independent sample. What the
-follow-up runs then establish is robustness: S37/B11's residual
+follow-up runs then establish is robustness: S37/B11's defect
 population persists at 400 steps, across 10 seeds, and at grid sizes up
 to $192 \times 192$, rather than dissolving as a transient.
 
 ``Organized'' is measured, not eyeballed. For each rule we compare the
-residual mask's run-length codelength and connected-component count
+defect mask's run-length codelength and connected-component count
 against 20 uniformly shuffled masks of identical density (released as
 \texttt{mask\_structure} in the artifact). An unstructured mask scores
 ratio $\approx 1$; and indeed every density-matched Bernoulli control
 scores $1.000$, confirming calibration. The focal rules are far below
-baseline: Diamoeba's residual codes at $0.27\times$ its shuffled
+baseline: Diamoeba's defect mask codes at $0.27\times$ its shuffled
 baseline with $0.002\times$ the components; S37/B11 at $0.77\times$
 ($0.35\times$ with the raster order reversed) and $0.15\times$ the
 components; Maze with Mice, S24/B11, and S11/B37 are comparable, with
 deviations of tens to hundreds of standard deviations. The statistic
-also keeps us honest in both directions: Rule~30's diffuse residual
+also keeps us honest in both directions: Rule~30's diffuse defect mask
 scores $1.000$ --- quantitatively indistinguishable from noise, matching
 its description above --- and time-shuffled controls retain the
 \emph{spatial} organization they preserve by construction, so full
@@ -546,21 +552,22 @@ pipeline:
 
 Winnower is deliberately modest. It is complementary to computational
 mechanics rather than a replacement: the output is a compact global
-background and a residual mask, not an account of interaction structure.
+domain template and a defect mask, not an account of interaction structure.
 What it buys in exchange is scale --- the same orbit-class computation
 runs unchanged across many rules and across 1D, 2D, and 3D.
 
 Its limitations are equally concrete. The selector returns the
 best-compressing global explanation, which need not coincide with a
-physicist's preferred background when the residual itself carries
-periodic structure. Period-1 shift ties make the reported shift
-arbitrary for effectively aperiodic rules. The scanned grid bounds what
-can be found: periodicity outside the grid is invisible, as the
-candidate-range robustness runs in the repository quantify. And the
-residual mask says where structure is, not how it interacts. Natural
-next steps are direct comparisons with local causal-state filters on
-shared examples, component tracking within residual masks, and
-application to continuous substrates such as Lenia after thresholding.
+physicist's preferred domain when the defect mask itself carries
+periodic structure. Period-1 displacement ties make the reported
+displacement arbitrary for effectively aperiodic rules. The scanned
+grid bounds what can be found: periodicity outside the grid is
+invisible, as the candidate-range robustness runs in the repository
+quantify. And the defect mask says where structure is, not how it
+interacts. Natural next steps are direct comparisons with local
+causal-state filters on shared examples, component tracking within
+defect masks, and application to continuous substrates such as Lenia
+after thresholding.
 
 %======================================================================
 \section{Conclusion}
@@ -568,13 +575,13 @@ application to continuous substrates such as Lenia after thresholding.
 
 Winnower turns a simple observation --- relative-periodic fitting
 reduces to independent majority votes --- into a practical survey
-instrument: linear-time background fitting, a complexity-aware selector
+instrument: linear-time template fitting, a complexity-aware selector
 that resists the period inflation raw fit criteria demonstrably suffer
 (with a machine-checked characterization of exactly when that inflation
 pressure exists, and a prose proof, audited in the repository's claim
-ledger, that the selector resists it whenever the background is exactly
+ledger, that the selector resists it whenever the domain is exactly
 periodic),
-calibration on planted truth and null controls, and a residual mask
+calibration on planted truth and null controls, and a defect mask
 that isolates particle-like structure across 1D, 2D, and 3D. The tool, the data, the
 proofs, and an in-browser reproduction of every reported number are
 public. For ALIFE the payoff is practical: screen many rules cheaply,

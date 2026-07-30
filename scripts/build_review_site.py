@@ -25,6 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "review_site"
 ALIFE = ROOT / "outputs" / "alife_2026"
+PAPER_FIGS = ROOT / "paper" / "figures"
 
 # --------------------------------------------------------------------------
 # Content configuration
@@ -32,24 +33,25 @@ ALIFE = ROOT / "outputs" / "alife_2026"
 
 FIGURES = [
     dict(
-        path=ALIFE / "editable_figures" / "algorithm_detailed.png",
-        title="Algorithm overview",
+        path=PAPER_FIGS / "algorithm_nml.png",
+        title="Winnower's pipeline (LBA Figure 1)",
         caption=(
-            "A candidate (period, shift) pair induces an orbit partition of the "
-            "spacetime. Majority vote on each orbit class gives the best-fitting "
-            "background B*; the residual mask M = U ⊕ B* marks every cell the "
-            "background cannot explain. Candidates are compared with a "
-            "Bernoulli NML score (fit + complexity)."
+            "A candidate translation (p, s) partitions observed space–time "
+            "sites into orbits. Orbit majorities define the domain template, "
+            "mismatches form the defect mask, and Bernoulli NML balances fit "
+            "against model complexity."
         ),
-        source="scripts/alife/alife_algorithm_figure.py",
+        source="paper/figures/algorithm_nml.svg (editable vector master)",
     ),
     dict(
-        path=ALIFE / "rule_diagrams" / "representative_rules_1d.png",
-        title="Representative 1D rules (ECA 30 / 54 / 110)",
+        path=PAPER_FIGS / "lba_results.png",
+        title="Focus rules — ECA 54 and 110 (LBA Figure 2)",
         caption=(
-            "Spacetime, selected background B*, and residual mask M for the three focus "
-            "elementary CA. Rule 54 decomposes cleanly into a periodic background "
-            "plus particle-like residuals; Rule 30 stays diffuse."
+            "The left panels show the observation, selected shift-zero domain "
+            "template, and defect mask; the right panels show selected period "
+            "and NML margin versus horizon T. Rule 54 stays at period 4. "
+            "Rule 110 changes once from period 1 to its period-7 ether domain, "
+            "after which the margin grows."
         ),
         source="scripts/alife/alife_rule_diagrams.py",
     ),
@@ -57,9 +59,9 @@ FIGURES = [
         path=ALIFE / "rule_diagrams" / "representative_rules_2d.png",
         title="Representative 2D rules",
         caption=(
-            "Life-like rules with structured residuals (e.g. Diamoeba, Maze with "
-            "Mice, S37/B11): the selected background absorbs the bulk of the "
-            "pattern while the sparse residual mask stays visibly organized."
+            "Life-like rules with structured defect masks (e.g. Diamoeba, Maze "
+            "with Mice, S37/B11): the selected domain template absorbs the bulk "
+            "of the pattern while the sparse defect mask stays visibly organized."
         ),
         source="scripts/alife/alife_rule_diagrams.py",
     ),
@@ -91,8 +93,8 @@ FIGURES = [
     ),
     dict(
         path=ALIFE / "null_controls" / "null_controls_defect_rate.png",
-        title="Null controls — residual rate",
-        caption="Residual (defect) rates for the same control panel.",
+        title="Null controls — defect rate",
+        caption="Defect rates for the same control panel.",
         source="scripts/alife/alife_run_all.py (null_controls)",
     ),
     dict(
@@ -112,7 +114,7 @@ FIGURES = [
         title="Seed stability",
         caption=(
             "Representative rules re-run across 10 seeds and 6 horizons: modal "
-            "period agreement, transition counts, and residual variability."
+            "period agreement, transition counts, and defect-rate variability."
         ),
         source="scripts/alife/alife_run_all.py (seed_stability)",
     ),
@@ -120,7 +122,7 @@ FIGURES = [
         path=ALIFE / "candidate_range_robustness" / "candidate_range_robustness.png",
         title="Candidate-range robustness",
         caption=(
-            "Sensitivity of the selection to the scanned period/shift ranges "
+            "Sensitivity of the selection to the scanned period/displacement ranges "
             "(small vs. default vs. large candidate grids)."
         ),
         source="scripts/alife/alife_run_all.py (candidate_range_robustness)",
@@ -144,7 +146,7 @@ FIGURES = [
     dict(
         path=ALIFE / "rule_diagrams_3d_voxel" / "diamoeba3d" / "diamoeba3d_voxel_decomposition.png",
         title="3D voxel decomposition — diamoeba3d",
-        caption="Voxel view of spacetime U, selected background B*, and residual mask M for a 3D rule.",
+        caption="Voxel view of space–time U, selected domain template B*, and defect mask M for a 3D rule.",
         source="scripts/alife/alife_rule_diagrams.py",
     ),
 ]
@@ -155,7 +157,7 @@ TABLES = [
         title="Ground-truth recovery (planted periodicity)",
         caption=(
             "Spacetimes constructed to be exactly relative-periodic with a known "
-            "(period, shift), corrupted by bit flips at rate flip_rate, then run "
+            "(period, displacement), corrupted by bit flips at rate flip_rate, then run "
             "through the shipped selector. Accuracy = fraction of runs recovering "
             "the planted value."
         ),
@@ -163,24 +165,24 @@ TABLES = [
     ),
     dict(
         path=ALIFE / "mask_structure" / "mask_structure_summary.csv",
-        title="Residual-mask organization (vs shuffled baselines)",
+        title="Defect-mask organization (vs shuffled baselines)",
         caption=(
             "Run-length codelength and component-count ratios of each selected "
-            "residual mask against 20 uniformly shuffled masks of the same "
+            "defect mask against 20 uniformly shuffled masks of the same "
             "density (ratio 1 = unstructured). Originals of the focal rules sit "
             "far below 1; every Bernoulli control sits at 1.000; ECA-30's "
-            "diffuse residual also scores 1.000 — the statistic is calibrated "
+            "diffuse defect mask also scores 1.000 — the statistic is calibrated "
             "in both directions. Time-shuffled controls retain per-frame "
             "spatial organization by construction."
         ),
-        claim="Residual organization is measured, not eyeballed",
+        claim="Defect-mask organization is measured, not eyeballed",
     ),
     dict(
         path=ALIFE / "null_controls" / "null_controls_summary.csv",
         title="Null controls (summary)",
         caption=(
-            "Original spacetimes vs. shuffled/Bernoulli controls, same selector. "
-            "Large margins and low residual rates for originals — and not for "
+            "Original space–times vs. shuffled/Bernoulli controls, same selector. "
+            "Large margins and low defect rates for originals — and not for "
             "controls — indicate the method detects real structure. "
             "No null-control false positives were observed."
         ),
@@ -191,7 +193,7 @@ TABLES = [
         title="Seed stability (summary)",
         caption=(
             "Per-rule agreement of the final selected period across 10 seeds, "
-            "with transition counts and residual-rate coefficient of variation."
+            "with transition counts and defect-rate coefficient of variation."
         ),
         claim="Selection is stable across random initial conditions",
     ),
@@ -199,7 +201,7 @@ TABLES = [
         path=ALIFE / "candidate_range_robustness" / "candidate_range_robustness_summary.csv",
         title="Candidate-range robustness (summary)",
         caption=(
-            "Whether the selected period/shift changes when the scanned candidate "
+            "Whether the selected period/displacement changes when the scanned candidate "
             "grid is shrunk or enlarged."
         ),
         claim="Results are not an artifact of the scanned candidate range",
@@ -214,7 +216,7 @@ TABLES = [
         path=ALIFE / "eca_atlas" / "eca_atlas_summary.csv",
         title="ECA atlas (all 256 rules)",
         caption=(
-            "Final modal period, stability, margins, and residual rate for every "
+            "Final modal period, stability, margins, and defect rate for every "
             "elementary CA rule. Use the filter box to find a rule."
         ),
         claim="Full 1D coverage, not cherry-picked examples",
@@ -236,20 +238,20 @@ TABLES = [
 
 CONTRIBUTIONS = [
     ("The Winnower tool",
-     "An open-source, deterministic pipeline that splits a CA spacetime into a periodic background B* and a residual mask M, with an in-browser reproduction of every reported number."),
+     "An open-source, deterministic pipeline that splits a CA space–time into a periodic domain template B* and a defect mask M, with an in-browser reproduction of every reported number."),
     ("Calibrated accuracy",
      "Recovers planted ground-truth periodicity at realistic noise levels, and selects no periodic structure on time-shuffled, space-shuffled, or Bernoulli null controls — zero false positives."),
-    ("Linear-time background fitting",
-     "Majority vote on orbit classes: one pass over the data per candidate (period, shift), which is what makes whole-catalog 1D/2D/3D surveys practical."),
+    ("Linear-time template fitting",
+     "Orbit majorities give the minimum-Hamming template in one pass over the data per candidate (period, displacement), which is what makes whole-catalog 1D/2D/3D surveys practical."),
     ("Complexity-aware selection via Bernoulli NML",
-     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact six-way equivalence — velocity-matched divisibility is necessary as well as sufficient for universal improvement — machine-checked in Lean with public CI."),
+     "Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact characterization — velocity-matched divisibility is necessary as well as sufficient for universal improvement — proved directly and confirmed by an exhaustive test."),
 ]
 
 LIMITATIONS = [
-    "The selector returns the best-compressing global explanation, which need not match a physicist's preferred background when the residual itself carries periodic structure.",
-    "At period 1 the reported shift is arbitrary (a tie), so shift values for aperiodic rules carry no information.",
+    "The selector returns the best-compressing global explanation, which need not match a physicist's preferred domain when the defect mask itself carries periodic structure.",
+    "At period 1 the reported displacement is arbitrary (a tie), so displacement values for aperiodic rules carry no information.",
     "Periodicity outside the scanned candidate grid is invisible; the candidate-range robustness runs quantify this.",
-    "The residual mask says where structure is, not how it interacts — no particle interaction analysis.",
+    "The defect mask says where structure is, not how it interacts — no particle interaction analysis. Defect sites are candidate departures from the domain, not identified particles.",
     "Scaling observations (e.g. S37/B11) rest on limited seeds and sizes; the run-length diagnostic is raster-order dependent.",
 ]
 
@@ -268,7 +270,7 @@ REPRO_STEPS = [
 
 REPO_MAP = [
     ("paper/paper_alife2026.pdf", "The submission PDF."),
-    ("paper/alife2026_lba.pdf", "ALIFE 2026 late-breaking abstract (2 pages): the machine-checked period-inflation characterization."),
+    ("paper/alife2026_lba.pdf", "ALIFE 2026 late-breaking abstract (submitted July 2026): “Winnower: Inferring Periodic Domains in Cellular Automata”."),
     ("paper/paper_alife2026.tex", "LaTeX source; figures pulled from outputs/."),
     ("docs/CLAIM_LEDGER.md", "Claim-by-claim audit: status, caveats, what remains."),
     ("docs/THEORY_NOTE.md", "Extended theory notes."),
@@ -276,7 +278,7 @@ REPO_MAP = [
     ("scripts/alife/alife_run_all.py", "One-shot driver for every experiment in the paper."),
     ("outputs/alife_2026/", "Generated data behind every figure and table, with per-experiment manifest.json files recording seeds and parameters."),
     ("webdemo/", "In-browser live reproduction (Pyodide bootstrap, page, worker); verified by scripts/verify_webdemo_bootstrap.py."),
-    ("proofs/", "Lean 4 artifacts at documented completeness: machine-checked proofs of majority-vote optimality, the six-way refinement/monotonicity equivalence, and the stabilization core in the default build (public CI); the rest labeled drafts — see proofs/README.md."),
+    ("proofs/", "Lean 4 proof artifacts (supporting material at documented completeness; see proofs/README.md). The paper's claims rest on the experiments and the reproducible pipeline, not on these artifacts."),
     ("tests/", "364-test suite."),
     ("REPRODUCING.md", "Full reproduction pipeline, step by step."),
 ]
@@ -334,9 +336,13 @@ def csv_to_table(path: Path, filterable: bool = False, table_id: str = "") -> st
     return "".join(parts)
 
 
+def detex_dashes(text: str) -> str:
+    return text.replace("---", "—").replace("--", "–")
+
+
 def extract_tex_field(tex: str, name: str) -> str:
     m = re.search(r"\\" + name + r"\{(.+?)\}", tex, re.S)
-    return m.group(1).strip() if m else ""
+    return " ".join(detex_dashes(m.group(1)).split()) if m else ""
 
 
 def extract_abstract(tex: str) -> str:
@@ -347,7 +353,7 @@ def extract_abstract(tex: str) -> str:
     text = re.sub(r"\\citep?\{[^}]*\}", "", text)
     text = re.sub(r"\\emph\{([^}]*)\}", r"\1", text)
     text = re.sub(r"\\[a-zA-Z]+", "", text)
-    text = text.replace("~", " ").replace("$", "")
+    text = detex_dashes(text.replace("~", " ").replace("$", ""))
     return " ".join(text.split())
 
 
@@ -561,7 +567,7 @@ def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
             f'<div class="tiles">{tiles}</div>'
             '<p class="tbl-meta">Full report: <code>outputs/alife_2026/counterexample_stress/counterexample_stress_summary.md</code>. '
             "Non-unique winners are dominated by trivial/degenerate rules (e.g. ECA-0) where "
-            "many shifts fit an empty background equally well; margins ≤ 0.5 bits and "
+            "many displacements fit an empty domain template equally well; margins ≤ 0.5 bits and "
             "null-control false positives were both zero.</p>"
         )
 
@@ -743,6 +749,11 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 <section id="overview" class="active">
   <h2>What this paper does</h2>
   <div class="abstract"><strong>Abstract.</strong> {esc(abstract)}</div>
+  <p class="tbl-meta">Terminology: the paper, the ALIFE 2026 late-breaking abstract,
+  and this site all say <em>domain template</em> B* and <em>defect mask</em> M;
+  earlier drafts — still quoted verbatim in the claim ledger and visible in some
+  older figure panel labels — called these the <em>background</em> and the
+  <em>residual mask</em>.</p>
   <div class="links">
     <a href="{pdf_href}" target="_blank" rel="noopener">Open the paper (PDF)</a>
     {demo_overview}
@@ -772,68 +783,67 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 
 <section id="latebreaking">
   <h2>Late-breaking abstract — ALIFE 2026</h2>
-  <p><strong>The exact boundary of period inflation: a machine-checked
-  characterization for the Winnower CA background detector.</strong>
-  A two-page late-breaking abstract prepared for
+  <p><strong>Winnower: Inferring Periodic Domains in Cellular Automata.</strong>
+  A two-page late-breaking abstract submitted (July 2026) to
   <a href="https://2026.alife.org/" target="_blank" rel="noopener">ALIFE 2026</a>
   (Waterloo, Ontario, Canada, August 17&ndash;21, 2026 &mdash; theme
-  &ldquo;Living and Life-like Complex Adaptive Systems&rdquo;). The
-  late-breaking track accepts work in progress in a
-  <em>maximum of 2 pages excluding references</em>; accepted abstracts are
-  presented as posters and are not included in the proceedings
-  (submissions due July&nbsp;20, 2026 AoE; notification July&nbsp;27, 2026).</p>
+  &ldquo;Living and Life-like Complex Adaptive Systems&rdquo;). It presents
+  Winnower as a model-selection method for inferring a periodic
+  spatiotemporal domain from a finite CA space&ndash;time observation: each
+  candidate temporal period and spatial displacement induces translation
+  orbits over the observed sites, orbit-majority states define the
+  minimum-Hamming domain template, and Bernoulli normalized maximum
+  likelihood (NML) ranks candidates by fit and complexity. Winnower returns
+  the selected template and a defect mask. Accepted late-breaking abstracts
+  are presented as posters and are not included in the proceedings.</p>
   <div class="links">
-    <a href="{lba_href}" target="_blank" rel="noopener">Open the late-breaking abstract (PDF, 2 pages)</a>
-    <a href="https://github.com/zitterbewegung/Winnower/blob/main/proofs/aristotle_submissions/verify/Verify/Theorem2.lean" target="_blank" rel="noopener" class="secondary">The Lean proof (Theorem2.lean)</a>
-    <a href="https://github.com/zitterbewegung/Winnower/actions/workflows/lean-verify.yml" target="_blank" rel="noopener" class="secondary">Its CI runs (Lean proof check)</a>
+    <a href="{lba_href}" target="_blank" rel="noopener">Open the late-breaking abstract (PDF)</a>
+    <a href="reproduce.html" class="secondary">Reproduce it in the browser</a>
   </div>
-  <h3>The result, in plain terms</h3>
-  <p>Every fit-based background detector faces <em>period inflation</em>: a
-  candidate with a longer period has more parameters, so it can never fit
-  worse, and a selector scoring by fit alone drifts to the largest model
-  scanned. The late-breaking result pins down <em>exactly</em> when that
-  pressure exists. For two constant-velocity candidates, five natural
-  conditions are all equivalent: velocity-matched divisibility of the
-  periods and shifts; one translation being a power of the other;
-  orbit-partition refinement; model-class nesting; and universal
-  improvement (on <em>every</em> spacetime) of both the residual count and
-  the Bernoulli negative log-likelihood. Divisibility is
-  <em>necessary</em>, not just sufficient &mdash; whenever it fails, some
-  spacetime makes the longer-period candidate strictly worse. That makes
-  divisibility the precise frontier of the guaranteed-improvement regime,
-  and therefore the precise set of comparisons Winnower's NML complexity
-  penalty exists to neutralize.</p>
+  <h3>Preliminary results, in plain terms</h3>
+  <p>In one-, two-, and three-dimensional experiments, selected symmetries
+  stabilized after short transients: Rule&nbsp;54 selected period&nbsp;4
+  throughout, with its margin increasing from 681 to 2318 bits; Rule&nbsp;110
+  changed once from period&nbsp;1 to its period-7 ether domain, and B5/S45
+  selected period&nbsp;1 throughout (margin 3324&nbsp;&rarr;&nbsp;7403 bits).
+  Every fit-based domain detector faces <em>period inflation</em>: a
+  compatible longer-period candidate can refine a shorter candidate's orbit
+  partition without worsening fit, so fit-only selection favors longer
+  periods. In a sweep of 105 nontrivial Life-like rules at T&nbsp;=&nbsp;100,
+  unpenalized likelihood selected the largest scanned period in <em>every</em>
+  case, whereas NML selected period&nbsp;1 for 97 rules. Several defect masks
+  retained persistent localized structure (e.g. S37/B11) &mdash; candidate
+  departures from the domain, not identified particles. The corresponding
+  divisibility and refinement result behind period inflation is formalized in
+  Lean&nbsp;4.</p>
   <h3>How it connects to the tool on this site</h3>
   <ul>
-    <li><strong>Machine-checked:</strong> the full six-way equivalence
-    &mdash; including the previously open necessity direction
-    (refinement&nbsp;&rArr;&nbsp;power) &mdash; is proved in Lean&nbsp;4
-    against a pinned Mathlib toolchain and rebuilt by public CI on every
-    push, which also greps the built file for placeholder tactics. The
-    prose proof is Theorem&nbsp;C.3 in the
-    <a href="#claims" onclick="return show('claims')">theory notes audited in the claim ledger</a>.</li>
+    <li><strong>The pipeline figure:</strong> the abstract's Figure&nbsp;1
+    names each stage &mdash; candidate translation, orbit partition,
+    majority-vote fit, domain template, defect mask, and the Bernoulli-NML
+    score &mdash; so the diagram doubles as a legend for the
+    <a href="#figures" onclick="return show('figures')">figures tab</a>.</li>
     <li><strong>Exhaustively tested:</strong>
     <code>tests/test_theory.py::test_refinement_iff_velocity_matched_multiple</code>
-    checks the finite-window form of the equivalence over every candidate
-    pair on a 6&times;4 grid.</li>
+    checks the finite-window form of the refinement equivalence over every
+    candidate pair on a 6&times;4 grid.</li>
     <li><strong>Visible in the live demo:</strong> the
     <a href="reproduce.html">in-browser reproduction</a> reports, for any
     supported rule, seed, and horizon, the per-period fit (NLL) and
     penalized (NML) scores side by side &mdash; the fit column improves
-    along velocity-matched chains exactly as the theorem dictates, while
-    the penalized column resists.</li>
+    along velocity-matched chains exactly as predicted, while the penalized
+    column resists.</li>
     <li><strong>At survey scale:</strong> the
-    <a href="#figures" onclick="return show('figures')">selector-ablation figure</a>
-    shows the practical stakes: at horizon 100, plain NLL selects the
+    <a href="#results" onclick="return show('results')">survey tables</a>
+    show the practical stakes: at horizon 100, plain NLL selects the
     largest scanned period on all 105 non-degenerate Life-like rules,
     while Bernoulli NML concentrates at low period.</li>
   </ul>
   <p class="tbl-meta">Source: <code>paper/alife2026_lba.tex</code> &mdash; US-letter,
-  two pages excluding references, abstract under 250 words, built with the
-  official <code>alifeconf</code> LaTeX style and matching the format of
-  accepted ALIFE&nbsp;2025 submissions. Re-anonymize the author block if the
-  late-breaking track is double-blind, and paste the body into the
-  conference's 2026 template if one is released.</p>
+  two pages of main text (bibliography on page 3), abstract under 250 words,
+  built with the official <code>alifeconf</code> LaTeX style. Figures:
+  <code>paper/figures/algorithm_nml.png</code> (pipeline; editable SVG master
+  alongside) and <code>paper/figures/lba_results.png</code> (Rules 54 and 110).</p>
 </section>
 
 <section id="claims">
@@ -841,14 +851,11 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <p>This is the project's own claim-by-claim audit (<code>docs/CLAIM_LEDGER.md</code>),
   rendered verbatim. It records, for every theorem and empirical claim, its current
   status, why it holds, what was weakened relative to earlier drafts, and what remains
-  open. The supporting properties additionally have Lean 4 artifacts under
-  <code>proofs/</code> at documented levels of completeness — the majority-vote
-  optimality theorem, the six-way refinement/monotonicity equivalence (including
-  its necessity direction), and the stabilization core are machine-checked in the
-  default build with public CI, the rest are clearly-labeled drafts (see
-  <code>proofs/README.md</code> for the per-file inventory). The math is supporting
-  material for the tool; the paper's claims rest on the experiments and the
-  reproducible pipeline.</p>
+  open. Lean 4 proof artifacts under <code>proofs/</code> provide supporting
+  formal material at documented levels of completeness (see
+  <code>proofs/README.md</code> for the per-file inventory). The math is
+  supporting material for the tool; the paper's claims rest on the experiments
+  and the reproducible pipeline.</p>
   {ledger_html}
 </section>
 
@@ -863,7 +870,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   <h2>Results &amp; robustness</h2>
   <p>Each table below is loaded from the CSVs in <code>outputs/alife_2026/</code> —
   the same files the paper's tables are built from. Column names come straight from
-  the code (<code>defect_*</code> columns are the paper's <em>residual</em> quantities).
+  the code (<code>defect_*</code> columns are the defect-mask quantities).
   Click a column header to sort.</p>
   {stress_html}
   {''.join(tables_html)}

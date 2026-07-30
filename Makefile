@@ -1,13 +1,24 @@
-.PHONY: all data figures tikz paper review test clean
+.PHONY: all data data-fresh figures tikz paper review test clean
 
 all: data figures paper
 
 install:
 	pip install -e .
 
+# Resumes by default: rows already present in outputs/alife_2026 are REUSED,
+# not recomputed, so this is fast on a fresh checkout and does almost nothing
+# on a complete one. Use it to continue an interrupted sweep. The run now
+# prints a resume report saying exactly what it reused.
 data:
 	PYTHONPATH=src python scripts/alife/alife_run_all.py \
 		--output-root outputs/alife_2026 --paper-dir paper
+
+# Recomputes everything from scratch. This is the target to use when
+# VERIFYING reproducibility -- `make data` on a complete checkout reuses the
+# committed CSVs and would report success without recomputing a single row.
+data-fresh:
+	PYTHONPATH=src python scripts/alife/alife_run_all.py \
+		--output-root outputs/alife_2026 --paper-dir paper --no-resume
 
 figures:
 	PYTHONPATH=src python scripts/alife/alife_rule_diagrams.py \
