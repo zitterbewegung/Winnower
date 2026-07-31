@@ -1,16 +1,15 @@
 """Search rule spaces for rules worth running the selector on.
 
-Picking the rules a paper reports is usually done by hand, and by hand it is
-easy to pick one that does not survive its own horizon -- ``3d-life``
-(S4-5/B5) is extinct by t=49 at the tuned density, so the last third of its
-observed window is an empty lattice, which is exactly relative-periodic under
-``p=1, s=0`` at zero defect rate and flatters the fit it contributes to.
+A rule is only informative if something is still happening at the horizon it
+is observed over: a lattice that has died out or frozen is exactly
+relative-periodic under ``p=1, s=0`` at zero defect rate, so it fits perfectly
+without exhibiting anything. Checking that by eye does not scale.
 
-This module makes that check mechanical. It enumerates a rule family, screens
-each rule cheaply for whether anything is still happening at the horizon, and
-then runs the *real* selector on the survivors, so "useful" means what it
-means everywhere else in this project: the rule sustains activity, and the
-pipeline finds a domain template with a sparse defect mask.
+This module makes the check mechanical. It enumerates a rule family, screens
+each rule cheaply for sustained activity, and then runs the *real* selector on
+the survivors, so "useful" means what it means everywhere else in this
+project: the rule sustains activity, and the pipeline finds a domain template
+with a sparse defect mask.
 
 Two consumers share this core. ``webdemo/bootstrap.py`` exposes it to the
 in-browser reproduction under a rule budget, so a reviewer can search
@@ -86,11 +85,11 @@ class ScreenSettings:
     measurement, and the rules that pass get re-run at full size.
 
     ``densities`` is a ladder, not a single value, because initial density is
-    a per-rule tuning knob rather than a property of the family: ``clouds``
-    (S13-26/B13-14) needs a dense start to reach its birth threshold and dies
-    at 0.3, while ``crystal`` (S1/B1-3) is smothered above 0.2. Screening at
-    one density would reject rules the paper already ships. Each rule is
-    screened at every density and keeps its best outcome.
+    a per-rule tuning knob rather than a property of the family. A rule with
+    high birth thresholds needs a dense start to get going at all, while one
+    with low thresholds is smothered by the same density, so a single value
+    would reject perfectly good rules on the wrong end of that range. Each
+    rule is screened at every density and keeps its best outcome.
     """
 
     size: int
@@ -110,10 +109,11 @@ _VERDICT_RANK: dict[str, int] = {"extinct": 0, "saturated": 1, "frozen": 2, "act
 #: the 3D horizon matches ``max(DEFAULT_HORIZONS_3D)``.
 #:
 #: The horizon matters more than it looks. A verdict is only ever a statement
-#: about the window it was measured on: ``3d-life`` screens as *active* over 30
-#: frames and is extinct by frame 49, so a screen shorter than the horizon you
-#: intend to report at will happily recommend a rule that dies later.
-#: :func:`search_rules` therefore screens over at least its evaluation horizon.
+#: about the window it was measured on -- a rule can sustain activity for
+#: dozens of frames and still die well before a longer horizon -- so screening
+#: over a shorter window than results are reported for can recommend a rule
+#: that does not last. :func:`search_rules` therefore screens over at least
+#: its evaluation horizon.
 DEFAULT_SCREEN: dict[int, ScreenSettings] = {
     1: ScreenSettings(size=96, horizon=200, densities=(0.3, 0.5)),
     2: ScreenSettings(size=32, horizon=100, densities=(0.2, 0.35, 0.5)),
@@ -601,8 +601,8 @@ def search_rules(
         counts[screen.verdict] += 1
         room = max_evaluations is None or len(evaluations) < int(max_evaluations)
         if screen.passed and evaluate and room:
-            # Evaluate at the density the rule actually survived at, not a
-            # family-wide default -- that default is what killed 3d-life.
+            # Evaluate at the density the rule actually survived at, rather
+            # than a family-wide default that may not suit it.
             density = float(eval_density if eval_density is not None else screen.density)
             evaluations.append(
                 evaluate_rule(

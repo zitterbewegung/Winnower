@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Sweep a rule family for rules worth reporting, and rank them.
 
-Motivation: the four hard-coded 3D rules were chosen by hand, and two of them
-do not sustain activity over their own observed horizon --- ``3d-life`` is
-extinct from t=49 and ``clouds`` freezes into a static blob from t=10 at every
-initial density. A dead or frozen lattice is exactly relative-periodic under
-``p=1, s=0`` at zero defect rate, so both flatter the fits they contribute to.
+A rule is only informative if something is still happening at the horizon it
+is observed over: a lattice that has died out or frozen is exactly
+relative-periodic under ``p=1, s=0`` at zero defect rate, so it fits perfectly
+without exhibiting anything.
 
-This script makes the choice mechanical: it screens a whole rule family for
+This script makes the check mechanical: it screens a whole rule family for
 sustained activity (each rule at its own best initial density), runs the
 shipped selector on the survivors, and ranks them by defect rate --- the
 paper's own target signature, a domain template covering most of the run with

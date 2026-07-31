@@ -16,12 +16,10 @@ without measuring anything --- period, displacement, and a defect rate of
 exactly zero. That makes them ground truth for the selector rather than one
 more thing to survey.
 
-The 3D entries are for ``3d-life`` (S4-5/B5, Bays' rule 4555). They matter
-practically as well as as tests: that rule's random soup is extinct by t=49 at
-16^3, leaving a dead lattice that is trivially relative-periodic under
-``p=1, s=0``, whereas seeding ``PATTERNS_3D["glider"]`` gives a permanently
-persistent, spatially localized, *moving* structure --- the signature the
-defect-mask claim is actually about.
+The 3D entries are for ``3d-life`` (S4-5/B5, Bays' rule 4555). They are useful
+beyond testing: seeding ``PATTERNS_3D["glider"]`` instead of a random soup
+gives a permanently persistent, spatially localized, *moving* structure ---
+the signature the defect-mask claim is about.
 
 Every pattern here was found by random search and then re-verified in
 isolation in a clean lattice: constant population, exact translation over the
