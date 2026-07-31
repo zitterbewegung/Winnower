@@ -326,3 +326,70 @@ def test_rule_spaces_reports_every_family_when_data_is_present(demo):
     assert set(spaces) == {"eca", "life_range", "lifewiki", "rule3d"}
     assert spaces["lifewiki"]["size"] == 106
     assert spaces["rule3d"]["size"] == 142_884
+
+
+# --- The bundle itself, built the way the site builds it ----------------------
+#
+# The tests above check code paths; the defect was in *packaging*. The bundle
+# shipped only .py files, so data/lifewiki_rules.json was absent in the
+# browser and the demo died on start-up. These build the real bundle and run
+# it in a bare directory, which is the only shape that would have caught it.
+
+
+@pytest.fixture(scope="module")
+def demo_bundle(tmp_path_factory):
+    """Build winnower_src.zip through the site builder's own code path."""
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    try:
+        import build_review_site
+    finally:
+        sys.path.remove(str(REPO_ROOT / "scripts"))
+    site = tmp_path_factory.mktemp("site")
+    build_review_site.write_demo_assets(site)
+    return site / "winnower_src.zip"
+
+
+def test_bundle_ships_the_data_the_package_reads(demo_bundle):
+    """The exact omission that broke the deployed demo."""
+    import zipfile
+
+    names = set(zipfile.ZipFile(demo_bundle).namelist())
+    assert "relative_symmetry_repair/data/lifewiki_rules.json" in names, (
+        "the LifeWiki catalogue is missing from the demo bundle; "
+        "rule_spaces() will raise FileNotFoundError in the browser"
+    )
+    assert "bootstrap.py" in names
+    assert "relative_symmetry_repair/rule_search.py" in names
+
+
+def test_bundle_runs_with_no_repository_around_it(demo_bundle, tmp_path):
+    """End-to-end: extract the bundle alone, stub numba, call what crashed.
+
+    Runs in a subprocess from a directory that is not inside the repository,
+    so ``_repo_root()`` cannot accidentally find the real ``data/``. This is
+    the shape Pyodide sees.
+    """
+    import json as _json
+    import subprocess
+    import zipfile
+
+    workdir = tmp_path / "bare"
+    workdir.mkdir()
+    zipfile.ZipFile(demo_bundle).extractall(workdir)
+
+    script = workdir / "check.py"
+    script.write_text(
+        "import sys, json\n"
+        "sys.modules['numba'] = None\n"      # Pyodide has no numba
+        "sys.path.insert(0, '.')\n"
+        "import bootstrap\n"
+        "print(json.dumps(bootstrap.rule_spaces()))\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "check.py"],
+        cwd=workdir, capture_output=True, text=True, timeout=300,
+    )
+    assert result.returncode == 0, f"demo bundle failed to start:\n{result.stderr}"
+    spaces = _json.loads(result.stdout.strip().splitlines()[-1])
+    assert set(spaces) == {"eca", "life_range", "lifewiki", "rule3d"}
+    assert spaces["lifewiki"]["size"] == 106
