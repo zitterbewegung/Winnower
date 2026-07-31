@@ -190,12 +190,12 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
         <div class="col-auto">
           <label class="form-label" for="search-budget">Rules to screen</label>
           <input id="search-budget" class="form-control narrow" type="number"
-                 min="10" max="5000" step="10" value="300">
+                 min="10" max="5000" step="10" value="200">
         </div>
         <div class="col-auto">
           <label class="form-label" for="search-evals">Selector runs</label>
           <input id="search-evals" class="form-control narrow" type="number"
-                 min="1" max="50" value="10">
+                 min="1" max="50" value="4">
         </div>
         <div class="col-auto">
           <button id="search-run" type="button" class="btn btn-outline-primary px-4" disabled>
@@ -516,14 +516,20 @@ function renderSpaces(spaces) {
   refreshSearchEstimate();
 }
 
-// Seconds per screened rule and per selector run, measured under the demo's
-// own vectorized kernels (no numba under WebAssembly). 3D screening costs most
-// because it runs to T=80 over a five-density ladder.
+// Seconds per screened rule and per selector run. Measured in a real browser
+// (headless Chromium, Pyodide, no numba) by running each family twice at the
+// same budget and seed -- once with the selector disabled to time screening
+// alone, once with it enabled -- and taking the difference. Predicts the
+// observed runs to within 3%.
+//
+// The selector dominates: it costs 40-100x a screen, which is why the two
+// stages are budgeted separately and why the screening budget can be large
+// while the selector budget stays small.
 const SEARCH_COST = {
-  eca:        { screen: 0.009, evaluate: 0.05 },
-  life_range: { screen: 0.05,  evaluate: 0.5 },
-  lifewiki:   { screen: 0.05,  evaluate: 0.5 },
-  rule3d:     { screen: 0.10,  evaluate: 0.9 },
+  eca:        { screen: 0.006, evaluate: 0.26 },
+  life_range: { screen: 0.014, evaluate: 2.3 },
+  lifewiki:   { screen: 0.016, evaluate: 2.4 },
+  rule3d:     { screen: 0.068, evaluate: 7.1 },
 };
 
 function refreshSearchEstimate() {
