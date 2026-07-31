@@ -468,3 +468,24 @@ def test_the_demo_page_takes_its_badges_from_the_payload():
     # The classifier owns the labels; the page should not spell them itself.
     assert "PERSISTENT DEFECTS" not in html
     assert "DENSE DEFECT MASK" not in html
+
+
+# --- The demo's expected rows must come from the reproducible table -----------
+
+
+def test_demo_expected_rows_prefer_the_atlas_over_the_stale_table():
+    """eca_atlas and seed_stability overlap and disagree; the atlas must win.
+
+    seed_stability_runs.csv was last recomputed on 2026-03-22 and predates
+    later scoring fixes; eca_atlas_runs.csv does not. Later entries overwrite
+    earlier ones, so seed_stability has to be read FIRST. Loading it last made
+    the live demo quote stale values and flag correct browser results as
+    mismatches on 32 of 6400 comparison rows.
+    """
+    import re
+
+    source = (REPO_ROOT / "scripts" / "build_review_site.py").read_text()
+    body = source.split("def _demo_expected_rows")[1].split("def ")[0]
+    seed_at = body.index("seed_stability/seed_stability_runs.csv")
+    atlas_at = body.index("eca_atlas/eca_atlas_runs.csv")
+    assert seed_at < atlas_at, "eca_atlas must be loaded after seed_stability"
