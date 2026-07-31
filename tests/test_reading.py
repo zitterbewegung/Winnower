@@ -489,3 +489,31 @@ def test_demo_expected_rows_prefer_the_atlas_over_the_stale_table():
     seed_at = body.index("seed_stability/seed_stability_runs.csv")
     atlas_at = body.index("eca_atlas/eca_atlas_runs.csv")
     assert seed_at < atlas_at, "eca_atlas must be loaded after seed_stability"
+
+
+def test_every_searchable_family_has_a_cost_estimate_on_the_page():
+    """The page estimates search time per family; a missing entry silently
+    falls back to the 3D costs and would mis-state the wait by ~10x.
+
+    The constants themselves are measured in a real browser (headless
+    Chromium, Pyodide) and predict observed runs to within 3%; this only
+    guards the mapping from families to entries.
+    """
+    import re
+
+    from relative_symmetry_repair.rule_search import RULE_SPACES
+
+    html = REPRODUCE_HTML.read_text()
+    block = html.split("const SEARCH_COST = {")[1].split("};")[0]
+    listed = set(re.findall(r"^\s*(\w+):\s*\{", block, re.M))
+    assert listed == set(RULE_SPACES), (
+        f"SEARCH_COST covers {sorted(listed)} but the searchable families are "
+        f"{sorted(RULE_SPACES)}"
+    )
+    for name, screen, evaluate in re.findall(
+        r"(\w+):\s*\{\s*screen:\s*([\d.]+),\s*evaluate:\s*([\d.]+)", block
+    ):
+        assert 0 < float(screen) < 1, f"{name}: implausible screen cost"
+        assert float(screen) < float(evaluate), (
+            f"{name}: a selector run must cost more than a screen"
+        )
