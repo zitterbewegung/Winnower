@@ -317,6 +317,17 @@ def csv_to_table(path: Path, filterable: bool = False, table_id: str = "") -> st
     if not rows:
         return '<p class="missing">Empty CSV.</p>'
     header, body = rows[0], rows[1:]
+
+    # Drop columns that carry no information for a reader. stable_winner_fraction
+    # is the share of runs whose margin cleared a fixed 2.0-bit threshold; on the
+    # committed tables that is 8,974 of 8,978 runs, so the column reads as a
+    # quality score while being ~1.0 by construction. The margin itself is
+    # reported alongside and is the quantity that actually varies.
+    dropped = {i for i, h in enumerate(header) if h in HIDDEN_TABLE_COLUMNS}
+    if dropped:
+        header = [h for i, h in enumerate(header) if i not in dropped]
+        body = [[c for i, c in enumerate(row) if i not in dropped] for row in body]
+
     parts = []
     if filterable:
         parts.append(
@@ -334,6 +345,10 @@ def csv_to_table(path: Path, filterable: bool = False, table_id: str = "") -> st
     parts.append("</tbody></table></div>")
     parts.append(f'<p class="tbl-meta">{len(body)} rows · source: <code>{esc(path.relative_to(ROOT))}</code></p>')
     return "".join(parts)
+
+
+#: Columns hidden from the rendered result tables (see csv_table).
+HIDDEN_TABLE_COLUMNS = {"stable_winner_fraction"}
 
 
 def detex_dashes(text: str) -> str:

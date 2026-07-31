@@ -336,7 +336,7 @@ const COMPARE_COLUMNS = [
   ["selected_nml_bits", "float"], ["selected_nll_bits", "float"],
   ["selected_complexity", "float"], ["selected_defect_rate", "float"],
   ["runner_up_period", "int"], ["runner_up_nml_bits", "float"],
-  ["margin_bits", "float"], ["status", "str"],
+  ["margin_bits", "float"],
   ["period_tie_count", "int"], ["selected_shift_tie_count", "int"],
 ];
 const REL_TOL = 1e-9, ABS_TOL = 1e-9;
@@ -578,7 +578,7 @@ function renderSearch(res) {
     return;
   }
   wrap.style.display = "";
-  const head = ["#", "rule", "density", "p", "s", "defect rate", "bits/site", "status", ""];
+  const head = ["#", "rule", "density", "p", "s", "defect rate", "bits/site", ""];
   const html = [`<thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>`];
   rows.forEach((r, i) => {
     const label = r.rule.label;
@@ -589,7 +589,6 @@ function renderSearch(res) {
       `<td>${r.selected_period}</td><td>${shift}</td>` +
       `<td>${pct(r.defect_rate, 3)}</td>` +
       `<td>${Number(r.bits_per_site).toFixed(3)}</td>` +
-      `<td>${r.status}</td>` +
       `<td><button type="button" class="btn btn-sm btn-outline-secondary" ` +
       `data-search-load="${i}">Load</button></td></tr>`
     );
@@ -1022,12 +1021,15 @@ function confidenceItems(reading) {
         "against a competitor.");
       break;
     case "stable_winner":
-      items.push(`<strong>Clear winner within the grid.</strong> The best ` +
+      // Deliberately reports the margin rather than a pass/fail label. The
+      // label the pipeline derives from it clears its threshold on ~99.95% of
+      // committed runs, so it separates nothing; the margin is the quantity
+      // that actually varies, and the one the paper reports.
+      items.push(`<strong>Margin over the runner-up.</strong> The best ` +
         `alternative (period ${c.runner_up_period}) costs ${bits(c.margin_bits)} bits ` +
-        `more, clear of the ${oneDp(th.near_tie_bits)}-bit threshold the pipeline ` +
-        `uses to label a run <code>stable_winner</code>. That is a ` +
-        `description-length gap over the whole block under this code, not a ` +
-        `calibrated significance test.`);
+        `more. That is a description-length gap over the whole block under this ` +
+        `code &mdash; not a calibrated significance test, and not evidence that the ` +
+        `scanned grid contained the right answer.`);
       break;
     case "near_tie":
       items.push(`<strong>Near tie — read the period with caution.</strong> Period ` +
@@ -1426,7 +1428,6 @@ function render(res) {
     ["NML score (bits)", Number(rec.selected_nml_bits).toFixed(2)],
     ["Defect rate", (Number(rec.selected_defect_rate) * 100).toFixed(3) + "%"],
     ["Margin to runner-up (bits)", Number(rec.margin_bits).toFixed(2)],
-    ["Status", rec.status],
   ];
   $("selection-kv").innerHTML = kv
     .map(([k, v]) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`)
