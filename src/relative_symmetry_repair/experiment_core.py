@@ -57,7 +57,17 @@ def _repo_root() -> Path:
 
 
 def _lifewiki_rules_path() -> Path:
-    return _repo_root() / "data" / "lifewiki_rules.json"
+    """Locate the LifeWiki rule catalogue.
+
+    Normally this sits in the repository's ``data/`` directory. The
+    WebAssembly demo ships only the package (see ``write_demo_assets`` in
+    ``scripts/build_review_site.py``), so a copy is bundled alongside the
+    package itself and used when the repository layout is absent.
+    """
+    repo_copy = _repo_root() / "data" / "lifewiki_rules.json"
+    if repo_copy.exists():
+        return repo_copy
+    return Path(__file__).resolve().parent / "data" / "lifewiki_rules.json"
 
 
 def _serialize_jsonable(value: Any) -> Any:

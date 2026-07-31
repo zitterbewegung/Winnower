@@ -466,11 +466,20 @@ def stress_stats() -> list[tuple[str, str]]:
 
 
 def _demo_expected_rows() -> dict:
-    """Committed run-level rows the in-browser demo compares against."""
+    """Committed run-level rows the in-browser demo compares against.
+
+    The two tables overlap on 75 (rule, seed, horizon) keys and disagree on 12
+    of them, because seed_stability_runs.csv was last recomputed on 2026-03-22
+    and predates later scoring fixes while eca_atlas_runs.csv does not. Later
+    entries win, so seed_stability is loaded FIRST and the atlas overwrites it
+    on any conflict: the atlas is the table current code reproduces exactly,
+    and quoting the stale value made the demo flag a correct browser result as
+    a mismatch. Order is load-bearing -- do not swap these back.
+    """
     rows: dict[str, dict] = {}
     for rel in (
-        "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
         "outputs/alife_2026/seed_stability/seed_stability_runs.csv",
+        "outputs/alife_2026/eca_atlas/eca_atlas_runs.csv",
     ):
         path = ROOT / rel
         if not path.exists():
@@ -494,6 +503,13 @@ def write_demo_assets(site: Path) -> None:
         pkg = ROOT / "src" / "relative_symmetry_repair"
         for py in sorted(pkg.glob("*.py")):
             zf.write(py, f"relative_symmetry_repair/{py.name}")
+        # Data the package reads at runtime. Only the package is shipped, so
+        # the repository's data/ directory does not exist in the browser and
+        # _lifewiki_rules_path() falls back to this package-local copy.
+        zf.write(
+            ROOT / "data" / "lifewiki_rules.json",
+            "relative_symmetry_repair/data/lifewiki_rules.json",
+        )
 
     (site / "expected_runs.json").write_text(json.dumps(_demo_expected_rows()))
 

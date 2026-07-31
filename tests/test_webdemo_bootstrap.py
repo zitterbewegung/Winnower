@@ -287,3 +287,109 @@ def test_run_repro_matches_the_library_run_for_the_same_case(demo, eca_result):
 def test_lz4_shim_flag_is_reported_to_the_page(eca_result):
     """The lz4 column is cosmetic, but the page must say when it is approximate."""
     assert isinstance(eca_result["lz4_shimmed"], bool)
+
+
+# --- The demo bundle must carry what the package reads at runtime -------------
+#
+# The demo ships only bootstrap.py and the package; the repository's data/
+# directory does not exist in the browser. A LifeWiki rule-space lookup
+# therefore resolved to /home/data/lifewiki_rules.json and raised
+# FileNotFoundError inside the worker's init(), taking down the entire
+# reproduction demo for the sake of an optional search panel.
+
+
+def test_lifewiki_rules_resolve_without_the_repository_layout(tmp_path, monkeypatch):
+    """The package-local fallback is what makes the browser build work."""
+    import relative_symmetry_repair.experiment_core as core
+
+    # Pretend the repository's data/ directory is not there, as in the browser.
+    monkeypatch.setattr(core, "_repo_root", lambda: tmp_path)
+    fallback = core._lifewiki_rules_path()
+    assert fallback.parent.name == "data"
+    assert fallback.parent.parent.name == "relative_symmetry_repair"
+
+
+def test_rule_spaces_never_raises_during_startup(demo, monkeypatch):
+    """rule_spaces() runs inside worker init(); it must degrade, not raise."""
+    import relative_symmetry_repair.rule_search as rs
+
+    def boom(name):
+        raise FileNotFoundError("simulated missing data file")
+
+    monkeypatch.setattr(demo.bootstrap, "count_rule_space", boom)
+    spaces = demo.bootstrap.rule_spaces()
+    assert spaces == {}          # every family omitted, nothing raised
+
+
+def test_rule_spaces_reports_every_family_when_data_is_present(demo):
+    spaces = demo.bootstrap.rule_spaces()
+    assert set(spaces) == {"eca", "life_range", "lifewiki", "rule3d"}
+    assert spaces["lifewiki"]["size"] == 106
+    assert spaces["rule3d"]["size"] == 142_884
+
+
+# --- The bundle itself, built the way the site builds it ----------------------
+#
+# The tests above check code paths; the defect was in *packaging*. The bundle
+# shipped only .py files, so data/lifewiki_rules.json was absent in the
+# browser and the demo died on start-up. These build the real bundle and run
+# it in a bare directory, which is the only shape that would have caught it.
+
+
+@pytest.fixture(scope="module")
+def demo_bundle(tmp_path_factory):
+    """Build winnower_src.zip through the site builder's own code path."""
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    try:
+        import build_review_site
+    finally:
+        sys.path.remove(str(REPO_ROOT / "scripts"))
+    site = tmp_path_factory.mktemp("site")
+    build_review_site.write_demo_assets(site)
+    return site / "winnower_src.zip"
+
+
+def test_bundle_ships_the_data_the_package_reads(demo_bundle):
+    """The exact omission that broke the deployed demo."""
+    import zipfile
+
+    names = set(zipfile.ZipFile(demo_bundle).namelist())
+    assert "relative_symmetry_repair/data/lifewiki_rules.json" in names, (
+        "the LifeWiki catalogue is missing from the demo bundle; "
+        "rule_spaces() will raise FileNotFoundError in the browser"
+    )
+    assert "bootstrap.py" in names
+    assert "relative_symmetry_repair/rule_search.py" in names
+
+
+def test_bundle_runs_with_no_repository_around_it(demo_bundle, tmp_path):
+    """End-to-end: extract the bundle alone, stub numba, call what crashed.
+
+    Runs in a subprocess from a directory that is not inside the repository,
+    so ``_repo_root()`` cannot accidentally find the real ``data/``. This is
+    the shape Pyodide sees.
+    """
+    import json as _json
+    import subprocess
+    import zipfile
+
+    workdir = tmp_path / "bare"
+    workdir.mkdir()
+    zipfile.ZipFile(demo_bundle).extractall(workdir)
+
+    script = workdir / "check.py"
+    script.write_text(
+        "import sys, json\n"
+        "sys.modules['numba'] = None\n"      # Pyodide has no numba
+        "sys.path.insert(0, '.')\n"
+        "import bootstrap\n"
+        "print(json.dumps(bootstrap.rule_spaces()))\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "check.py"],
+        cwd=workdir, capture_output=True, text=True, timeout=300,
+    )
+    assert result.returncode == 0, f"demo bundle failed to start:\n{result.stderr}"
+    spaces = _json.loads(result.stdout.strip().splitlines()[-1])
+    assert set(spaces) == {"eca", "life_range", "lifewiki", "rule3d"}
+    assert spaces["lifewiki"]["size"] == 106

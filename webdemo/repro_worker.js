@@ -68,7 +68,13 @@ def _rule_spaces():
     pandas: pyodide.runPython("import pandas; pandas.__version__"),
     lz4: lz4Loaded,
   });
-  post("spaces", JSON.parse(pyodide.runPython("_rule_spaces()")));
+  // The rule-search panel is optional; the reproduction demo is not. Never let
+  // a failure here abort init() and take the whole page down with it.
+  try {
+    post("spaces", JSON.parse(pyodide.runPython("_rule_spaces()")));
+  } catch (err) {
+    post("status", "Rule search unavailable in this build; reproduction is unaffected.");
+  }
 }
 
 self.onmessage = async (event) => {
