@@ -670,10 +670,9 @@ class ResumeTable:
     Resuming is the default, and it is silent by construction: rows whose keys
     are already present are skipped, so a re-run over a complete table does no
     work and still exits successfully. That is the intended behaviour for a
-    sweep that died halfway, and a trap for anyone re-running to check
-    reproducibility -- ``outputs/alife_2026``'s null-control and
-    seed-stability tables sat four months out of date behind it, through
-    re-runs that reported success while recomputing nothing.
+    sweep that died halfway, and the wrong behaviour for a run intended to
+    verify that the pipeline still produces the committed numbers, which would
+    report success without recomputing anything.
 
     So the table counts what it reused. :attr:`preexisting_rows` is what was
     loaded from disk, :attr:`added_rows` what this run actually computed, and
