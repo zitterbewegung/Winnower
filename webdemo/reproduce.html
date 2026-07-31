@@ -125,9 +125,8 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
   <div class="wrap">
     <h1>Live reproduction: run Winnower in your browser</h1>
     <p class="subtitle">
-      This page runs the actual <em>Winnower</em> pipeline
-      (<code>relative_symmetry_repair</code>, WebAssembly Python) on a
-      space&ndash;time it simulates from your chosen rule, seed, and horizon —
+      This page runs the actual <em>Winnower</em> pipeline (WebAssembly Python)
+      on a space&ndash;time it simulates from your chosen rule, seed, and horizon —
       infers the periodic domain template and defect mask, compares the result
       against the committed row in the paper's result CSVs, and reads back what
       the selected template says about the run.
@@ -178,11 +177,7 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
         Find rules worth running &mdash; search a rule family
       </summary>
       <p class="hint mt-2">
-        Picking rules by hand is how a dead one gets reported: <code>3d-life</code>
-        is extinct from t&nbsp;=&nbsp;49 and <code>clouds</code> freezes into a static
-        blob from t&nbsp;=&nbsp;10, and a dead or frozen lattice is exactly
-        relative-periodic under <code>p&nbsp;=&nbsp;1, s&nbsp;=&nbsp;0</code> at zero
-        defect rate. This screens a sample of a rule family for rules that are
+        This screens a sample of a rule family for rules that are
         still <em>doing</em> something at the horizon &mdash; each at its own best
         initial density &mdash; then runs the real selector on some of the survivors
         and ranks them by defect rate.
@@ -493,7 +488,7 @@ $("run").addEventListener("click", () => {
 // ---------------------------------------------------------------------------
 // Rule search
 //
-// Screening and ranking happen in Python (relative_symmetry_repair.rule_search),
+// Screening and ranking happen in Python (the rule_search module),
 // against the same simulator and the same selector as every other run on this
 // page; this section only builds the request and renders the reply. "Useful"
 // means the rule is still changing at the horizon and the selector finds a
@@ -940,9 +935,9 @@ function renderVerdict(rec) {
 // selected template say about the run?
 //
 // Every decision shown here — which kind of domain won, what the margin is
-// worth, what the defect mask did over time — is made in Python by
-// relative_symmetry_repair.reading, against the same thresholds
-// experiment_core.py uses for the paper's own tables, and arrives ready-made
+// worth, what the defect mask did over time — is made in Python by the
+// reading module, against the same thresholds experiment_core.py uses for
+// the paper's own tables, and arrives ready-made
 // on res.reading. This section formats that payload and nothing else: no
 // threshold is restated here and no run is re-classified here, so the page
 // cannot drift from the pipeline. The logic is covered by
