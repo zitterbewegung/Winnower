@@ -287,3 +287,42 @@ def test_run_repro_matches_the_library_run_for_the_same_case(demo, eca_result):
 def test_lz4_shim_flag_is_reported_to_the_page(eca_result):
     """The lz4 column is cosmetic, but the page must say when it is approximate."""
     assert isinstance(eca_result["lz4_shimmed"], bool)
+
+
+# --- The demo bundle must carry what the package reads at runtime -------------
+#
+# The demo ships only bootstrap.py and the package; the repository's data/
+# directory does not exist in the browser. A LifeWiki rule-space lookup
+# therefore resolved to /home/data/lifewiki_rules.json and raised
+# FileNotFoundError inside the worker's init(), taking down the entire
+# reproduction demo for the sake of an optional search panel.
+
+
+def test_lifewiki_rules_resolve_without_the_repository_layout(tmp_path, monkeypatch):
+    """The package-local fallback is what makes the browser build work."""
+    import relative_symmetry_repair.experiment_core as core
+
+    # Pretend the repository's data/ directory is not there, as in the browser.
+    monkeypatch.setattr(core, "_repo_root", lambda: tmp_path)
+    fallback = core._lifewiki_rules_path()
+    assert fallback.parent.name == "data"
+    assert fallback.parent.parent.name == "relative_symmetry_repair"
+
+
+def test_rule_spaces_never_raises_during_startup(demo, monkeypatch):
+    """rule_spaces() runs inside worker init(); it must degrade, not raise."""
+    import relative_symmetry_repair.rule_search as rs
+
+    def boom(name):
+        raise FileNotFoundError("simulated missing data file")
+
+    monkeypatch.setattr(demo.bootstrap, "count_rule_space", boom)
+    spaces = demo.bootstrap.rule_spaces()
+    assert spaces == {}          # every family omitted, nothing raised
+
+
+def test_rule_spaces_reports_every_family_when_data_is_present(demo):
+    spaces = demo.bootstrap.rule_spaces()
+    assert set(spaces) == {"eca", "life_range", "lifewiki", "rule3d"}
+    assert spaces["lifewiki"]["size"] == 106
+    assert spaces["rule3d"]["size"] == 142_884

@@ -350,8 +350,20 @@ def run_repro(family: str, rule, seed: int, horizon: int, progress=None) -> dict
 
 
 def rule_spaces() -> dict:
-    """The rule families the page can search, with their exact sizes."""
-    return {name: {"size": count_rule_space(name)} for name in sorted(RULE_SPACES)}
+    """The rule families the page can search, with their exact sizes.
+
+    A family whose size cannot be determined -- ``lifewiki`` needs a data file
+    that older bundles did not ship -- is omitted rather than raised. This runs
+    during worker start-up, so an exception here would take down the whole
+    reproduction demo for the sake of an optional panel.
+    """
+    spaces = {}
+    for name in sorted(RULE_SPACES):
+        try:
+            spaces[name] = {"size": count_rule_space(name)}
+        except Exception as error:  # noqa: BLE001 - never fail start-up
+            print(f"rule space {name!r} unavailable: {error}")
+    return spaces
 
 
 def run_rule_search(
