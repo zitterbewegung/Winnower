@@ -1047,9 +1047,10 @@ function confidenceItems(reading) {
         `. Under ${oneDp(th.near_tie_bits)} bits the pipeline labels the run ` +
         `<code>near_tie</code>: two candidates are separated by less than the width ` +
         `of the tie band, so the period reported here is not settled. The paper's ` +
-        `argument is that a per-site fit-rate difference eventually outgrows the ` +
-        `logarithmic penalty gap, so a longer T tends to separate them — worth ` +
-        `re-running.`);
+        `argument is that <em>if</em> a per-site fit-rate difference persists, it ` +
+        `eventually outgrows the logarithmic penalty gap; a difference measured at ` +
+        `this T need not persist, so a longer run may or may not separate them — ` +
+        `worth re-running.`);
       break;
     default:
       items.push(`<strong>Unresolved.</strong> The margin is ${bits(c.margin_bits)} ` +
