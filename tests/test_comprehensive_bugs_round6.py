@@ -25,14 +25,14 @@ class TestPaperClaimsALIFE:
 
     @pytest.fixture
     def t100_survey(self):
-        path = REPO_ROOT / "outputs/lifewiki_survey_T100_rerun.csv"
+        path = REPO_ROOT / "outputs/lifewiki_survey.csv"
         if not path.exists():
             pytest.skip("T100 survey CSV not found")
         return pd.read_csv(path)
 
     @pytest.fixture
     def t400_survey(self):
-        path = REPO_ROOT / "outputs/lifewiki_survey_T400_rerun.csv"
+        path = REPO_ROOT / "outputs/lifewiki_survey_T400.csv"
         if not path.exists():
             pytest.skip("T400 survey CSV not found")
         return pd.read_csv(path)

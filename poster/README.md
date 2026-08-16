@@ -1,11 +1,15 @@
-# ALIFE 2026 Poster Draft
+# ALIFE 2026 Poster
 
-This directory contains a first-pass poster assembled from the stronger poster-oriented assets already present in the repository.
+This directory holds both published artifacts: the accepted late-breaking
+abstract and the poster board assembled from it. Accepted LBAs are presented
+as posters and are not included in the proceedings.
 
 ## Files
 
-- `alife_2026_poster.tex` — standalone landscape poster source
+- `alife2026_poster.tex` / `.pdf` — the accepted ALIFE 2026 late-breaking abstract (US-letter, 2 pages of main text). This is the canonical copy; the review site and `deploy-review-site.yml` both read it from here.
+- `alife_2026_poster.tex` — standalone landscape poster source (48x36 in board)
 - `alife_2026_poster.pdf` — compiled poster output after a successful local build
+- `alifeconf.sty` — symlink to `../paper/alifeconf.sty`, the official conference style shared with the companion paper
 - `EDITABLE_FIGURES.md` — notes on which figure families are best edited as PDF, SVG, or by direct redraw
 
 ## Build
@@ -13,14 +17,15 @@ This directory contains a first-pass poster assembled from the stronger poster-o
 From this directory:
 
 ```bash
-pdflatex -interaction=nonstopmode alife_2026_poster.tex
+pdflatex -interaction=nonstopmode alife2026_poster.tex   # late-breaking abstract
+pdflatex -interaction=nonstopmode alife_2026_poster.tex  # poster board
 ```
 
-The poster uses checked-in image assets from:
+The board uses checked-in image assets from:
 
-- `../alife_lba_bundle/figures/`
+- `../_archive/alternate_layouts/alife_lba_bundle/figures/`
 - `../outputs/alife_2026/rule_diagrams/`
-- `../figures/`
+- `../paper/figures/`
 
 ## Data choices for this draft
 
@@ -28,7 +33,7 @@ This poster intentionally favors the newer ALIFE-facing artifacts over older sum
 
 Primary sources used here:
 
-- `../alife_lba_bundle/alife_lba_2026_knuth.tex`
+- `../_archive/alternate_layouts/alife_lba_bundle/alife_lba_2026_knuth.tex`
 - `../outputs/alife_2026/rule_diagrams/presentation_guide.md`
 - `../results/baseline_selector_summary.csv`
 - `../outputs/alife_2026/null_controls/null_controls_summary.csv`

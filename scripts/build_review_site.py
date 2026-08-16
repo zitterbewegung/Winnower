@@ -270,7 +270,7 @@ REPRO_STEPS = [
 
 REPO_MAP = [
     ("paper/paper_alife2026.pdf", "The submission PDF."),
-    ("paper/alife2026_lba.pdf", "ALIFE 2026 late-breaking abstract (submitted July 2026): “Winnower: Inferring Periodic Domains in Cellular Automata”."),
+    ("poster/alife2026_poster.pdf", "ALIFE 2026 late-breaking abstract (submitted July 2026): “Winnower: Inferring Periodic Domains in Cellular Automata”. Accepted LBAs are presented as posters."),
     ("paper/paper_alife2026.tex", "LaTeX source; figures pulled from outputs/."),
     ("docs/CLAIM_LEDGER.md", "Claim-by-claim audit: status, caveats, what remains."),
     ("docs/THEORY_NOTE.md", "Extended theory notes."),
@@ -499,7 +499,7 @@ def write_demo_assets(site: Path) -> None:
 
 
 def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
-          lba_href: str = "../paper/alife2026_lba.pdf", live_demo: bool = False) -> str:
+          lba_href: str = "../poster/alife2026_poster.pdf", live_demo: bool = False) -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
     title = extract_tex_field(tex, "title") or "Winnower — reviewer guide"
     abstract = extract_abstract(tex)
@@ -839,7 +839,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
     largest scanned period on all 105 non-degenerate Life-like rules,
     while Bernoulli NML concentrates at low period.</li>
   </ul>
-  <p class="tbl-meta">Source: <code>paper/alife2026_lba.tex</code> &mdash; US-letter,
+  <p class="tbl-meta">Source: <code>poster/alife2026_poster.tex</code> &mdash; US-letter,
   two pages of main text (bibliography on page 3), abstract under 250 words,
   built with the official <code>alifeconf</code> LaTeX style. Figures:
   <code>paper/figures/algorithm_nml.png</code> (pipeline; editable SVG master
@@ -962,7 +962,7 @@ def main() -> None:
         pdf = ROOT / "paper" / "paper_alife2026.pdf"
         if pdf.exists():
             shutil.copy2(pdf, site / pdf.name)
-        lba = ROOT / "paper" / "alife2026_lba.pdf"
+        lba = ROOT / "poster" / "alife2026_poster.pdf"
         if lba.exists():
             shutil.copy2(lba, site / lba.name)
         write_demo_assets(site)
