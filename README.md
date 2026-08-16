@@ -190,6 +190,10 @@ period-1 fit leaves accumulate with T.
 }
 ```
 
+## Acknowlegement in the Paper about AI use
+
+Thanks Editage for language editing. ChatGPT and Claude Code helped with software development, first drafts of the paper and creation of figures; Aristotle and Claude assisted with Lean proof verification, ChatGPT was used as a brainstorming tool that contributed to refine and devise the final Winnower algorithm.
+
 ## License
 
 See [LICENSE](LICENSE) for details.
