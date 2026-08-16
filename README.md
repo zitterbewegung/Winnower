@@ -65,11 +65,8 @@ the complete 6400-row ECA atlas — regenerates byte-identically. See
 
 ## Reviewer / evaluation interface
 
-A self-contained web page for evaluating the paper — abstract, claim-by-claim
-audit ledger, all figures with their generating scripts, sortable result
-tables, and reproduction steps.
 
-The hosted version additionally includes a **live in-browser reproduction**
+This hosted version additionally includes a **live in-browser reproduction**
 (`reproduce.html`): WebAssembly Python (Pyodide) runs the actual
 `relative_symmetry_repair` pipeline — simulate → scan candidates →
 Bernoulli-NML selection — for any ECA rule, any 2D B/S rulestring, arbitrary
@@ -113,25 +110,7 @@ python scripts/build_review_site.py --embed-images
 ### Hosting
 
 Published via GitHub Pages from the `gh-pages` branch at
-`https://<owner>.github.io/Winnower/`. **Do not push `gh-pages` by hand** —
-`.github/workflows/deploy-review-site.yml` rebuilds and force-pushes it
-automatically on any push to `main` or the site source branch that touches the
-paper, `outputs/alife_2026/`, the site generator, `webdemo/`, or
-`src/relative_symmetry_repair/`. The last two matter because the demo's page
-and worker are copied into the site verbatim and the package is bundled into
-`winnower_src.zip`; before they were added, a demo-only change could merge
-without ever reaching the live site.
-
-To host elsewhere, build the same folder and upload it to any static host:
-
-```bash
-python scripts/build_review_site.py --pages _site
-```
-
-Note for double-blind review: the paper is anonymized, but a GitHub Pages URL
-under your account is not. For reviewer-facing links, prefer an anonymized
-mirror (e.g. https://anonymous.4open.science) or share the portable
-single-file HTML directly.
+`https://zitterbewegung.github.io/Winnower/`.
 
 ## Project structure
 
