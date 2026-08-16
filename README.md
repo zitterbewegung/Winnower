@@ -2,7 +2,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-543%20passing-brightgreen)]()
 
-This project is primarily software used to replicate the results in Winnower as referenced in the paper that will be published and referenced in the paper as AI generated.
+This project is primarily software used to replicate the results in Winnower as referenced in the paper that will be published.
 
 This algorithm fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured residual masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
 
