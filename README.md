@@ -2,7 +2,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-543%20passing-brightgreen)]()
 
-Fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured residual masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
+This algorithm fits relative-periodic backgrounds to cellular automaton spacetimes and analyzes the structured residual masks that remain. Uses Normalized Maximum Likelihood (NML) for principled model selection across shift and period candidates.
 
 **Paper:** *Winnower: A Fast Tool for Splitting Cellular Automaton Spacetimes into a Periodic Background and a Residual Mask* — see `paper/paper_alife2026.pdf` and the [reviewer site](https://zitterbewegung.github.io/Winnower/). Accepted at ALIFE 2026.
 
