@@ -176,11 +176,6 @@ from relative_symmetry_repair.experiment_core import (  # noqa: E402
 from relative_symmetry_repair.reading import build_reading  # noqa: E402
 from relative_symmetry_repair.repair import scan_relative_periodicity  # noqa: E402
 from relative_symmetry_repair.repair_nd import scan_relative_periodicity_nd  # noqa: E402
-from relative_symmetry_repair.rule_search import (  # noqa: E402
-    RULE_SPACES,
-    count_rule_space,
-    search_rules,
-)
 
 NAMED_CASES = {case.name: case for case in (*REPRESENTATIVE_CASES_2D, *REPRESENTATIVE_CASES_3D)}
 
@@ -347,42 +342,3 @@ def run_repro(family: str, rule, seed: int, horizon: int, progress=None) -> dict
         "lz4_shimmed": bool(LZ4_SHIMMED),
         "runtime_s": round(time.time() - started, 2),
     }
-
-
-def rule_spaces() -> dict:
-    """The rule families the page can search, with their exact sizes."""
-    return {name: {"size": count_rule_space(name)} for name in sorted(RULE_SPACES)}
-
-
-def run_rule_search(
-    space: str,
-    budget: int,
-    shuffle_seed: int = 7,
-    max_evaluations: int = 12,
-    progress=None,
-) -> dict:
-    """Search a rule family for rules that sustain activity, and rank them.
-
-    ``budget`` bounds how many rules are screened, because the full 3D family
-    is 142,884 rules -- far past what a browser tab should attempt. With
-    ``shuffle_seed`` the budget buys a representative sample of the space
-    rather than its first entries in enumeration order.
-
-    The two stages are budgeted separately because they cost very differently
-    under WebAssembly: screening a rule is ~16 ms (small lattice, several
-    initial densities, aborting the moment it dies or fills) while running the
-    selector on it is ~0.9 s. So the page screens widely and scores only
-    ``max_evaluations`` survivors; the payload reports how many alive rules
-    went unscored.
-    """
-    started = time.time()
-    result = search_rules(
-        str(space),
-        limit=int(budget),
-        shuffle_seed=int(shuffle_seed),
-        evaluate=True,
-        max_evaluations=int(max_evaluations),
-        progress=progress,
-    )
-    result["runtime_s"] = round(time.time() - started, 2)
-    return _py(result)

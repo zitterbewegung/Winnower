@@ -125,13 +125,12 @@ src/relative_symmetry_repair/   Core library
   experiment_core.py            Cases, sweeps, resume tables, parallel units
   experiment_suite.py           The ALIFE experiment suite
   reading.py                    Structured reading of a selected template
-  rule_search.py                Search a rule family for rules worth running
   patterns.py                   Catalogued orbits with a known period/displacement
   cli.py                        Command-line interface
 
 scripts/                        Experiment and survey scripts
   alife/                        ALIFE paper figure and data generation
-  surveys/                      Rule surveys (LifeWiki, ECA atlas, rule search)
+  surveys/                      Rule surveys (LifeWiki, ECA atlas)
   analysis/                     Convergence, baselines, stabilization
 
 webdemo/                        In-browser reproduction (Pyodide)
