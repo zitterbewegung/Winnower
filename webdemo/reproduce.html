@@ -173,7 +173,10 @@ footer.page { border-top: 1px solid var(--line); color: var(--muted);
       </div>
     </div>
     <p class="hint mt-2 mb-0" id="estimate"></p>
-    <details class="mt-3" id="search-block">
+    <!-- Rule search is disabled: too buggy to put in front of a reader. The
+         panel and its JS are left in place -- drop this `hidden` and flip
+         RULE_SEARCH_ENABLED below to bring it back. -->
+    <details class="mt-3" id="search-block" hidden>
       <summary class="reading-head mb-0" style="cursor:pointer">
         Find rules worth running &mdash; search a rule family
       </summary>
@@ -372,7 +375,7 @@ worker.onmessage = (event) => {
     workerReady = true;
     setStatus("Ready — pick a configuration and press Run.", 0);
     $("run").disabled = false;
-    $("search-run").disabled = false;
+    if (RULE_SEARCH_ENABLED) $("search-run").disabled = false;
   }
   else if (type === "search-progress") { setStatus(payload.text, payload.frac); }
   else if (type === "search-result") {
@@ -491,14 +494,20 @@ $("run").addEventListener("click", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Rule search
+// Rule search — DISABLED
 //
 // Screening and ranking happen in Python (relative_symmetry_repair.rule_search),
 // against the same simulator and the same selector as every other run on this
 // page; this section only builds the request and renders the reply. "Useful"
 // means the rule is still changing at the horizon and the selector finds a
 // domain with a sparse defect mask — it is not a judgement about the rule.
+//
+// The feature is off: #search-block above carries `hidden`, nothing below wires
+// up a listener, and the worker is never sent a "search" message. The code is
+// left intact — set the flag to true and drop that `hidden` to restore it.
 // ---------------------------------------------------------------------------
+const RULE_SEARCH_ENABLED = false;
+
 const SPACE_LABELS = {
   eca: "1D elementary CA",
   life_range: "2D survive/birth ranges",
@@ -509,6 +518,7 @@ let ruleSpaces = {};
 
 function renderSpaces(spaces) {
   ruleSpaces = spaces || {};
+  if (!RULE_SEARCH_ENABLED) return;
   const select = $("search-space");
   select.innerHTML = "";
   for (const [name, meta] of Object.entries(ruleSpaces)) {
@@ -543,23 +553,25 @@ function refreshSearchEstimate() {
     `family is larger), then runs the selector on up to ${evals} survivors. ` +
     `Rough estimate: ${seconds < 60 ? `${seconds}s` : `${Math.round(seconds / 60)} min`}.`;
 }
-for (const id of ["search-budget", "search-evals", "search-space"]) {
-  $(id).addEventListener("input", refreshSearchEstimate);
-  $(id).addEventListener("change", refreshSearchEstimate);
-}
+if (RULE_SEARCH_ENABLED) {
+  for (const id of ["search-budget", "search-evals", "search-space"]) {
+    $(id).addEventListener("input", refreshSearchEstimate);
+    $(id).addEventListener("change", refreshSearchEstimate);
+  }
 
-$("search-run").addEventListener("click", () => {
-  $("error").classList.remove("visible");
-  $("search-run").disabled = true;
-  $("run").disabled = true;
-  setStatus("Screening rules…", 0);
-  worker.postMessage({
-    type: "search",
-    space: $("search-space").value,
-    budget: parseInt($("search-budget").value, 10),
-    maxEvaluations: parseInt($("search-evals").value, 10),
+  $("search-run").addEventListener("click", () => {
+    $("error").classList.remove("visible");
+    $("search-run").disabled = true;
+    $("run").disabled = true;
+    setStatus("Screening rules…", 0);
+    worker.postMessage({
+      type: "search",
+      space: $("search-space").value,
+      budget: parseInt($("search-budget").value, 10),
+      maxEvaluations: parseInt($("search-evals").value, 10),
+    });
   });
-});
+}
 
 function renderSearch(res) {
   const c = res.counts || {};
