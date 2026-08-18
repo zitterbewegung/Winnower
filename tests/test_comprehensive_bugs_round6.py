@@ -71,10 +71,18 @@ class TestPaperClaimsALIFE:
 
     def test_nll_selects_largest_period_always(self, baseline_summary):
         """Paper: 'Bernoulli NLL selects the largest tested period in every case'."""
-        lifewiki_rows = baseline_summary[baseline_summary["dataset"] == "LifeWiki_T100"]
-        nll_row = lifewiki_rows[lifewiki_rows["selector"] == "nll"]
-        if nll_row.empty:
-            pytest.skip("NLL selector row not found in baseline_summary")
+        # The summary CSV carries the *display* label, not the internal dataset
+        # key: baseline_selector_comparison.py maps "LifeWiki_T100" -> "LifeWiki"
+        # (and "1D_ECA" -> "1D ECA") when it writes this file, while the
+        # rule-level CSV keeps the key. Selector names are upper-case there too.
+        # Filtering on the key, or on "nll", matches nothing -- which is how this
+        # test skipped rather than checked for as long as it has existed.
+        lifewiki_rows = baseline_summary[baseline_summary["dataset"] == "LifeWiki"]
+        nll_row = lifewiki_rows[lifewiki_rows["selector"] == "NLL"]
+        assert not nll_row.empty, (
+            "No LifeWiki/NLL row in baseline_selector_summary.csv; present "
+            f"pairs: {sorted(map(tuple, baseline_summary[['dataset', 'selector']].values))}"
+        )
         nll_row = nll_row.iloc[0]
         # p1 + p2 + p3 should be 0 (all rules at p4plus)
         assert nll_row["p1"] == 0
