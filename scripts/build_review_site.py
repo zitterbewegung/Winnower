@@ -502,6 +502,12 @@ def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
           lba_href: str = "../poster/alife2026_poster.pdf", live_demo: bool = False) -> str:
     tex = (ROOT / "paper" / "paper_alife2026.tex").read_text(errors="replace")
     title = extract_tex_field(tex, "title") or "Winnower — reviewer guide"
+    # Browser-tab title: the short LBA title, not the long paper title in <h1>.
+    lba_tex_path = ROOT / "poster" / "alife2026_poster.tex"
+    tab_title = (
+        extract_tex_field(lba_tex_path.read_text(errors="replace"), "title")
+        if lba_tex_path.exists() else ""
+    ) or title
     abstract = extract_abstract(tex)
 
     ledger_path = ROOT / "docs" / "CLAIM_LEDGER.md"
@@ -625,7 +631,7 @@ def build(embed: bool, pdf_href: str = "../paper/paper_alife2026.pdf",
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reviewer guide — {esc(title)}</title>
+<title>Reviewer guide — {esc(tab_title)}</title>
 <style>
 :root {{
   --bg: #f7f7f5; --fg: #1a1a1a; --muted: #5a5a55; --card: #ffffff;
@@ -735,8 +741,8 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   </div>
 </header>
 <nav><div class="wrap">
-  <a href="#overview" class="active" onclick="return show('overview')">Overview</a>
-  <a href="#latebreaking" onclick="return show('latebreaking')">Late-breaking</a>
+  <!--a href="#overview" class="active" onclick="return show('overview')">Overview</a-->
+  <a href="#latebreaking" class="active" onclick="return show('latebreaking')">Late-breaking</a>
   <a href="#claims" onclick="return show('claims')">Claims &amp; theory</a>
   <a href="#figures" onclick="return show('figures')">Figures</a>
   <a href="#results" onclick="return show('results')">Results &amp; robustness</a>
@@ -746,42 +752,7 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
 </div></nav>
 <main class="wrap">
 
-<section id="overview" class="active">
-  <h2>What this paper does</h2>
-  <div class="abstract"><strong>Abstract.</strong> {esc(abstract)}</div>
-  <p class="tbl-meta">Terminology: the paper, the ALIFE 2026 late-breaking abstract,
-  and this site all say <em>domain template</em> B* and <em>defect mask</em> M;
-  earlier drafts — still quoted verbatim in the claim ledger and visible in some
-  older figure panel labels — called these the <em>background</em> and the
-  <em>residual mask</em>.</p>
-  <div class="links">
-    <a href="{pdf_href}" target="_blank" rel="noopener">Open the paper (PDF)</a>
-    {demo_overview}
-    <a href="#reproduce" class="secondary" onclick="return show('reproduce')">Reproduce the results</a>
-    <a href="#claims" class="secondary" onclick="return show('claims')">Audit the claims</a>
-  </div>
-  {pdf_note}
-  <div class="two-col">
-    <div>
-      <h3>Claimed contributions</h3>
-      <ul>{contribs}</ul>
-    </div>
-    <div>
-      <h3>Known limitations (author-acknowledged)</h3>
-      <ul>{limits}</ul>
-    </div>
-  </div>
-  <h3>Suggested 20-minute evaluation path</h3>
-  <ol>
-    <li>Read the abstract above, then skim the <a href="#figures" onclick="return show('figures')">algorithm figure and representative-rule panels</a> to see what the decomposition produces.</li>
-    <li>Check the <a href="#results" onclick="return show('results')">null controls</a> — the central sanity check that the selector does not find structure in shuffled data.</li>
-    <li>Check the <a href="#results" onclick="return show('results')">ground-truth recovery table</a> — calibration showing the selector finds planted periodicity and reports nothing on noise.</li>
-    <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, the project's own audit of every mathematical statement. The supporting math is deliberately secondary to the tool, and the ledger says exactly how strong each statement is.</li>
-    <li>Optionally run <code>make test</code> and one <code>analyze</code> command from the <a href="#reproduce" onclick="return show('reproduce')">reproduce tab</a>.</li>
-  </ol>
-</section>
-
-<section id="latebreaking">
+<section id="latebreaking" class="active">
   <h2>Late-breaking abstract — ALIFE 2026</h2>
   <p><strong>Winnower: Inferring Periodic Domains in Cellular Automata.</strong>
   A two-page late-breaking abstract submitted (July 2026) to
@@ -844,6 +815,41 @@ footer {{ border-top: 1px solid var(--line); color: var(--muted);
   built with the official <code>alifeconf</code> LaTeX style. Figures:
   <code>paper/figures/algorithm_nml.png</code> (pipeline; editable SVG master
   alongside) and <code>paper/figures/lba_results.png</code> (Rules 54 and 110).</p>
+</section>
+
+<section id="overview">
+  <h2>What this paper does</h2>
+  <div class="abstract"><strong>Abstract.</strong> {esc(abstract)}</div>
+  <p class="tbl-meta">Terminology: the paper, the ALIFE 2026 late-breaking abstract,
+  and this site all say <em>domain template</em> B* and <em>defect mask</em> M;
+  earlier drafts — still quoted verbatim in the claim ledger and visible in some
+  older figure panel labels — called these the <em>background</em> and the
+  <em>residual mask</em>.</p>
+  <div class="links">
+    <a href="{pdf_href}" target="_blank" rel="noopener">Open the paper (PDF)</a>
+    {demo_overview}
+    <a href="#reproduce" class="secondary" onclick="return show('reproduce')">Reproduce the results</a>
+    <a href="#claims" class="secondary" onclick="return show('claims')">Audit the claims</a>
+  </div>
+  {pdf_note}
+  <div class="two-col">
+    <div>
+      <h3>Claimed contributions</h3>
+      <ul>{contribs}</ul>
+    </div>
+    <div>
+      <h3>Known limitations (author-acknowledged)</h3>
+      <ul>{limits}</ul>
+    </div>
+  </div>
+  <h3>Suggested 20-minute evaluation path</h3>
+  <ol>
+    <li>Read the abstract above, then skim the <a href="#figures" onclick="return show('figures')">algorithm figure and representative-rule panels</a> to see what the decomposition produces.</li>
+    <li>Check the <a href="#results" onclick="return show('results')">null controls</a> — the central sanity check that the selector does not find structure in shuffled data.</li>
+    <li>Check the <a href="#results" onclick="return show('results')">ground-truth recovery table</a> — calibration showing the selector finds planted periodicity and reports nothing on noise.</li>
+    <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, the project's own audit of every mathematical statement. The supporting math is deliberately secondary to the tool, and the ledger says exactly how strong each statement is.</li>
+    <li>Optionally run <code>make test</code> and one <code>analyze</code> command from the <a href="#reproduce" onclick="return show('reproduce')">reproduce tab</a>.</li>
+  </ol>
 </section>
 
 <section id="claims">

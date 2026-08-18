@@ -124,42 +124,7 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
 </div></nav>
 <main class="wrap">
 
-<section id="overview" class="active">
-  <h2>What this paper does</h2>
-  <div class="abstract"><strong>Abstract.</strong> Cellular automata often form broad periodic domains together with interfaces, defects, and particle-like activity. Winnower is an open-source tool that splits a finite CA space–time into two parts: a domain template — the best-fitting periodic pattern, possibly drifting sideways over time — and a defect mask marking every cell the template fails to explain. The tool scans a grid of candidate periodicities, fits each one in a single linear pass by majority vote, and picks between them with a complexity-aware score (Bernoulli normalized maximum likelihood, NML) so that bigger candidates do not win just by having more parameters. On planted ground truth the selector recovers the true period and drift essentially always at realistic noise levels, and on shuffled and random controls of a representative rule panel it never reports periodic structure. Across 1D, 2D, and 3D rules the resulting defect masks isolate particle-like activity — for example in Diamoeba, Maze with Mice, and S37/B11 — cheaply enough for whole-catalog surveys. Every number and figure in this paper regenerates from a deterministic public pipeline, and an in-browser demo re-runs the identical code on any rule in the supported families, at any seed and horizon, checking the output against the committed results column by column wherever a committed row exists.</div>
-  <p class="tbl-meta">Terminology: the paper, the ALIFE 2026 late-breaking abstract,
-  and this site all say <em>domain template</em> B* and <em>defect mask</em> M;
-  earlier drafts — still quoted verbatim in the claim ledger and visible in some
-  older figure panel labels — called these the <em>background</em> and the
-  <em>residual mask</em>.</p>
-  <div class="links">
-    <a href="../paper/paper_alife2026.pdf" target="_blank" rel="noopener">Open the paper (PDF)</a>
-    
-    <a href="#reproduce" class="secondary" onclick="return show('reproduce')">Reproduce the results</a>
-    <a href="#claims" class="secondary" onclick="return show('claims')">Audit the claims</a>
-  </div>
-  
-  <div class="two-col">
-    <div>
-      <h3>Claimed contributions</h3>
-      <ul><li><strong>The Winnower tool</strong> — An open-source, deterministic pipeline that splits a CA space–time into a periodic domain template B* and a defect mask M, with an in-browser reproduction of every reported number.</li><li><strong>Calibrated accuracy</strong> — Recovers planted ground-truth periodicity at realistic noise levels, and selects no periodic structure on time-shuffled, space-shuffled, or Bernoulli null controls — zero false positives.</li><li><strong>Linear-time template fitting</strong> — Orbit majorities give the minimum-Hamming template in one pass over the data per candidate (period, displacement), which is what makes whole-catalog 1D/2D/3D surveys practical.</li><li><strong>Complexity-aware selection via Bernoulli NML</strong> — Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact characterization — velocity-matched divisibility is necessary as well as sufficient for universal improvement — proved directly and confirmed by an exhaustive test.</li></ul>
-    </div>
-    <div>
-      <h3>Known limitations (author-acknowledged)</h3>
-      <ul><li>The selector returns the best-compressing global explanation, which need not match a physicist&#x27;s preferred domain when the defect mask itself carries periodic structure.</li><li>At period 1 the reported displacement is arbitrary (a tie), so displacement values for aperiodic rules carry no information.</li><li>Periodicity outside the scanned candidate grid is invisible; the candidate-range robustness runs quantify this.</li><li>The defect mask says where structure is, not how it interacts — no particle interaction analysis. Defect sites are candidate departures from the domain, not identified particles.</li><li>Scaling observations (e.g. S37/B11) rest on limited seeds and sizes; the run-length diagnostic is raster-order dependent.</li></ul>
-    </div>
-  </div>
-  <h3>Suggested 20-minute evaluation path</h3>
-  <ol>
-    <li>Read the abstract above, then skim the <a href="#figures" onclick="return show('figures')">algorithm figure and representative-rule panels</a> to see what the decomposition produces.</li>
-    <li>Check the <a href="#results" onclick="return show('results')">null controls</a> — the central sanity check that the selector does not find structure in shuffled data.</li>
-    <li>Check the <a href="#results" onclick="return show('results')">ground-truth recovery table</a> — calibration showing the selector finds planted periodicity and reports nothing on noise.</li>
-    <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, the project's own audit of every mathematical statement. The supporting math is deliberately secondary to the tool, and the ledger says exactly how strong each statement is.</li>
-    <li>Optionally run <code>make test</code> and one <code>analyze</code> command from the <a href="#reproduce" onclick="return show('reproduce')">reproduce tab</a>.</li>
-  </ol>
-</section>
-
-<section id="latebreaking">
+<section id="latebreaking" class="active">
   <h2>Late-breaking abstract — ALIFE 2026</h2>
   <p><strong>Winnower: Inferring Periodic Domains in Cellular Automata.</strong>
   A two-page late-breaking abstract submitted (July 2026) to
@@ -222,6 +187,41 @@ footer { border-top: 1px solid var(--line); color: var(--muted);
   built with the official <code>alifeconf</code> LaTeX style. Figures:
   <code>paper/figures/algorithm_nml.png</code> (pipeline; editable SVG master
   alongside) and <code>paper/figures/lba_results.png</code> (Rules 54 and 110).</p>
+</section>
+
+<section id="overview">
+  <h2>What this paper does</h2>
+  <div class="abstract"><strong>Abstract.</strong> Cellular automata often form broad periodic domains together with interfaces, defects, and particle-like activity. Winnower is an open-source tool that splits a finite CA space–time into two parts: a domain template — the best-fitting periodic pattern, possibly drifting sideways over time — and a defect mask marking every cell the template fails to explain. The tool scans a grid of candidate periodicities, fits each one in a single linear pass by majority vote, and picks between them with a complexity-aware score (Bernoulli normalized maximum likelihood, NML) so that bigger candidates do not win just by having more parameters. On planted ground truth the selector recovers the true period and drift essentially always at realistic noise levels, and on shuffled and random controls of a representative rule panel it never reports periodic structure. Across 1D, 2D, and 3D rules the resulting defect masks isolate particle-like activity — for example in Diamoeba, Maze with Mice, and S37/B11 — cheaply enough for whole-catalog surveys. Every number and figure in this paper regenerates from a deterministic public pipeline, and an in-browser demo re-runs the identical code on any rule in the supported families, at any seed and horizon, checking the output against the committed results column by column wherever a committed row exists.</div>
+  <p class="tbl-meta">Terminology: the paper, the ALIFE 2026 late-breaking abstract,
+  and this site all say <em>domain template</em> B* and <em>defect mask</em> M;
+  earlier drafts — still quoted verbatim in the claim ledger and visible in some
+  older figure panel labels — called these the <em>background</em> and the
+  <em>residual mask</em>.</p>
+  <div class="links">
+    <a href="../paper/paper_alife2026.pdf" target="_blank" rel="noopener">Open the paper (PDF)</a>
+    
+    <a href="#reproduce" class="secondary" onclick="return show('reproduce')">Reproduce the results</a>
+    <a href="#claims" class="secondary" onclick="return show('claims')">Audit the claims</a>
+  </div>
+  
+  <div class="two-col">
+    <div>
+      <h3>Claimed contributions</h3>
+      <ul><li><strong>The Winnower tool</strong> — An open-source, deterministic pipeline that splits a CA space–time into a periodic domain template B* and a defect mask M, with an in-browser reproduction of every reported number.</li><li><strong>Calibrated accuracy</strong> — Recovers planted ground-truth periodicity at realistic noise levels, and selects no periodic structure on time-shuffled, space-shuffled, or Bernoulli null controls — zero false positives.</li><li><strong>Linear-time template fitting</strong> — Orbit majorities give the minimum-Hamming template in one pass over the data per candidate (period, displacement), which is what makes whole-catalog 1D/2D/3D surveys practical.</li><li><strong>Complexity-aware selection via Bernoulli NML</strong> — Prevents the period inflation that raw fit criteria demonstrably suffer (plain NLL picks the largest scanned period on every Life-like rule tested). The underlying refinement/monotonicity relationship is an exact characterization — velocity-matched divisibility is necessary as well as sufficient for universal improvement — proved directly and confirmed by an exhaustive test.</li></ul>
+    </div>
+    <div>
+      <h3>Known limitations (author-acknowledged)</h3>
+      <ul><li>The selector returns the best-compressing global explanation, which need not match a physicist&#x27;s preferred domain when the defect mask itself carries periodic structure.</li><li>At period 1 the reported displacement is arbitrary (a tie), so displacement values for aperiodic rules carry no information.</li><li>Periodicity outside the scanned candidate grid is invisible; the candidate-range robustness runs quantify this.</li><li>The defect mask says where structure is, not how it interacts — no particle interaction analysis. Defect sites are candidate departures from the domain, not identified particles.</li><li>Scaling observations (e.g. S37/B11) rest on limited seeds and sizes; the run-length diagnostic is raster-order dependent.</li></ul>
+    </div>
+  </div>
+  <h3>Suggested 20-minute evaluation path</h3>
+  <ol>
+    <li>Read the abstract above, then skim the <a href="#figures" onclick="return show('figures')">algorithm figure and representative-rule panels</a> to see what the decomposition produces.</li>
+    <li>Check the <a href="#results" onclick="return show('results')">null controls</a> — the central sanity check that the selector does not find structure in shuffled data.</li>
+    <li>Check the <a href="#results" onclick="return show('results')">ground-truth recovery table</a> — calibration showing the selector finds planted periodicity and reports nothing on noise.</li>
+    <li>Skim the <a href="#claims" onclick="return show('claims')">claim ledger</a>, the project's own audit of every mathematical statement. The supporting math is deliberately secondary to the tool, and the ledger says exactly how strong each statement is.</li>
+    <li>Optionally run <code>make test</code> and one <code>analyze</code> command from the <a href="#reproduce" onclick="return show('reproduce')">reproduce tab</a>.</li>
+  </ol>
 </section>
 
 <section id="claims">
