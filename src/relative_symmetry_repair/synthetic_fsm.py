@@ -953,9 +953,15 @@ def write_csv_gz(df, path: str | Path, sort_keys: Sequence[str]) -> None:
 
 
 def read_csv_gz(path: str | Path):
+    """Read a gzipped CSV with an exactly round-tripping float parser.
+
+    pandas' default ``float_precision="high"`` parser is fast but not exact;
+    it loses up to a few ULP, which would silently degrade the integer-derived
+    columns this study writes.  ``round_trip`` restores byte-exact values.
+    """
     import pandas as pd
 
-    return pd.read_csv(path, compression="gzip")
+    return pd.read_csv(path, compression="gzip", float_precision="round_trip")
 
 
 def write_json(obj, path: str | Path) -> None:

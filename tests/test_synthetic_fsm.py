@@ -713,3 +713,27 @@ def test_dirty_guard_ignores_only_the_output_directory():
     assert mod.dirty_paths(REPO_ROOT / "does" / "not" / "exist") == [
         line for line in porcelain.splitlines()
     ]
+
+
+def test_written_csv_floats_round_trip_exactly(tmp_path):
+    """Committed CSV floats must read back bit-identical to what was written.
+
+    pandas' default ``float_precision="high"`` CSV parser loses ULPs; the
+    production readers must use ``round_trip``.
+    """
+    inst = sf.generate_fsm("development", "contracting", 110120)
+    fit = sf.fit_mdl(inst.table)
+    df = pd.DataFrame(sf.entry_rows(inst, fit))
+    path = tmp_path / "entries.csv.gz"
+    sf.write_csv_gz(df, path, ["state"])
+    back = sf.read_csv_gz(path).sort_values("state").reset_index(drop=True)
+    ref = df.sort_values("state", kind="mergesort").reset_index(drop=True)
+    for col in ("theta", "C", "post_w", "pre_w"):
+        assert (back[col].to_numpy() == ref[col].to_numpy()).all(), col
+        assert (back["theta"].to_numpy() == back["theta_numerator"].to_numpy() / 63).all()
+        assert (
+            back["C"].to_numpy() == back["C_numerator"].to_numpy() / (64 * 63)
+        ).all()
+    # Demonstrate that the default parser would NOT have been exact here.
+    lossy = pd.read_csv(path, compression="gzip")
+    assert not (lossy["theta"].to_numpy() == ref["theta"].to_numpy()).all()

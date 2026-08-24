@@ -406,7 +406,7 @@ def main(argv=None) -> int:
             if not p.exists():
                 print(f"ERROR: missing raw artifact {p}", file=sys.stderr)
                 return 2
-            parts.append(pd.read_csv(p, compression="gzip"))
+            parts.append(pd.read_csv(p, compression="gzip", float_precision="round_trip"))
         frames[kind] = pd.concat(parts, ignore_index=True)
 
     summary, entries, matched = frames["summary"], frames["entries"], frames["matched"]

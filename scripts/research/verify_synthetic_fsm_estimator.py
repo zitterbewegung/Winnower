@@ -38,7 +38,8 @@ def sha256_file(path: str) -> str:
 
 def independent_primary_estimate(matched_path: str, split: str) -> dict:
     """Recompute the equal-family-weighted primary estimate from raw rows."""
-    frame = pd.read_csv(matched_path, compression="gzip")
+    # pandas' default float parser is not exact; round_trip is.
+    frame = pd.read_csv(matched_path, compression="gzip", float_precision="round_trip")
     rows = frame[
         (frame["split"] == split) & (frame["analysis"] == "primary_planted_pre")
     ]

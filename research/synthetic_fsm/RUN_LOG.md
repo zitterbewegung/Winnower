@@ -301,3 +301,36 @@ The stale development artifacts produced under the first freeze were **deleted,
 not reused**, and development was regenerated against the second freeze SHA.
 No holdout outcome had been generated at any point in this section.
 
+
+## 10. Second pre-holdout bug and third (final) freeze commit
+
+Development was regenerated against the second freeze SHA and then *validated*
+(schemas, row counts, bounds, exactness, model recovery). The exactness check
+`theta == theta_numerator / 63` **failed for 12,417 of 23,040 entry rows**.
+
+**Diagnosis.** The written bytes were exact: `write_csv_gz` emits
+`0.015873015873015872` for `1/63`. The loss was on the **read** side. pandas'
+default `read_csv(float_precision="high")` uses a fast, inexact float parser
+and returned `0.0158730158730158` (a few ULP low). Because
+`analyze_synthetic_fsm.py` re-reads the per-split raw CSVs to build the
+committed artifacts, and `verify_synthetic_fsm_estimator.py` re-reads
+`matched_effects.csv.gz`, every downstream number was being derived from
+slightly degraded values.
+
+**Fix.** All three readers now pass `float_precision="round_trip"`
+(`synthetic_fsm.read_csv_gz`, `analyze_synthetic_fsm.main`,
+`verify_synthetic_fsm_estimator.independent_primary_estimate`). A new test,
+`test_written_csv_floats_round_trip_exactly`, asserts bit-identical round trip
+for `theta`, `C`, `post_w`, `pre_w`, asserts the integer-derived identities
+after the round trip, and explicitly demonstrates that the default parser would
+*not* have been exact.
+
+This fix changes no generator, codelength, estimand, matching, weighting,
+statistic or gate threshold. It was found **before any holdout outcome was
+generated**; the development artifacts from the second freeze were deleted, not
+reused.
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python -m pytest tests/test_synthetic_fsm.py -q
+98 passed in 18.90s
+```
