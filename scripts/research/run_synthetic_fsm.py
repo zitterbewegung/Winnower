@@ -53,8 +53,38 @@ def _git(*args: str) -> str:
     ).stdout.strip()
 
 
-def worktree_is_dirty() -> bool:
-    return bool(_git("status", "--porcelain"))
+def _porcelain_lines() -> list[str]:
+    """Raw ``git status --porcelain`` lines, with their two-column status
+    prefix preserved exactly (no whitespace stripping)."""
+    proc = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+    )
+    return [line for line in proc.stdout.split("\n") if line]
+
+
+def dirty_paths(ignore_dir: Path | None = None) -> list[str]:
+    """Porcelain status entries, excluding the run's own output directory.
+
+    The guard exists to stop the scientific *code* tree drifting between the
+    freeze commit and a registered run.  A run's own not-yet-committed output
+    directory is not code drift, so it is excluded; everything else — including
+    any other untracked or modified file — still trips the guard.
+    """
+    entries: list[str] = []
+    ignore_rel = None
+    if ignore_dir is not None:
+        try:
+            ignore_rel = ignore_dir.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
+        except ValueError:
+            ignore_rel = None
+    for line in _porcelain_lines():
+        rel = line[3:].strip().strip('"')
+        if ignore_rel and (rel == ignore_rel or rel.startswith(ignore_rel.rstrip("/") + "/")):
+            continue
+        entries.append(line)
+    return entries
 
 
 def code_hashes() -> dict[str, str]:
@@ -157,9 +187,11 @@ def main(argv=None) -> int:
         return 2
 
     if not args.allow_dirty:
-        if worktree_is_dirty():
+        dirty = dirty_paths(args.out_dir)
+        if dirty:
             print(
-                "ERROR: worktree is dirty; commit or stash before running",
+                "ERROR: worktree is dirty outside the output directory; commit "
+                f"or stash before running:\n  " + "\n  ".join(dirty),
                 file=sys.stderr,
             )
             return 3

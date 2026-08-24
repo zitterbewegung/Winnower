@@ -68,6 +68,34 @@ def _git(*args: str) -> str:
         return ""
 
 
+def _porcelain_lines() -> list[str]:
+    """Raw ``git status --porcelain`` lines, with their two-column status
+    prefix preserved exactly (no whitespace stripping)."""
+    proc = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+    )
+    return [line for line in proc.stdout.split("\n") if line]
+
+
+def dirty_paths(ignore_dir: Path | None = None) -> list[str]:
+    """Porcelain status entries, excluding the analysis output directory."""
+    ignore_rel = None
+    if ignore_dir is not None:
+        try:
+            ignore_rel = ignore_dir.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
+        except ValueError:
+            ignore_rel = None
+    entries = []
+    for line in _porcelain_lines():
+        rel = line[3:].strip().strip('"')
+        if ignore_rel and (rel == ignore_rel or rel.startswith(ignore_rel.rstrip("/") + "/")):
+            continue
+        entries.append(line)
+    return entries
+
+
 def _pkg_versions() -> dict[str, str]:
     import scipy
 
@@ -355,6 +383,15 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     started = time.time()
     raw, out = args.raw_dir, args.out_dir
+    if not args.allow_dirty:
+        dirty = dirty_paths(out)
+        if dirty:
+            print(
+                "ERROR: worktree is dirty outside the output directory:\n  "
+                + "\n  ".join(dirty),
+                file=sys.stderr,
+            )
+            return 3
     out.mkdir(parents=True, exist_ok=True)
 
     frames = {}

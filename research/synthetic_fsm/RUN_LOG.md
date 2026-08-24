@@ -231,6 +231,73 @@ to `< 3e-17`.
 for any scientific claim.** They were produced before the freeze commit; the
 frozen design was not altered afterwards.
 
-## 8. Freeze commit
+## 8. First freeze commit
 
-See section 9 onward for the exact SHAs and everything that followed.
+```console
+$ git add research/synthetic_fsm/PRIOR_ART.md research/synthetic_fsm/PROTOCOL.md \
+    research/synthetic_fsm/RUN_LOG.md scripts/research \
+    src/relative_symmetry_repair/synthetic_fsm.py tests/test_synthetic_fsm.py
+$ git commit -F - <<'MSG'
+Freeze synthetic FSM residual-leverage protocol
+...
+MSG
+```
+
+Full repository suite immediately before this commit:
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python -m pytest tests/ -q
+607 passed in 83.42s (0:01:23)
+```
+
+(511 baseline + 96 new; no skip, no xfail.)  Protected trees confirmed
+unchanged:
+
+```console
+$ git status --porcelain -- paper poster _archive outputs/alife_2026
+(empty)
+```
+
+**First freeze SHA: `100d4a1413c1fa901677aafd0b3b3906f240a835`.**
+
+## 9. Pre-holdout implementation bug and second freeze commit
+
+Registered development was then run against the first freeze SHA and succeeded:
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python scripts/research/run_synthetic_fsm.py \
+    --split development --out-dir research/synthetic_fsm/results/raw \
+    --freeze-sha 100d4a1413c1fa901677aafd0b3b3906f240a835 --jobs 8
+development: 360 FSMs, informative={'permutation': 120, 'contracting': 120}, 2.0s
+```
+
+**Bug found (before any holdout outcome).** The clean-worktree guard used a
+bare `git status --porcelain` check, so the run's *own* freshly written output
+directory made the tree dirty and the guard would have refused the holdout run
+that immediately follows the development run. The guard was therefore
+unusable exactly where it mattered. A second, latent defect in the same helper:
+`_git()` applied `str.strip()` to the whole porcelain output, so the first
+status line lost its leading status column.
+
+**Fix.** `dirty_paths(ignore_dir)` now reads porcelain lines without stripping
+(new `_porcelain_lines()`) and excludes only entries under the run's declared
+output directory; every other modified or untracked path still trips the guard.
+The same guard was added to `analyze_synthetic_fsm.py`, whose `--allow-dirty`
+flag had previously been inert. A new test,
+`test_dirty_guard_ignores_only_the_output_directory`, checks both halves of the
+behaviour against live `git status` output.
+
+This fix touches only a run-time guard. It changes no generator, codelength,
+estimand, matching, weighting, statistic or gate threshold.
+
+Correctness tests rerun after the fix:
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python -m pytest tests/test_synthetic_fsm.py -q
+97 passed in 19.54s
+```
+
+The stale development artifacts produced under the first freeze were **deleted,
+not reused**, and development was regenerated against the second freeze SHA.
+No holdout outcome had been generated at any point in this section.
+

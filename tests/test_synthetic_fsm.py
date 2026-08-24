@@ -687,3 +687,29 @@ def test_independent_estimator_on_fixture(tmp_path):
     assert est["combined"] == pytest.approx(
         0.5 * sum(exp_p) / 2 + 0.5 * sum(exp_c) / 2, abs=1e-15
     )
+
+
+def test_dirty_guard_ignores_only_the_output_directory():
+    """The freeze guard must ignore a run's own output dir and nothing else."""
+    spec = importlib.util.spec_from_file_location(
+        "run_synth", SCRIPTS / "run_synthetic_fsm.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    porcelain = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+    ).stdout
+    out_dir = REPO_ROOT / "research" / "synthetic_fsm" / "results"
+    ignored = mod.dirty_paths(out_dir)
+    for line in porcelain.splitlines():
+        rel = line[3:].strip().strip('"')
+        if rel.startswith("research/synthetic_fsm/results"):
+            assert line not in ignored
+        else:
+            assert line in ignored
+    # A path outside the output directory is never ignored.
+    assert mod.dirty_paths(REPO_ROOT / "does" / "not" / "exist") == [
+        line for line in porcelain.splitlines()
+    ]
