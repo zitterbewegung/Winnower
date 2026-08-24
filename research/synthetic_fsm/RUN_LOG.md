@@ -227,9 +227,43 @@ generator and the analyser into fresh directories and comparing SHA-256 for all
 six scientific artifacts (all identical), and the independent estimator agreed
 to `< 3e-17`.
 
-**These sentinel-cohort numbers are not the registered result and are not used
-for any scientific claim.** They were produced before the freeze commit; the
-frozen design was not altered afterwards.
+**Disclosure, added after adversarial review (Review D, §2).** The original
+version of this section said only that "these sentinel-cohort numbers are not
+the registered result" and did not state them. That was an inadequate
+disclosure. The numbers the operator saw, at full sample size, **before the
+freeze commit**, were:
+
+| pre-freeze sentinel (protocol_revision 900) | Delta | permutation | contracting |
+|---|---:|---:|---:|
+| development | +0.036159 | +0.074637 | −0.002319 |
+| holdout | **+0.054684** | +0.077474 | +0.031895 |
+
+together with `FSM_H1_confirmed: false`, both gates passing, and the
+"permutation carries it / contracting is null" split. The registered holdout
+later returned +0.031119. So the direction and rough magnitude of the final
+result were known before `PROTOCOL.md` was committed.
+
+**Why no registered scientific choice could have been influenced.** Every
+scientific element of the design — the state set, both structured families, the
+affine candidate family, the exact codelength and tie rule, the planting rule,
+all six registered seed blocks, the continuation seeds and rule, the estimand,
+the matching, the equal-family weighting, **the direction of FSM-H1**, both gate
+thresholds, the bootstrap and sign-flip specifications, the analysis RNG seeds
+and the interpretation gate — was specified verbatim in the externally supplied
+task specification, which predates all work in this repository. `PROTOCOL.md` is
+a transcription of that specification, not an authored design. The generator's
+RNG draw order was fixed in code (step 7 above) *before* this sentinel run.
+
+The only elements authored after these numbers were seen are `PROTOCOL.md`'s
+prose, the residual-destination-type taxonomy (descriptive, secondary), and the
+§6.1 "Consequence" lemma — which turned out to be false and is retracted in
+`PROTOCOL_ERRATA.md`, Erratum 1.
+
+**Consequence for how the result may be described.** The reversal must **not**
+be presented as a falsified prediction or as a surprise. It is a confirmation,
+on registered seeds, of a direction already observed on an exchangeable
+non-registered cohort. See `RESULTS.md` §5.1 and `PROTOCOL_ERRATA.md`,
+Erratum 8.
 
 ## 8. First freeze commit
 
@@ -383,3 +417,221 @@ artifacts from the third freeze were deleted, not reused.
 $ PYTHONPATH=src ./.venv/bin/python -m pytest tests/test_synthetic_fsm.py -q
 99 passed in 14.53s
 ```
+
+## 12. Registered execution
+
+### 12.1 Development (against the final freeze `b61e402f`)
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python scripts/research/run_synthetic_fsm.py \
+    --split development --out-dir research/synthetic_fsm/results/raw \
+    --freeze-sha b61e402f6e501aa132d7310c400adfa7fa0024ab --jobs 8
+development: 360 FSMs, informative={'permutation': 120, 'contracting': 120}, 1.6s
+```
+
+Validated: 360 summary rows, 23,040 entry rows, 22,321 matched rows; all bounds
+hold; all integer identities hold bit-exactly; skeleton recovery 1.0, pooled
+precision 1.0, pooled recall 1.0 (TP 240, FP 0, FN 0); random full-table rate
+1.0; residual-count distribution `{1: 240}`; 120/120 informative per structured
+family; matched-control counts min 1, median 31, max 63; zero skeleton
+resamples. Development results were used for implementation diagnostics only.
+No scientific choice was altered in response to any development estimate.
+
+### 12.2 Holdout — run exactly once
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python scripts/research/run_synthetic_fsm.py \
+    --split holdout --out-dir research/synthetic_fsm/results/raw \
+    --freeze-sha b61e402f6e501aa132d7310c400adfa7fa0024ab --jobs 8
+holdout: 360 FSMs, informative={'permutation': 120, 'contracting': 120}, 1.6s
+```
+
+The run passed both guards: clean worktree outside the output directory, and
+scientific-code hashes identical to those in the freeze commit.
+
+### 12.3 Continuation — NOT triggered
+
+Both structured holdout families reached **120 informative FSMs** against a
+threshold of 100, so the pre-frozen continuation rule did not fire. No
+continuation seed (`221000+`, `222000+`) was used. `continuation_blocks` is 0
+for both splits in `results/manifest.json`.
+
+### 12.4 Analysis
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python scripts/research/analyze_synthetic_fsm.py \
+    --raw-dir research/synthetic_fsm/results/raw \
+    --out-dir research/synthetic_fsm/results \
+    --freeze-sha b61e402f6e501aa132d7310c400adfa7fa0024ab
+```
+
+Wall clock 4.3 s. Registered outcome:
+
+```text
+Delta = +0.031118708021286745
+95% CI  [+0.009616174329122745, +0.053229401709838454]
+p_left  = 0.9972002799720028   p_right = 0.0028997100289971
+two-sided p = 0.0057994200579942
+FSM_H1_confirmed = false
+recovery_gate_pass = true   specificity_gate_pass = true
+informative_cluster_gate_pass = true   family_signs_differ = false
+```
+
+**FSM-H1 was falsified and the effect ran significantly in the opposite
+direction.** Nothing in the frozen design was changed after this was seen.
+
+### 12.5 Independent estimator
+
+```console
+$ ./.venv/bin/python scripts/research/verify_synthetic_fsm_estimator.py \
+    --results-dir research/synthetic_fsm/results \
+    --out research/synthetic_fsm/results/independent_check.json
+"pass": true
+combined      |diff| = 1.734723475976807e-17
+permutation   |diff| = 3.469446951953614e-17
+contracting   |diff| = 1.734723475976807e-18   (tolerance 1e-12)
+```
+
+### 12.6 Clean reproduction
+
+Both splits and the analysis were re-run from the same freeze SHA into a fresh
+temporary directory outside the repository. All six scientific artifacts matched
+**byte-for-byte**, including compressed gzip bytes and the SVG, and all three
+decompressed CSV contents matched. Hashes are in `results/hashes.sha256` and are
+tabulated in `RESULTS.md` §16.
+
+### 12.7 Full-suite regression
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python -m pytest tests/ -q
+610 passed in 42.60s
+```
+
+Baseline at the base commit was 511 passed / 0 failed / 0 skipped / 0 xfailed;
+final is 610 passed / 0 failed / **0 skipped / 0 xfailed**. 99 new tests, no new
+skip, no new xfail.
+
+Accepted-artifact protection, verified against the base commit:
+
+```console
+$ git diff --stat 598a774abaef70236f62a5df8f312632e6cb7caa HEAD -- paper poster _archive outputs
+(empty)
+```
+
+Files changed since the base commit (all additions, nothing modified or deleted):
+
+```text
+A  research/synthetic_fsm/PRIOR_ART.md
+A  research/synthetic_fsm/PROTOCOL.md
+A  research/synthetic_fsm/RUN_LOG.md
+A  scripts/research/analyze_synthetic_fsm.py
+A  scripts/research/run_synthetic_fsm.py
+A  scripts/research/verify_synthetic_fsm_estimator.py
+A  src/relative_symmetry_repair/synthetic_fsm.py
+A  tests/test_synthetic_fsm.py
+```
+
+plus the result artifacts added in the result commit.
+
+## 13. Independent adversarial review
+
+Four independent adversarial reviews were run in parallel, each read-only on the
+worktree with scratch space outside the repository. Full reports in `review/`.
+
+| Review | Scope | Verdict |
+|---|---|---|
+| A | mathematical correctness | PASS WITH CONCERNS |
+| B | leakage and statistical validity | **DEFECTS FOUND** |
+| C | implementation and reproducibility | PASS WITH CONCERNS |
+| D | novelty and publishability (Codex substitute) | **NEEDS REVISION** |
+
+### 13.1 Codex — attempted and unavailable
+
+The repository's `CLAUDE.md` asks for independent Codex review of novelty and
+publishability conclusions.
+
+```console
+$ codex --version
+codex-cli 0.149.0
+$ codex exec --sandbox read-only --skip-git-repo-check -C . - < codex_prompt.md
+ERROR: You've hit your usage limit. Visit https://chatgpt.com/codex/settings/usage
+to purchase more credits or try again at Aug 29th, 2026 10:33 AM.
+CODEX_EXIT=1
+```
+
+The account's Codex usage limit is exhausted until 2026-08-29. No model output
+was produced. The full attempt, the exact error and the complete submitted
+prompt are preserved verbatim in `review/CODEX_AUDIT.md`. The identical prompt
+was put to an independent reviewer instead (Review D). The Codex review should be
+re-run after 2026-08-29 and appended to that file.
+
+### 13.2 What the reviews changed
+
+Every finding that altered the write-up was **re-verified by the author** before
+being incorporated; the verifications are quoted inline in each review file. The
+material ones:
+
+- **Review B, blocking.** `PROTOCOL.md` §6.1's pre-freeze lemma — "`theta` is
+  identically free of `visitCount`" — is **false**. The exact identity is
+  `s = visitCount + 64 − B − onCycle` (0 violations over all 46,080 entry rows).
+  Retracted in `PROTOCOL_ERRATA.md`, Erratum 1.
+- **Review B, blocking.** The positive effect is mechanical: `visitCount(u*)` is
+  invariant to editing `u*`'s own edge (0/480 changed) while controls drift by
+  −5.055 / +0.778, and matching additionally on post-treatment visit count and
+  cycle membership drives Δ to **exactly zero** (max per-FSM |effect| 2.776e-17).
+- **Review D.** On all 4,096 affine skeletons the matching stratum determines
+  `s` exactly, so the **pre-treatment placebo is identically zero**
+  (Δ = −2.949e-18, max |δ| = 2.776e-17). The design has no pre-treatment
+  contrast; 100% of Δ comes from the edit.
+- **Review D.** The registered design has an **exact expected Δ of +0.042541**
+  under its own uniform destination law, computable with no data. The headline
+  is a design constant.
+- **Review D.** Neither gate has power to fail: two distinct affine maps on
+  `Z_64` agree in at most 32/64 places (so recovery is a theorem), and a uniform
+  random map beats the full table only 0.0024–0.0029 of the time against a 0.05
+  threshold.
+- **Review D.** RUN_LOG §7.2 disclosed the pre-freeze sentinel run but not its
+  numbers. §7.2 above is now amended to state them.
+- **Review A.** The registered confirmation rule is ~1.25–1.4× anti-conservative
+  in the H1 direction under a centred-effect null. Review D reached the opposite
+  conclusion under a sham-source null. Both recorded, unreconciled
+  (`PROTOCOL_ERRATA.md`, Erratum 2).
+- **Review D.** The float-read defect in §10 above was real but its magnitude on
+  the primary estimate is **1.4e-16**. RUN_LOG's original description overstated
+  its scientific severity. Acknowledged; the wording stands as written with this
+  correction attached, because rewriting it would be exactly the tidying this log
+  is supposed to prevent.
+- **Review C.** Generation runtimes are not in `manifest.json`; three committed
+  files are outside the generated hash record. Addressed by recording wall clock
+  in §12 above and by adding `review/AUDIT_HASHES.sha256`, rather than by
+  changing scientific code after the holdout.
+
+Two reviewer claims were **corrected rather than accepted**: Review C quoted a
+bootstrap interval that does not match `summary.json` (the committed value is
+authoritative), and Reviews A and D disagree on sign-flip calibration.
+
+### 13.3 What did not change
+
+No number changed. `PROTOCOL.md` was **not edited** — its SHA-256
+`060d385bb1ed0d6c671f1019d7cac636cc30311166a4d4b68c7a57248945d1b6` still matches
+`results/manifest.json`. No scientific code file was touched after the holdout;
+all five still hash identically to their blobs at freeze commit `b61e402f`. All
+changes were wording, disclosure and claim narrowing, which `PROTOCOL.md` §11
+explicitly permits after holdout provided they alter no number and are
+documented.
+
+A reviewer may narrow prose or identify a bug. None was permitted to
+retroactively change the frozen hypothesis, and none tried.
+
+## 14. Result commit and publication
+
+The result commit's parent is the final freeze commit
+`b61e402f6e501aa132d7310c400adfa7fa0024ab`, which is also recorded as
+`result_parent_sha` in `results/manifest.json`. A commit cannot contain its own
+hash, so the result SHA is reported externally in the final execution report and
+is resolvable from the remote once pushed.
+
+Contents of the result commit: the immutable generated results
+(`results/` including `raw/`), the independent-estimator check, the four
+adversarial review records and the Codex-unavailability record, the protocol
+errata, `RESULTS.md`, this log, and the supplementary hash record.

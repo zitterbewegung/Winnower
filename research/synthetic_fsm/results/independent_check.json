@@ -1,0 +1,29 @@
+{
+  "absolute_differences": {
+    "combined": 1.734723475976807e-17,
+    "contracting_mean": 1.734723475976807e-18,
+    "permutation_mean": 3.469446951953614e-17
+  },
+  "command": "python scripts/research/verify_synthetic_fsm_estimator.py --results-dir research/synthetic_fsm/results --out research/synthetic_fsm/results/independent_check.json",
+  "independent": {
+    "combined": 0.031118708021286762,
+    "contracting_mean": 0.009639016897081415,
+    "permutation_mean": 0.05259839914549211
+  },
+  "independent_counts": {
+    "n_contracting": 120,
+    "n_permutation": 120
+  },
+  "input_hashes": {
+    "matched_effects.csv.gz": "9de2e824addd9cab3dc1effe8775af51c4da5efe39b07989218f48b0187134cb",
+    "summary.json": "f8d86d658e43da05d18e0bf8155ce3745a602b70f86ca4389f868ceaae6c43ec"
+  },
+  "pass": true,
+  "production": {
+    "combined": 0.031118708021286745,
+    "contracting_mean": 0.009639016897081416,
+    "permutation_mean": 0.052598399145492074
+  },
+  "split": "holdout",
+  "tolerance": 1e-12
+}
