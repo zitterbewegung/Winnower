@@ -69,10 +69,16 @@ def _git(*args: str) -> str:
 
 
 def _porcelain_lines() -> list[str]:
-    """Raw ``git status --porcelain`` lines, with their two-column status
-    prefix preserved exactly (no whitespace stripping)."""
+    """Raw ``git status --porcelain`` lines.
+
+    ``--untracked-files=all`` is required: the default collapses an untracked
+    tree to its top directory, so an output directory nested inside a new
+    parent would be reported as the *parent* and never match the ignore path.
+    The two-column status prefix is preserved exactly (no whitespace
+    stripping).
+    """
     proc = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
+        ["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--untracked-files=all"],
         capture_output=True,
         text=True,
     )

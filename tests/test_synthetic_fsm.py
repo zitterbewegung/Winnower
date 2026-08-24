@@ -697,7 +697,7 @@ def test_dirty_guard_ignores_only_the_output_directory():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     porcelain = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
+        ["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--untracked-files=all"],
         capture_output=True,
         text=True,
     ).stdout
@@ -737,3 +737,19 @@ def test_written_csv_floats_round_trip_exactly(tmp_path):
     # Demonstrate that the default parser would NOT have been exact here.
     lossy = pd.read_csv(path, compression="gzip")
     assert not (lossy["theta"].to_numpy() == ref["theta"].to_numpy()).all()
+
+
+def test_dirty_guard_sees_through_collapsed_untracked_directories(tmp_path):
+    """An untracked output dir nested in a new parent must still be ignored.
+
+    ``git status --porcelain`` without ``-uall`` reports only the top-most new
+    directory, so ``results/raw`` would surface as ``results/`` and never match.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "run_synth2", SCRIPTS / "run_synthetic_fsm.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    lines = mod._porcelain_lines()
+    collapsed = [line for line in lines if line[3:].rstrip().endswith("/")]
+    assert not collapsed, f"porcelain still collapsing directories: {collapsed}"

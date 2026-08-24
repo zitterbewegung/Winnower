@@ -334,3 +334,52 @@ reused.
 $ PYTHONPATH=src ./.venv/bin/python -m pytest tests/test_synthetic_fsm.py -q
 98 passed in 18.90s
 ```
+
+## 11. Third pre-holdout bug and fourth (final) freeze commit
+
+With the exact-read fix in place, development was regenerated against the third
+freeze SHA and fully validated:
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python scripts/research/run_synthetic_fsm.py \
+    --split development --out-dir research/synthetic_fsm/results/raw \
+    --freeze-sha 37c0b8d132b26f13f9e85b28d305e3327afdbf31 --jobs 8
+development: 360 FSMs, informative={'permutation': 120, 'contracting': 120}, 1.8s
+```
+
+Validation (development, diagnostic only): 360 summary rows, 23,040 entry rows,
+22,321 matched rows; all bounds hold; every integer identity
+(`theta == theta_numerator/63`, `C == C_numerator/(64*63)`,
+`post_w == post_visit_count/64`, `C_numerator == visit_count * switch_count`)
+holds **bit-exactly**; skeleton recovery 1.000000, pooled precision 1.000000,
+pooled recall 1.000000 (TP 240, FP 0, FN 0); development random-map full-table
+rate 1.0; fitted residual count 1 for all 240 structured FSMs; 120/120
+informative in each structured family; matched-control counts min 1, median 31,
+max 63.
+
+**Bug found (still before any holdout outcome).** The holdout run then failed:
+
+```console
+ERROR: worktree is dirty outside the output directory; commit or stash before running:
+  ?? research/synthetic_fsm/results/
+```
+
+`git status --porcelain` collapses an untracked tree to its top-most directory,
+so the output directory `research/synthetic_fsm/results/raw` was reported as
+its new parent `research/synthetic_fsm/results/` and never matched the ignore
+path. The guard was still unusable.
+
+**Fix.** `_porcelain_lines()` now passes `--untracked-files=all` in both
+scripts, so no untracked path is collapsed. Two tests cover it:
+`test_dirty_guard_ignores_only_the_output_directory` (unchanged semantics,
+updated to the same flag) and a new
+`test_dirty_guard_sees_through_collapsed_untracked_directories`.
+
+Again this touches only a run-time guard: no generator, codelength, estimand,
+matching, weighting, statistic or gate threshold changed. The development
+artifacts from the third freeze were deleted, not reused.
+
+```console
+$ PYTHONPATH=src ./.venv/bin/python -m pytest tests/test_synthetic_fsm.py -q
+99 passed in 14.53s
+```
